@@ -1,0 +1,118 @@
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+ul,
+li {
+  list-style: none none outside;
+}
+
+table,
+td,
+th {
+  border-collapse: collapse;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+  padding: 0;
+  margin: 0;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+body {
+  height: 100%;
+  font-size: @font-size;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  &.again-login-body{
+    // .again-login-message {}
+    .again-login-content{
+      padding: 0;
+      margin: 0;
+      width: auto;
+      border: none;
+      .el-message-box__header{
+        display: none;
+      }
+      .el-message-box__content{
+        padding: 0;
+        margin: 0;
+      }
+    }
+  }
+  #app {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
+  // el 按钮设置
+  .el-button{
+    &:not(.is-circle){
+      padding: 8px 10px;
+    }
+  }
+  .el-button,
+  .el-link{
+    .el-icon{
+      vertical-align: text-bottom;
+    }
+  }
+  // el 滚动条设置
+  .el-scrollbar__bar{
+    &.is-vertical{
+      width: 8px;
+    }
+    &.is-horizontal{
+      height: 8px;
+    }
+    .el-scrollbar__thumb{
+      background-color: #303030;
+    }
+  }
+  .el-pagination{
+    justify-content: flex-end;
+  }
+  .el-form-item{
+    &.is-error{
+      .dyt-input-tag-content{
+        border-color: #f20;
+      }
+    }
+  }
+}
+

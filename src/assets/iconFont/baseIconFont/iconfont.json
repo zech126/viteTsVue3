@@ -1,0 +1,163 @@
+{
+  "id": "2831836",
+  "name": "lapa公共图标",
+  "font_family": "lapa",
+  "css_prefix_text": "icon-",
+  "description": "lapa UPMS项目",
+  "glyphs": [
+    {
+      "icon_id": "2569862",
+      "name": "返回",
+      "font_class": "fanhui",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    },
+    {
+      "icon_id": "385428",
+      "name": "eye-close",
+      "font_class": "eyeclose",
+      "unicode": "e6ac",
+      "unicode_decimal": 59052
+    },
+    {
+      "icon_id": "1261590",
+      "name": "eye",
+      "font_class": "eye",
+      "unicode": "e673",
+      "unicode_decimal": 58995
+    },
+    {
+      "icon_id": "9783464",
+      "name": "接口设计",
+      "font_class": "interface",
+      "unicode": "e612",
+      "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "1271985",
+      "name": "操作-菜单",
+      "font_class": "menu",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "4139086",
+      "name": "系统配置",
+      "font_class": "system",
+      "unicode": "e679",
+      "unicode_decimal": 59001
+    },
+    {
+      "icon_id": "240314",
+      "name": "nav-list",
+      "font_class": "menu-list",
+      "unicode": "e6fa",
+      "unicode_decimal": 59130
+    },
+    {
+      "icon_id": "1761519",
+      "name": "办公",
+      "font_class": "desktop",
+      "unicode": "e64b",
+      "unicode_decimal": 58955
+    },
+    {
+      "icon_id": "4772855",
+      "name": "数据中心—数据仓库",
+      "font_class": "data-center",
+      "unicode": "e652",
+      "unicode_decimal": 58962
+    },
+    {
+      "icon_id": "9748098",
+      "name": "营销",
+      "font_class": "marketing",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    },
+    {
+      "icon_id": "12515461",
+      "name": "权限",
+      "font_class": "power",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "12974856",
+      "name": "退出",
+      "font_class": "exit",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "749772",
+      "name": "推荐",
+      "font_class": "praise",
+      "unicode": "e6ce",
+      "unicode_decimal": 59086
+    },
+    {
+      "icon_id": "817282",
+      "name": "评论",
+      "font_class": "information",
+      "unicode": "e6cf",
+      "unicode_decimal": 59087
+    },
+    {
+      "icon_id": "1248085",
+      "name": "关闭",
+      "font_class": "close",
+      "unicode": "e6d9",
+      "unicode_decimal": 59097
+    },
+    {
+      "icon_id": "2439072",
+      "name": "群组",
+      "font_class": "group",
+      "unicode": "e6f1",
+      "unicode_decimal": 59121
+    },
+    {
+      "icon_id": "2442418",
+      "name": "我",
+      "font_class": "personal",
+      "unicode": "e6f2",
+      "unicode_decimal": 59122
+    },
+    {
+      "icon_id": "2776597",
+      "name": "download",
+      "font_class": "download",
+      "unicode": "e70d",
+      "unicode_decimal": 59149
+    },
+    {
+      "icon_id": "2400368",
+      "name": "人数",
+      "font_class": "homt-people",
+      "unicode": "e6f0",
+      "unicode_decimal": 59120
+    },
+    {
+      "icon_id": "2776528",
+      "name": "user",
+      "font_class": "user",
+      "unicode": "e6f7",
+      "unicode_decimal": 59127
+    },
+    {
+      "icon_id": "2776600",
+      "name": "lock",
+      "font_class": "lock",
+      "unicode": "e710",
+      "unicode_decimal": 59152
+    },
+    {
+      "icon_id": "2853394",
+      "name": "trash",
+      "font_class": "trash",
+      "unicode": "e71a",
+      "unicode_decimal": 59162
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "vite-ts-vue3",
+  "private": true,
+  "version": "1.0.0",
+  "license": "ISC",
+  "scripts": {
+    "dev": "vite --mode dev",
+    "preview": "vite preview --port 8483",
+    "build:dev": "vue-tsc --noEmit && vite build --mode dev",
+    "build:test": "vue-tsc --noEmit && vite build --mode test",
+    "build:pre": "vue-tsc --noEmit && vite build --mode pre",
+    "build:prod": "vue-tsc --noEmit && vite build --mode prod",
+    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^1.1.1",
+    "axios": "^0.26.1",
+    "nprogress": "^0.2.0",
+    "vue": "^3.2.31",
+    "vue-router": "^4.0.14",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "@typescript-eslint/parser": "^5.14.0",
+    "@vitejs/plugin-vue": "^2.2.4",
+    "@vitejs/plugin-vue-jsx": "^1.3.8",
+    "eslint": "^8.10.0",
+    "eslint-plugin-vue": "^8.5.0",
+    "husky": "^7.0.4",
+    "less": "^4.1.2",
+    "sass": "^1.49.9",
+    "typescript": "^4.6.2",
+    "vite": "^2.8.6",
+    "vite-plugin-compression": "^0.5.1",
+    "vue-tsc": "^0.32.1"
+  }
+}
