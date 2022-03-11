@@ -7,7 +7,7 @@ app.mount('#app');
 const d:object = {
   g: 'dfgs',
   d: {
-    asgs:'sdh'
+    asgs:'sd0h'
   }
 };
-// console.log(d)
+console.log(d)
