@@ -10,4 +10,4 @@ const d:object = {
     asgs:'sdh'
   }
 };
-console.log(d)
+// console.log(d)
