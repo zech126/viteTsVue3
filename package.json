@@ -10,7 +10,8 @@
     "build:test": "vue-tsc --noEmit && vite build --mode test",
     "build:pre": "vue-tsc --noEmit && vite build --mode pre",
     "build:prod": "vue-tsc --noEmit && vite build --mode prod",
-    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src"
+    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^1.1.1",
