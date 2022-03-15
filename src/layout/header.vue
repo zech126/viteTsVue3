@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-import record from '@/utils/certificationCenter';
+import record from '@/utils/certificationCenter.ts';
 
 export default {
   name: 'HeaderDemo',

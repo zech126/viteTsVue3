@@ -398,7 +398,7 @@ const certification = {
     })
   },
   // 返回到指定路径, 不带参数返回认证中心首页
-  backOauth (url:any, type:any) {
+  backOauth (url:any = null, type:any = false) {
     const oauthHome = typeof url === 'string' ? url : `${tool.recordUrl}${tool.homePage}?targetEnv=${tool.targetEnv}`;
     window.location.href = oauthHome;
   },
