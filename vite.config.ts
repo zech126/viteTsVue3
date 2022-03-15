@@ -23,13 +23,15 @@ export default defineConfig({
   resolve: {
     // 忽略文件导入后缀名称（设置之将覆盖默认设置，建议使用默认）
     // extensions: ['.js', '.vue', '.json', 'jsx'],
+    // 使用别名并且TS框架时，需要到到 tsconfig.js 文件配置 path 属性自定义引入的路径
     alias: [
       // 图片文件别名
       { find: '@images', replacement: path.resolve(__dirname, './src/assets/images') },
       // src 根目录别名
       { find: '@', replacement: path.resolve(__dirname, './src') },
-      // views 目录别名
-      { find: '@views', replacement: path.resolve(__dirname, './src/views') }
+      { find: '@views', replacement: path.resolve(__dirname, './src/views') },
+      { find: '$api', replacement: path.resolve(__dirname, './src/api/APIConfig.ts') },
+      { find: '$common', replacement: path.resolve(__dirname, './src/utils/common.ts') }
     ]
   },
   // 打包配置

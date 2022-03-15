@@ -1,5 +1,14 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      // 根据ts配置项设置path属性可以自定义引入的路径
+      "@/*": ["./src/*"],
+      "@images/*": ["./src/assets/images/*"],
+      "@views/*": ["./src/views/*"],
+      "$api": ["./src/api/APIConfig.ts"],
+      "$common": ["./src/utils/common.ts"]
+    },
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
@@ -9,8 +18,11 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"]
+    "allowSyntheticDefaultImports": true,
+    "lib": ["esnext", "dom"],
+    "types": ["vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.jsx", "src/**/*.vue"],
+  // "exclude": ["node_modules", "**/*.stories.ts", "lib", "es"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
