@@ -10,7 +10,7 @@
     "build:test": "vue-tsc --noEmit && vite build --mode test",
     "build:pre": "vue-tsc --noEmit && vite build --mode pre",
     "build:prod": "vue-tsc --noEmit && vite build --mode prod",
-    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src",
+    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src && vue-tsc --noEmit",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -26,6 +26,9 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.1",
+    "@types/lodash": "^4.14.180",
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "^17.0.21",
     "@types/nprogress": "^0.2.0",
     "@typescript-eslint/parser": "^5.14.0",

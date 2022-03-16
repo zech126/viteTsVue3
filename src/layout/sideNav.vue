@@ -1,7 +1,7 @@
 <template>
   <div v-loading="data.navLoadinged" class="side-nav-container" element-loading-text="菜单加载中...">
     <el-menu :default-active="navActive" class="nav-item-container">
-      <dytSubmenu v-model:menu-list="data.navList" :default-props="data.defaultProps" />
+      <dytSubmenu :menu-list="data.navList" :default-props="data.defaultProps" />
     </el-menu>
   </div>
 </template>

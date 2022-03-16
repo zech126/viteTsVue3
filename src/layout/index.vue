@@ -23,6 +23,8 @@
   </el-container>
 </template>
 <script lang="ts">
+// computed, reactive, 
+import { defineComponent } from 'vue';
 import store from '@/store'
 import headerDemo from './header.vue'
 import sideNavDemo from './sideNav.vue'
@@ -30,8 +32,8 @@ import crumbs from './crumbs.vue'
 import noAccessView from './401.vue'
 import nonExistView from './404.vue'
 
-export default {
-  name: 'SideNav',
+export default defineComponent({
+  name: 'layout',
   components: {headerDemo, sideNavDemo, crumbs, noAccessView, nonExistView},
   data() {
     return {
@@ -49,17 +51,13 @@ export default {
       return store.getters['layout/nonExist'];
     }
   },
-  created() {
-    this.initPage();
-  },
+  created() {},
   // 页面渲染完
   mounted() {},
   // 组件销毁前
   beforeUnmount () {},
-  methods: {
-    initPage () {}
-  }
-};
+  methods: {}
+});
 </script>
 <style lang="less" scoped>
 .app-container{

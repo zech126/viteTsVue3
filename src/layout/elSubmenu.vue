@@ -22,7 +22,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { useRouter } from "vue-router";
 
 export default defineComponent({
@@ -31,7 +31,7 @@ export default defineComponent({
   props: {
     // 数据
     menuList: {
-      type: Array,
+      type: Array as unknown as PropType<[]>,
       default: () => []
     },
     // 键值

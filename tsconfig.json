@@ -9,6 +9,7 @@
       "$api": ["./src/api/APIConfig.ts"],
       "$common": ["./src/utils/common.ts"]
     },
+    "skipLibCheck": true,
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
