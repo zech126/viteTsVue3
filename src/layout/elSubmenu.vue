@@ -21,10 +21,11 @@
     </template>
   </div>
 </template>
-<script>
-// import store from '@/store';
+<script lang="ts">
+import { defineComponent } from "vue";
+import { useRouter } from "vue-router";
 
-export default {
+export default defineComponent({
   name: 'DytSubmenu',
   components: {},
   props: {
@@ -37,31 +38,22 @@ export default {
     defaultProps: {
       type: Object,
       default: () => {
-        return {
-          children: 'children',
-          name: 'name',
-          id: 'id',
-          path: 'url',
-          icon: 'icon'
-        }
+        return { children: 'children', name: 'name', id: 'id', path: 'url', icon: 'icon' }
       }
     }
   },
-  data() {
-    return {}
-  },
-  watch: {},
-  created() {},
-  // 页面渲染完
-  mounted() {},
-  // 组件销毁前
-  beforeUnmount () {},
-  methods: {
-    menuItemClick (item) {
-      this.$route.path !== item[this.defaultProps.path] && this.$router.push({
-        path: `${item[this.defaultProps.path]}`
+  // set 无法访问 vue 实例
+  setup(props) {
+    const $route = useRouter();
+    const menuItemClick = (item:any) => {
+      $route.currentRoute.value.path !== item[props.defaultProps.path] && $route.push({
+        path: `${item[props.defaultProps.path]}`
       })
     }
+    // 其他钩子使用 this(即挂载到 vue 实例) 调用 setup 定义的值时, 此次需要返回对应值
+    return {
+      menuItemClick
+    }
   }
-};
+});
 </script>

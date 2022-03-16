@@ -43,14 +43,23 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-  import errGif from '@images/401.gif';
-  const errGifGif = errGif + '?' + +new Date();
-  const loginOut = () => {}
-  const goToPageHome = () => {
-    const location = window.location;
-    window.location.href = `${location.origin}${location.pathname}`;
+<script lang="ts" >
+import { defineComponent } from 'vue';
+import errGif from '@images/401.gif';
+export default defineComponent({
+  name: 'NoAccessView',
+  setup(props) {
+    const errGifGif = errGif + '?' + +new Date();
+    const loginOut = () => {}
+    const goToPageHome = () => {
+      const location = window.location;
+      window.location.href = `${location.origin}${location.pathname}`;
+    }
+    return {
+      errGifGif, loginOut, goToPageHome
+    }
   }
+})
 </script>
 
 <style lang="less" scoped>

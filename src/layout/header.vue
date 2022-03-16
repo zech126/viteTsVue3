@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="headLoading" class="head-container">
+  <div v-loading="data.headLoading" class="head-container">
     <img class="logo" src="@images/logo.png">
     <div class="operation-container">
       <span class="operation-item" @click="goToLapa">
@@ -19,43 +19,33 @@
     </div>
   </div>
 </template>
-<script>
-import record from '@/utils/certificationCenter.ts';
-
-export default {
+<script lang="ts">
+import { computed, reactive, defineComponent } from 'vue';
+import record from '@/utils/certificationCenter';
+import store from '@/store';
+export default defineComponent({
   name: 'HeaderDemo',
-  components: {},
-  data () {
-    return {
+  setup(props) {
+    let data = reactive({
       headLoading: false
-    }
-  },
-  computed: {
-    getUserInfo () {
-      return this.$store.getters['layout/userInfo'];
-    }
-  },
-  watch: {},
-  created () {
-    this.init();
-  },
-  // 页面渲染完
-  mounted () { },
-  // 组件销毁前
-  beforeUnmount () { },
-
-  methods: {
-    init () { },
-    goToLapa () {
-      record.backOauth();
-    },
-    loginOut () {
-      record.outSystemLogin().then(res => {
+    })
+    const loginOut = () => {
+      record.outSystemLogin().then((res:any) => {
         res.defaultHand();
       });
     }
+    const goToLapa = () => {
+      record.backOauth();
+    }
+    const getUserInfo = computed(() => {
+      return store.getters['layout/userInfo'];
+    })
+    return {
+      data, loginOut, goToLapa, getUserInfo
+    }
   }
-};
+})
+
 </script>
 <style lang="less" scoped>
 .head-container {

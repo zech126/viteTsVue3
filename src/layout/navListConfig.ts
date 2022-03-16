@@ -21,7 +21,19 @@ const navList = [
         name: 'jsx测试',
         icon: '',
         url: '/test2'
-      }
+      },
+      // {
+      //   id: '1-4',
+      //   name: '测试页面',
+      //   childList: [
+      //     {
+      //       id: '1-2',
+      //       name: '测试页面-test1',
+      //       icon: '',
+      //       url: '/test1'
+      //     }
+      //   ]
+      // },
     ]
   }
 ]

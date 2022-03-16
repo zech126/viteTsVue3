@@ -1,29 +1,38 @@
 <template>
-  <div
-    v-loading="navLoadinged"
-    class="side-nav-container"
-    element-loading-text="菜单加载中..."
-  >
-    <el-menu
-      :default-active="navActive"
-      class="nav-item-container"
-    >
-      <dytSubmenu
-        v-model:menu-list="navList"
-        :default-props="defaultProps"
-      />
+  <div v-loading="data.navLoadinged" class="side-nav-container" element-loading-text="菜单加载中...">
+    <el-menu :default-active="navActive" class="nav-item-container">
+      <dytSubmenu v-model:menu-list="data.navList" :default-props="data.defaultProps" />
     </el-menu>
   </div>
 </template>
-<script>
+<script lang="ts">
+import { reactive, computed, watch, defineComponent } from "vue";
+import { useRouter } from "vue-router";
 import dytSubmenu from './elSubmenu.vue'
 import routerPage from '@/router/pageRouter';
+import store from '@/store';
+import common from '@/utils/common';
 
-export default {
-  name: 'SideNav',
+// 定义类型
+interface dataType {
+  navList: any;
+  navLoadinged:boolean;
+  defaultProps: {
+    children: string;
+    name: string;
+    id: string;
+    path: string;
+    icon: string;
+  };
+  allRouter: any;
+}
+export default defineComponent({
+  name: 'sideNavDemo',
   components: { dytSubmenu },
-  data() {
-    return {
+  // data, computed, watch 可以不用放到setup中， 支持在钩子上的写法
+  setup(props) {
+    // 相当于 data
+    let data:dataType = reactive({
       navList: [],
       navLoadinged: false,
       // 菜单键值替换
@@ -40,76 +49,67 @@ export default {
         icon: 'icon'
       },
       allRouter: {}
-    }
-  },
-  computed: {
-    // 当前菜单路由
-    navActive () {
-      return this.$route.path;
-    },
-    gettersNavList () {
-      return this.$store.getters['layout/menuTree']
-    }
-  },
-  watch: {
-    gettersNavList: {
-      deep: true,
-      handler (val) {
-        this.getNavList(val || []);
-      }
-    }
-  },
-  created() {
-    this.getNavList();
-  },
-  // 页面渲染完
-  mounted() {},
-  // 组件销毁前
-  beforeUnmount () {},
-  methods: {
-    // 获取菜单
-    getNavList (val) {
-      this.navLoadinged = true;
-      this.allRouter = {};
+    })
+    // 获取路由对象
+    const $route = useRouter();
+
+    const navActive = computed(() => {
+      return $route.currentRoute.value.path;
+    })
+    const gettersNavList = computed(() => {
+      return store.getters['layout/menuTree']
+    })
+    // 监听变化
+    watch([gettersNavList], ([val], [oldVal]) => {
+      getNavList(val || []);
+    })
+
+    const getNavList = (val:any = []) => {
+      data.navLoadinged = true;
+      data.allRouter = {};
       routerPage.forEach(item => {
-        this.allRouter[item.path] = item;
+        data.allRouter[item.path] = item;
       })
       
-      const {tree, crumbs} = this.menuTreeHand(val);
-      this.navList = tree;
-      this.$store.commit('layout/crumbsObj', crumbs);
-      this.navLoadinged = false;
-    },
+      const {tree, crumbs} = menuTreeHand(val);
+      data.navList = tree;
+      store.commit('layout/crumbsObj', crumbs);
+      data.navLoadinged = false;
+    }
     // 处理菜单树、面包屑
-    menuTreeHand (tree) {
-      const hand = (arr = [], type = false, crumbs = [], newArr = [], newCrumbs = {}) => {
-        arr.forEach((item, index) => {
-          const children = item[this.defaultProps.children];
-          delete item[this.defaultProps.children];
-          crumbs = type ? [item[this.defaultProps.name]] : !this.$common.isEmpty(children) ? [...crumbs, item[this.defaultProps.name]] : crumbs;
-          if (!this.$common.isEmpty(item[this.defaultProps.path])) {
+    const menuTreeHand = (tree:any) => {
+      const hand = (arr:any = [], type:any = false, crumbs:any = [], newArr:any = [], newCrumbs:any = {}) => {
+        arr.forEach((item:any, index:any) => {
+          const children = item[data.defaultProps.children];
+          delete item[data.defaultProps.children];
+          crumbs = type ? [item[data.defaultProps.name]] : !common.isEmpty(children) ? [...crumbs, item[data.defaultProps.name]] : crumbs;
+          if (!common.isEmpty(item[data.defaultProps.path])) {
             if (type) {
-              newCrumbs[item[this.defaultProps.path]] = [item[this.defaultProps.name]];
-            } if(!this.$common.isEmpty(children)) {
-              newCrumbs[item[this.defaultProps.path]] = crumbs;
+              newCrumbs[item[data.defaultProps.path]] = [item[data.defaultProps.name]];
+            } else if(!common.isEmpty(children)) {
+              newCrumbs[item[data.defaultProps.path]] = crumbs;
             } else {
-              newCrumbs[item[this.defaultProps.path]] = [...crumbs, item[this.defaultProps.name]];
+              newCrumbs[item[data.defaultProps.path]] = [...crumbs, item[data.defaultProps.name]];
             }
           }
-          item['vueRouterMeta'] = this.$common.isEmpty(this.allRouter[item.url]) ? {} : this.allRouter[item.url].meta || {};
+          item['vueRouterMeta'] = common.isEmpty(data.allRouter[item.url]) ? {} : data.allRouter[item.url].meta || {};
           // 设置隐藏的菜单不添加到菜单
           !item.vueRouterMeta.hidden && newArr.push(item);
-          if (!this.$common.isEmpty(children)) {
-            newArr[index][this.defaultProps.children] = [];
-            hand(children, false, crumbs, newArr[index][this.defaultProps.children], newCrumbs);
+          if (!common.isEmpty(children)) {
+            newArr[index][data.defaultProps.children] = [];
+            hand(children, false, crumbs, newArr[index][data.defaultProps.children], newCrumbs);
           }
         })
         return { tree: newArr, crumbs: newCrumbs };
       }
-      return hand(this.$common.copy(tree), true);
+      return hand(common.copy(tree), true);
+    }
+    return {
+      data, navActive
     }
   }
-};
+})
+
 </script>
 <style lang="less" scoped>
 .side-nav-container{

@@ -22,7 +22,8 @@
     </el-container>
   </el-container>
 </template>
-<script>
+<script lang="ts">
+import store from '@/store'
 import headerDemo from './header.vue'
 import sideNavDemo from './sideNav.vue'
 import crumbs from './crumbs.vue'
@@ -31,7 +32,7 @@ import nonExistView from './404.vue'
 
 export default {
   name: 'SideNav',
-  components: {noAccessView, nonExistView, headerDemo, crumbs, sideNavDemo},
+  components: {headerDemo, sideNavDemo, crumbs, noAccessView, nonExistView},
   data() {
     return {
       loadingTxt: '页面加载中，请稍后...'
@@ -39,13 +40,13 @@ export default {
   },
   computed: {
     loadingPage () {      
-      return this.$store.getters['routerModel/routerLoading'];
+      return store.getters['routerModel/routerLoading'];
     },
     noAccess () {
-      return this.$store.getters['layout/noAccess'];
+      return store.getters['layout/noAccess'];
     },
     nonExist () {
-      return this.$store.getters['layout/nonExist'];
+      return store.getters['layout/nonExist'];
     }
   },
   created() {

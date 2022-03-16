@@ -4,35 +4,31 @@
     <span class="crumbs-active">{{ getCrumbs.after }}</span>
   </div>
 </template>
-<script>
+<script lang="ts">
+import store from '@/store';
+import { computed, defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
+import common from '@/utils/common';
 
-export default {
-  name: 'Crumbs',
-  components: {},
-  data() {
-    return {}
-  },
-  computed: {
-    getCrumbs () {
-      const path = this.$route.path;
-      if (this.$common.isEmpty(path) || path === '/') return {before: '', after: ''};
-      let crumbsObj = this.$common.copy(this.$store.getters['layout/crumbsObj'][path] || []);
+export default defineComponent({
+  name: 'crumbs',
+  setup (props) {
+    const $route = useRouter();
+    const getCrumbs = computed(() => {
+      const path = $route.currentRoute.value.path;
+      if (common.isEmpty(path) || path === '/') return {before: '', after: ''};
+      let crumbsObj = common.copy(store.getters['layout/crumbsObj'][path] || []);
       const last = crumbsObj.splice(-1);
       return {
         before: crumbsObj.join(' / '),
         after: last.join(' / ')
       };
+    })
+    return {
+      getCrumbs
     }
-  },
-  watch: {},
-  created() {},
-  // 页面渲染完
-  mounted() {},
-  // 组件销毁前
-  beforeUnmount () {},
-  
-  methods: {}
-};
+  }
+})
 </script>
 <style lang="less" scoped>
 .crumbs-container{
