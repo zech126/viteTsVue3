@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite --mode dev",
     "preview": "vite preview --port 8483",
-    "build:dev": "vue-tsc --noEmit && vite build --mode dev",
-    "build:test": "vue-tsc --noEmit && vite build --mode test",
-    "build:pre": "vue-tsc --noEmit && vite build --mode pre",
-    "build:prod": "vue-tsc --noEmit && vite build --mode prod",
-    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src && vue-tsc --noEmit",
+    "build:dev": "vite build --mode dev",
+    "build:test": "vite build --mode test",
+    "build:pre": "vite build --mode pre",
+    "build:prod": "vite build --mode prod",
+    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src",
+    "vueTsc": "vue-tsc --noEmit",
     "prepare": "husky install"
   },
   "dependencies": {
