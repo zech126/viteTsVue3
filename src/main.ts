@@ -40,15 +40,7 @@ app.use(customComponents);
 app.mount('#app');
 // console.log(import.meta.env);
 
-
-// 使用 setup 时， 获取全局挂载方式
-//获取当前组件的实例、上下文来操作router和vuex等
-// import { getCurrentInstance } from 'vue'
-// setup(){
-//  const { ctx } = getCurrentInstance() as any 
-//     console.log('ctx', ctx, ctx._)
-//     const { $http } = ctx._.appContext.config.globalProperties //全局参数在这一层
-//     $http.get('/api').then((res: any) => {
-//       console.log(res)
-//     })
-// }
+// 使用 setup 时, 获取全局挂载方式, 获取当前组件的实例、上下文来操作router和vuex等
+// 注意的点：千万不要在 getCurrentInstance() 中获取 ctx; 在生产环境下， 货到到的 ctx 为空
+// import getGlobal from "@/hooks/global";
+// const global =  getGlobal();

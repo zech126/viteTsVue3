@@ -1,7 +1,6 @@
 import { defineComponent, reactive } from 'vue'
 
 export const component1 = defineComponent({
-  name: 'component1',
   props: {
     canshu: {type: String, defualt: ''}
   },
@@ -16,7 +15,6 @@ export const component1 = defineComponent({
   }
 })
 export const component2 = defineComponent({
-  name: 'component2',
   props: {
     canshu: {type: String, defualt: ''}
   },
