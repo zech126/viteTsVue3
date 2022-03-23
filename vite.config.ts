@@ -31,7 +31,8 @@ export default defineConfig({
       { find: '@', replacement: path.resolve(__dirname, './src') },
       { find: '@views', replacement: path.resolve(__dirname, './src/views') },
       { find: '$api', replacement: path.resolve(__dirname, './src/api/APIConfig.ts') },
-      { find: '$common', replacement: path.resolve(__dirname, './src/utils/common.ts') }
+      { find: '$common', replacement: path.resolve(__dirname, './src/utils/common.ts') },
+      { find: '$request', replacement: path.resolve(__dirname, './src/utils/request.ts') }
     ]
   },
   // 打包配置

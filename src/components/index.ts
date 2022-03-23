@@ -6,7 +6,6 @@ const files = import.meta.globEager('../components/*/index.ts');
 const jsx = import.meta.globEager('../components/*/index.jsx');
 const install = (app:any) => {
   Object.keys(icons).forEach((key:any) => {
-    // @ts-ignore
     app.component(key, icons[key]);
   });
   Object.keys(files).forEach((key) => {

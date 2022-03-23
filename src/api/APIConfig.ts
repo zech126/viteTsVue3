@@ -8,13 +8,9 @@ const files = import.meta.globEager("../views/*/apiConfig.ts");
 Object.keys(files).forEach((key) => {
   if (files[key].default) {
     Object.keys(files[key].default).forEach(apiKey => {
-      // @ts-ignore
       apiMaps[apiKey] = files[key].default[apiKey];
-      // @ts-ignore
       if (!!globalApi[apiKey]) {
-        // @ts-ignore
-        apiMaps[apiKey] = {...apiMaps[apiKey], ...lobalApi[apiKey]}
-        // @ts-ignore
+        apiMaps[apiKey] = {...apiMaps[apiKey], ...globalApi[apiKey]}
         delete globalApi[apiKey];
       }
     })

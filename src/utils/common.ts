@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie';
-// @ts-ignore
 import store from '@/store'
 import { cloneDeep } from 'lodash';
 
@@ -178,7 +177,7 @@ const common = {
   },
   // 插入cookie，支持数组和json
   setCookie (key:any = null, val:any = null, expires = {}) {
-    if (common.isEmpty(key) || common.isEmpty(val)) return;
+    if (common.isEmpty(key)) return;
     if (common.isJson(key)) {
       Object.keys(key).forEach(item => {
         if(!common.isEmpty(key[item].key) && !common.isEmpty(key[item].value)) {
@@ -274,7 +273,7 @@ const common = {
     const newElement = typeof element === 'string' ? document.querySelector(element) : element;
     if (!newElement || common.isEmpty(styleName)) return isNumber ? 0 : null;
     // @ts-ignore
-    const style = newElement.currentStyle ? newElement.currentStyle[styleName] : document.defaultView.getComputedStyle(newElement, null)[styleName];
+    const style:any = newElement.currentStyle ? newElement.currentStyle[styleName] : document.defaultView.getComputedStyle(newElement, null)[styleName];
     if (common.isEmpty(style)) return isNumber ? 0 : null;
     if (!isNumber || !style.includes('px')) return style;
     const styleArr = style.split(' ');

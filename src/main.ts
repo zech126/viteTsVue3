@@ -3,9 +3,8 @@ import App from './App.vue'
 import "@/assets/style/index.less";
 import "@/utils/loadIconFont";
 import dayjs from 'dayjs';
-// @ts-ignore
 import $common from "$common";
-// @ts-ignore
+import $http from "$request";
 import $api from '$api';
 import store from "@/store/index";
 import router from "@/router/index";
@@ -30,6 +29,8 @@ app.config.globalProperties.$dayjs = dayjs;
 // 注册全局对象
 app.config.globalProperties.$common = $common;
 app.config.globalProperties.api = $api;
+app.config.globalProperties.$http = $http;
+
 // 注册 store
 app.use(store);
 // 注册 router

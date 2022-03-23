@@ -8,6 +8,13 @@ declare module '@vue/runtime-core' {
     $http: AxiosInstance;
     $dayjs: Function;
     $common: commonObject;
+    $message: any;
+    api: any;
+    $api: any;
+    $refs: any;
+    $attrs: any;
+    $emit: any;
+    $parent: any;
   }
 }
 

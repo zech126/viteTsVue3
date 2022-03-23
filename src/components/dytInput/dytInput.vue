@@ -9,18 +9,12 @@
 import {computed, ComputedRef} from 'vue';
 import getProxy from "@/hooks/proxy";
 
-interface configType {
-  disabled: boolean,
-  readonly: boolean,
-  placeholder: string
-}
-
 export default {
   name: 'DytInput',
   isGlobal: true,
   props: {},
   setup(props, { attrs, slots, emit, expose }) {
-    const proxy = getProxy();
+    const proxy:any = getProxy();
     const mySlots:ComputedRef<unknown> = computed(() => {
       return {
         keys: Object.keys(slots),
@@ -28,7 +22,7 @@ export default {
       } 
     })
     const selectConfig:ComputedRef<unknown> = computed(() => {
-      let config:configType = {
+      let config = {
         ...{
           disabled: false,
           readonly: false,
@@ -43,15 +37,12 @@ export default {
       return config;
     })
     const focus = () => {
-      // @ts-ignore
       proxy.$refs.dytInputRef?.focus();
     }
     const blur = () => {
-      // @ts-ignore
       proxy.$refs.dytInputRef?.blur();
     }
     const select = () => {
-      // @ts-ignore
       proxy.$refs.dytInputRef?.select();
     }
     return {
@@ -59,8 +50,4 @@ export default {
     }
   }
 }
-
 </script>
-<style lang="less">
-// .dyt-input-demo.el-input{}
-</style>

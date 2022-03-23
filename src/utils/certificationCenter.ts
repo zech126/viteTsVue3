@@ -62,39 +62,35 @@ const tool = {
           tool.clearPassTime = null;
         }
         hand.isloadSuccess().then(res => {
-          const oldIframe = document.querySelector(`#iframe${tool.messageKey}`);
+          const oldIframe:any = document.querySelector(`#iframe${tool.messageKey}`);
           // oldIframe && oldIframe.remove();
           // 绑定方法
           window.addEventListener('message', hand[`function${key}`]);
           // console.log('createIframe: ', key, oldIframe)
           if (!oldIframe) {
             // 创建 iframe 指向 认证中心
-            let iframe = document.createElement('iframe');
+            let iframe:any = document.createElement('iframe');
             iframe.id = `iframe${tool.messageKey}`;
             iframe.src = `${config.src}?iframe=iframe&targetEnv=${tool.targetEnv}`;
             iframe.style.display = 'none';
             document.body.appendChild(iframe);
             // 页面加载后向目标页面发送数据
-            iframe.onload = (e) => {
-              // @ts-ignore
+            iframe.onload = (e:any) => {
               iframe.contentWindow.postMessage({ [`${key}`]: { ...config.data, type: config.type } }, '*');
             }
           } else {
-            // @ts-ignore
             oldIframe.contentWindow.postMessage({ [`${key}`]: { ...config.data, type: config.type } }, '*');
           }
         }).catch(() => {
           store.commit('routerModel/routerLoading', false);
           NProgress.done();
-          // @ts-ignore
           ElMessageBox.confirm('获取认证中心信息失败，无法打开当前系统，是否前往认证中心？', "提示", {
             closeOnClickModal: false,
-            showClose: false,
             closeOnPressEscape: false,
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
-            'button-size': 'default'
+            buttonSize: 'default'
           }).then(() => {
             certification.goToLogin();
           }).catch(() => {})
@@ -114,38 +110,30 @@ const tool = {
     config.remove ? hand.removeEvent() : hand.createIframe();
   },
   addModal: (config:any) => {
-    const body = document.querySelector('body');
-    // @ts-ignore
+    const body:any = document.querySelector('body');
     let className = body.className.split(' ');
-    // @ts-ignore
     if (!body.className.includes('again-login-body')) {
       className.push('again-login-body');
-      // @ts-ignore
       body.className =  className.join(' ');
     }
-    // @ts-ignore
     ElMessageBox.alert(config.content, config.title, {
       customClass: `${config.calssName ? `${config.calssName} again-login-message` : 'again-login-message'}`,
       dangerouslyUseHTMLString: true,
       closeOnClickModal: false,
-      showClose: false,
       closeOnPressEscape: false,
-      'button-size': 'default',
+      buttonSize: 'default',
       showConfirmButton: false
     })
   },
   removeModal: () => {
     setTimeout(() => {
-      const body = document.querySelector('body');
-      // @ts-ignore
-      let className = body.className.split(' ');
+      const body:any = document.querySelector('body');
+      let className:any = body.className.split(' ');
       if (className.includes('again-login-body')) {
         className.splice(className.indexOf('again-login-body'), 1);
-        // @ts-ignore
         body.className =  className.join(' ');
       }
-      const btn = document.querySelector('.el-message-box.again-login-message .el-message-box__btns .el-button');
-      // @ts-ignore
+      const btn:any = document.querySelector('.el-message-box.again-login-message .el-message-box__btns .el-button');
       btn && btn.click();
     }, 100)
   }
@@ -271,7 +259,7 @@ const certification = {
     })
   },
   // 重新登录
-  againLogin (type:any) {
+  againLogin (type:any = false) {
     const againLoginFun = (e:any) => {
       let res = e.data.againLogin;
       if (!res) return;
@@ -287,11 +275,7 @@ const certification = {
           return
         }
         // 重新登录成功后，启动刷新 token 方法
-        if(type) {
-          window.location.reload();
-        } else {
-          certification.refreshToken();
-        }
+        type ? window.location.reload() : certification.refreshToken();
       }
     }
     // 移除 cookie
@@ -319,15 +303,13 @@ const certification = {
   // 退出登录
   outSystemLogin (config:any = {}) {
     return new Promise(resolve => {
-      // @ts-ignore
       ElMessageBox.confirm(config.tips || '退出认证中心，已打开的系统将受到影响，是否确认退出？', "提示", {
         closeOnClickModal: false,
-        showClose: false,
         closeOnPressEscape: false,
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
-        'button-size': 'default'
+        buttonSize: 'default'
       }).then(() => {
         const content = `<div style="padding: 10px 30px; line-height: 1.2em;">
           <i class="el-icon-loading" style="margin-right:10px; font-size: 24px; color: #2d8cf0;vertical-align: middle;"></i>
@@ -403,7 +385,7 @@ const certification = {
     window.location.href = oauthHome;
   },
   // 返回到登录页面
-  goToLogin (type:any = false) {
+  goToLogin (type:boolean = false) {
     const login = `${tool.recordUrl}${tool.loginPage}?targetEnv=${tool.targetEnv}&systemKey=${tool.systemCode}`;
     // 移除 cookie
     common.delCookie([cookieConfig.tokenName]);

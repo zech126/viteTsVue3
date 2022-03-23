@@ -84,10 +84,8 @@ const hand = (obj:any) => {
     }
     delete obj.modules;
     // let newModules:Object = {};
-    // @ts-ignore
     storeMaps.modules[moduleName] = {
       namespaced: true,
-      // @ts-ignore
       ...(storeMaps.modules[moduleName] || {}),
       ...(obj || {}),
     };

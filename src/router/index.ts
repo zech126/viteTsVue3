@@ -69,7 +69,7 @@ const tool = {
       if (!validation.success) {
         store.commit('routerModel/routerLoading', false);
         NProgress.done();
-        record[validation.tagert === 'login' ? 'goToLogin' : 'againLogin'](true);
+        validation.tagert === 'login' ? record['goToLogin']() : record['againLogin'](true);
         return;
       }
       // 当菜单为空时，请求接口获取菜单
@@ -106,6 +106,9 @@ router.beforeEach((to:any, from:any, next:any) => {
   const routePath = tool.getRoutersPath(pageRouter);
   // 获取的信息
   record.recordCertification().then((info:any) => {
+    if (common.isEmpty(store.getters['layout/userInfo']) && !common.isEmpty(info.userInfo) && !common.isEmpty(info.login)) {
+      store.commit('layout/userInfo', {...(info.userInfo || {}), loginName: info.login.loginName});
+    }
     // 不需要验证登录状态
     if (common.isEmpty(to.meta) || to.meta && typeof to.meta.requireAuth === 'boolean' && !to.meta.requireAuth) {
       const treeJson = tool.getTreePath(menuTree);
@@ -117,9 +120,6 @@ router.beforeEach((to:any, from:any, next:any) => {
         next();
       }) : next();
       return;
-    }
-    if (common.isEmpty(store.getters['layout/userInfo']) && !common.isEmpty(info.userInfo) && !common.isEmpty(info.login)) {
-      store.commit('layout/userInfo', {...(info.userInfo || {}), loginName: info.login.loginName});
     }
     // 获取不到登录信息，跳转登录
     if (common.isEmpty(info.token) || common.isEmpty(info.login)) {
@@ -152,6 +152,7 @@ router.beforeEach((to:any, from:any, next:any) => {
 router.afterEach((to:any, from:any) => {
   NProgress.done();
   store.commit('routerModel/routerLoading', false);
+  tool.refreshToken();
 });
 
 export default router;

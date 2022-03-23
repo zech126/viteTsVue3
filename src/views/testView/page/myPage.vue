@@ -26,6 +26,37 @@
         <template #append>append</template>
       </dyt-input>
     </div>
+    <div style="margin-top:10px;">
+      <dyt-cascader v-model="data.cascader" :options="data.options" @change="cascaderChange" />
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-date-picker v-model="data.picker" type="date" />
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-date-picker v-model="data.daterange" type="daterange" />
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-input-tag style="margin: 10px 0;" v-model="data.inputTag" :string="true" />
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-input-tag style="margin: 10px 0; width: 500px;" :limit="1" type="textarea" v-model="data.inputTagP" :string="true" />
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-select
+        v-model="data.dytSelect"
+        :options="data.selectOptions"
+      />
+    </div>
+    <div style="margin-top: 10px">
+      <dytTreeSelect
+        v-model="data.treeSelectVal"
+        :data="data.options"
+        :defaultProps="data.defaultProps"
+        :limit="1"
+        :multiple="true"
+        :check-strictly="false"
+      />
+    </div>
   </div>
 </template>
 
@@ -35,16 +66,76 @@ import getProxy from "@/hooks/proxy";
 import * as component from './test';
 import {component1, component2} from './test';
 
-const proxy = getProxy();
+const proxy:any = getProxy();
 const data = reactive({
   canshu: 'component1',
   canshu1: 'component2',
-  inputVal: ''
+  inputVal: '',
+  cascader: '',
+  options: [
+    {
+      value: 'value-1',
+      label: 'label-1',
+      children: [
+        {
+          value: 'value-1-1',
+          label: 'label-1-1',
+          children: [
+            {
+              value: 'value-1-1-1',
+              label: 'label-1-1-1'
+            },
+            {
+              value: 'value-1-1-2',
+              label: 'label-1-1-2'
+            }
+          ]
+        },
+        {
+          value: 'value-1-2',
+          label: 'label-1-2'
+        }
+      ]
+    },
+    {
+      value: 'value-2',
+      label: 'label-2',
+      children: [
+        {
+          value: 'value-2-1',
+          label: 'label-2-1'
+        },
+        {
+          value: 'value-2-2',
+          label: 'label-2-2'
+        }
+      ]
+    }
+  ],
+  picker: '',
+  daterange: [],
+  inputTag: '',
+  inputTagP: '',
+  dytSelect: '',
+  selectOptions: [
+    {label: 'label-1', value: 'value-1'},
+    {label: 'label-2', value: 'value-2'},
+    {label: 'label-3', value: 'value-3'}
+  ],
+  treeSelectVal: [],
+  defaultProps: {
+    value: 'value',
+    label: 'label',
+    children: 'children'
+  }
 })
 
+const cascaderChange = (val:any) => {
+  console.log(val)
+}
+
 onMounted(() => {
-  // @ts-ignore
-  proxy.$refs.inputRef.focus(); // 焦点放到输入框里面
+  proxy.$refs.inputRef?.focus(); // 焦点放到输入框里面
 })
 setTimeout(() => {
   data.canshu = '我改变了';

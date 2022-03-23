@@ -7,11 +7,13 @@
       "@images/*": ["./src/assets/images/*"],
       "@views/*": ["./src/views/*"],
       "$api": ["./src/api/APIConfig.ts"],
-      "$common": ["./src/utils/common.ts"]
+      "$common": ["./src/utils/common.ts"],
+      "$request": ["./src/utils/request.ts"]
     },
     "skipLibCheck": true,
     "target": "esnext",
     "useDefineForClassFields": true,
+    "suppressImplicitAnyIndexErrors": true,
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
