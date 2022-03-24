@@ -7,7 +7,7 @@
 </template>
 <script lang="ts" setup>
 import {computed, ComputedRef, useSlots, useAttrs} from 'vue';
-import getProxy from "@/hooks/proxy";
+import getProxy from "@/utils/proxy";
 const proxy:any = getProxy();
 const slots:ComputedRef<unknown> = computed(() => Object.keys(useSlots()));
 const selectConfig:ComputedRef<unknown> = computed(() => {

@@ -48,6 +48,7 @@ export default {
     paginationAlign: { type: String, default: 'right' },
     paginationInfo: { type: Object, default: () => {return {}} }
   },
+  emits: ['update:pageConfig', 'change'],
   data ():dataType {
     return {
       align: ['top', 'right', 'bottom', 'let', 'center', 'end', 'inherit', 'initial', 'justify', 'unset', 'start', 'revert'],

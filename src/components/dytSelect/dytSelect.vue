@@ -1,11 +1,11 @@
 <template>
-  <el-select :ref="pageId" v-bind="selectConfig" class="dyt-select-demo">
+  <el-select :ref="data.pageId" v-bind="selectConfig" class="dyt-select-demo">
     <!-- 默认插槽 -->
     <slot>
-      <template v-for="(item, index) in options">
+      <template v-for="(item, index) in props.options">
         <el-option
           v-if="(typeof item.value !== 'undefined')"
-          :key="`${pageId}-${index}`"
+          :key="`${data.pageId}-${index}`"
           :label="(typeof item.label !== 'undefined' ? item.label : item.value)"
           :value="item.value"
           :disabled="(typeof item.disabled !== 'boolean' ? item.disabled : false)"
@@ -17,56 +17,35 @@
     </template>
   </el-select>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
+import {computed, useSlots, useAttrs, reactive} from 'vue';
+import getProxy from "@/utils/proxy";
 
-export default {
-  name: 'DytSelect',
-  components: {},
-  props: {
-    options: { type: Array, default: () => {return []} }
-  },
-  data () {
-    return {
-      pageId: Math.random().toString(36).substr(2),
-    }
-  },
-  computed: {
-    slots () {
-      return Object.keys(this.$slots)
-    },
-    selectConfig () {
-      let config = {
-        ...{
-          placeholder: '请选择',
-          size: 'default',
-          clearable: true,
-          filterable: true,
-          disabled: false,
-          readonly: false
-        },
-        ...this.$attrs
-      };
-      if (config.disabled || config.readonly) {
-        config.placeholder = '';
-      }
-      return config;
-    }
-  },
-  watch: {},
-  created () {
-    this.init();
-  },
-  mounted () {},
-  methods: {
-    init () {},
-    focus () {
-      this.$refs[`${this.pageId}`].focus();
-    },
-    blur () {
-      this.$refs[`${this.pageId}`].blur();
-    }
+const props = defineProps({
+  options: { type: Array, default: () => {return []} }
+});
+const data = reactive({
+  pageId: Math.random().toString(36).substr(2) 
+})
+const proxy:any = getProxy();
+const slots = computed(() => Object.keys(useSlots()));
+const selectConfig = computed(() => {
+  let config = { ...{ placeholder: '请选择', size: 'default', clearable: true, filterable: true, disabled: false, readonly: false }, ...useAttrs() };
+  if (config.disabled || config.readonly) {
+    config.placeholder = '';
   }
+  return config;
+});
+
+const focus = () => {
+  proxy.$refs[`${data.pageId}`]?.focus();
 };
+const blur = () => {
+  proxy.$refs[`${data.pageId}`]?.blur();
+}
+// 暴露给父级使用 ref 时使用
+defineExpose({ focus, blur });
+
 </script>
 <style lang="less">
 .dyt-select-demo{

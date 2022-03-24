@@ -143,6 +143,7 @@ export default {
     //   formData
     // }
   },
+  emits: ['performSearch', 'resetFilter', 'filterExpand'],
   data () {
     return {
       showMore: true,

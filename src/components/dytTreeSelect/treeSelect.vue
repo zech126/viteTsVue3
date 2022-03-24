@@ -116,6 +116,7 @@ export default {
     // 设置树宽度
     popoverTreeWidth: { type: [String, Number], default: null },
   },
+  emits: ['show', 'showAfter', 'hide', 'hideAfter', 'update:modelValue'],
   data ():dataType {
     return {
       pageId: Math.random().toString(36).substr(2),

@@ -177,6 +177,7 @@ export default {
     // 请求报错时，是否情况列表数据
     isClearData: { type: Boolean, default: true }
   },
+  emits: ['requested', 'expandFilter', 'filterReset'],
   data () {
     return {
       pageId: Math.random().toString(36).substr(2),

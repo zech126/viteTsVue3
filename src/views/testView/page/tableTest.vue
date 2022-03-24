@@ -261,7 +261,7 @@ export default {
           render: () => {
             let filterModel:any = this.filterModel;
             return <dyt-input-tag
-              style="width: 300px;"
+              style="width: 500px;"
               v-model={filterModel.superAdmin3}
               string={true}
               limit={1}

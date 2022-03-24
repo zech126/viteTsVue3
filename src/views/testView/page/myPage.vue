@@ -62,7 +62,7 @@
 
 <script lang="ts" setup>
 import { reactive, onMounted } from 'vue';
-import getProxy from "@/hooks/proxy";
+import getProxy from "@/utils/proxy";
 import * as component from './test';
 import {component1, component2} from './test';
 

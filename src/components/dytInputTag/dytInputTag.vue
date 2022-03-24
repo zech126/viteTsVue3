@@ -166,6 +166,7 @@ export default {
     // 当 type 为 textarea 并且 limit 大于 0 生效， 下拉是否展示 tag 默认 false
     preview: { type: Boolean, default: false }
   },
+  emits: ['update:modelValue','change','click','clearableHand','close','keyup','keyupEnter','addTheTag','show','showAfter','hide','hideAfter'],
   data ():dataType {
     return {
       pageId: Math.random().toString(36).substr(2),

@@ -1,5 +1,5 @@
 <template>
-  <el-cascader :ref="pageId" v-bind="selectConfig" class="dyt-cascader-demo">
+  <el-cascader ref="dytCascader" v-bind="selectConfig" class="dyt-cascader-demo">
     <template v-if="slots.includes('default')" v-slot="scope">
       <slot v-bind="scope">
         <span>{{ scope.data.label }}</span>
@@ -11,54 +11,27 @@
     </template>
   </el-cascader>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
+import {computed, useSlots, useAttrs} from 'vue';
+import getProxy from "@/utils/proxy";
 
-export default {
-  name: 'DytCascader',
-  components: {},
-  props: {},
-  data() {
-    return {
-      unSlots: ['default'],
-      pageId: Math.random().toString(36).substr(2)
-    }
-  },
-  computed: {
-    slots () {
-      return Object.keys(this.$slots)
-    },
-    selectConfig () {
-      let config = {
-        ...{
-          disabled: false,
-          readonly: false,
-          size: 'default',
-          clearable: true,
-          placeholder: '请选择'
-        },
-        ...this.$attrs
-      };
-      config['popper-class'] = `dyt-cascader-popper-${this.pageId}${this.$common.isEmpty(config['popper-class'])?'':` ${config['popper-class']}`}`;
-      if (config.disabled || config.readonly) {
-        config.placeholder = '';
-      }
-      return config;
-    }
-  },
-  watch: {},
-  created () {},
-  mounted () {
-    // 设置弹窗宽度
-    // const popper:any = document.querySelector(`.dyt-cascader-popper-${this.pageId}`);
-    // popper.style.width = this.$common.getElementStyle(this.$refs[this.pageId].$el.parentNode, 'width');
-  },
-  methods: {
-    // 获取选中的节点
-    getCheckedNodes (leafOnly:boolean = false) {
-      this.$refs[`${this.pageId}`].getCheckedNodes(leafOnly);
-    }
+const unSlots = ['default'];
+const proxy:any = getProxy();
+const slots = computed(() => Object.keys(useSlots()));
+const selectConfig = computed(() => {
+  let config = { ...{ disabled: false, readonly: false, size: 'default', clearable: true, placeholder: '请选择' }, ...useAttrs() };
+  if (config.disabled || config.readonly) {
+    config.placeholder = '';
   }
-};
+  return config;
+});
+
+const getCheckedNodes = (leafOnly:boolean = false) => {
+  proxy.$refs.dytCascader?.getCheckedNodes(leafOnly);
+}
+// 暴露给父级使用 ref 时使用
+defineExpose({ getCheckedNodes });
+
 </script>
 <style lang="less">
 .dyt-cascader-demo.el-cascader{

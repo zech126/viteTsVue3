@@ -42,6 +42,6 @@ app.mount('#app');
 // console.log(import.meta.env);
 
 // 使用 setup 时, 获取全局挂载方式, 获取当前组件的实例、上下文来操作router和vuex等
-// 注意的点：千万不要在 getCurrentInstance() 中获取 ctx; 在生产环境下， 货到到的 ctx 为空
-// import getGlobal from "@/hooks/global";
+// 注意的点：千万不要在 getCurrentInstance() 中获取 ctx; 在生产环境下， 获取到的 ctx 为空
+// import getGlobal from "@/utils/global";
 // const global =  getGlobal();
