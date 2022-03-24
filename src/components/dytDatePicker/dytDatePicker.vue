@@ -13,7 +13,6 @@
 
 export default {
   name: 'DytDatePicker',
-  isGlobal: true,
   components: {},
   props: {
     moduleData: {

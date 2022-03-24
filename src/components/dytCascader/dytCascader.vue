@@ -15,7 +15,6 @@
 
 export default {
   name: 'DytCascader',
-  isGlobal: true,
   components: {},
   props: {},
   data() {

@@ -139,7 +139,6 @@ interface dataType {
 }
 export default {
   name: 'DytInputTag',
-  isGlobal: true,
   components: {},
   props: {
     // 绑定值， 使用 v-model 或 modelValue 绑定

@@ -21,7 +21,6 @@
 
 export default {
   name: 'DytSelect',
-  isGlobal: true,
   components: {},
   props: {
     options: { type: Array, default: () => {return []} }

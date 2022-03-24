@@ -147,7 +147,6 @@ const includeFun = ['filterReset', 'expandFilter', 'requested'];
 
 export default {
   name: 'dytTable',
-  isGlobal: true,
   components: { filterBar, pagination, tableView },
   props: {
     //搜索栏

@@ -10,9 +10,6 @@
         >
       </div>
       <div style="flex: 100; min-width: 230px; padding-top: 50px;">
-        <!-- <h1 class="text-jumbo text-ginormous">
-          抱歉，你没有该页面权限，无法访问!
-        </h1> -->
         <h1 style="margin-bottom: 10px">
           抱歉，你没有该页面权限，无法访问!
         </h1>
@@ -20,10 +17,6 @@
           你可以点击 返回首页 或 重新登录 切换账号！
         </h2>
         <div style="margin-top: 50px; padding-left: 30px;">
-          <!-- <a
-            class="bullshit__return-home"
-            href="/"
-          >返回首页</a> -->
           <el-button
             type="primary"
             @click="goToPageHome"
@@ -38,28 +31,24 @@
           </el-button>
         </div>
       </div>
-      <!-- </el-row> -->
     </div>
   </div>
 </template>
 
-<script lang="ts" >
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
 import errGif from '@images/401.gif';
-export default defineComponent({
-  name: 'NoAccessView',
-  setup(props) {
-    const errGifGif = errGif + '?' + +new Date();
-    const loginOut = () => {}
-    const goToPageHome = () => {
-      const location = window.location;
-      window.location.href = `${location.origin}${location.pathname}`;
-    }
-    return {
-      errGifGif, loginOut, goToPageHome
-    }
-  }
-})
+import record from '@/utils/certificationCenter';
+
+const errGifGif = errGif + '?' + +new Date();
+const loginOut = () => {
+  record.outSystemLogin().then((res:any) => {
+    res.defaultHand();
+  });
+}
+const goToPageHome = () => {
+  const location = window.location;
+  window.location.href = `${location.origin}${location.pathname}`;
+}
 </script>
 
 <style lang="less" scoped>

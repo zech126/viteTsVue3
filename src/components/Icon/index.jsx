@@ -4,7 +4,6 @@
 import { h, resolveComponent } from 'vue';
 export default {
   name: 'Icon',
-  isGlobal: true,
   props: {
     name: { type: String, required: true }
   },

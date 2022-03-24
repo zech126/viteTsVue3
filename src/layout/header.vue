@@ -19,33 +19,25 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { computed, reactive, defineComponent } from 'vue';
+<script lang="ts" setup>
+import { computed, reactive } from 'vue';
 import record from '@/utils/certificationCenter';
 import store from '@/store';
-export default defineComponent({
-  name: 'HeaderDemo',
-  setup(props) {
-    let data = reactive({
-      headLoading: false
-    })
-    const loginOut = () => {
-      record.outSystemLogin().then((res:any) => {
-        res.defaultHand();
-      });
-    }
-    const goToLapa = () => {
-      record.backOauth();
-    }
-    const getUserInfo = computed(() => {
-      return store.getters['layout/userInfo'];
-    })
-    return {
-      data, loginOut, goToLapa, getUserInfo
-    }
-  }
-})
 
+let data = reactive({
+  headLoading: false
+})
+const loginOut = () => {
+  record.outSystemLogin().then((res:any) => {
+    res.defaultHand();
+  });
+}
+const goToLapa = () => {
+  record.backOauth();
+}
+const getUserInfo = computed(() => {
+  return store.getters['layout/userInfo'];
+})
 </script>
 <style lang="less" scoped>
 .head-container {

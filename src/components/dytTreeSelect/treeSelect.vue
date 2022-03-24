@@ -86,7 +86,6 @@ interface dataType {
 }
 export default {
   name: 'DytTreeSelect',
-  isGlobal: true,
   components: {},
   props: {
     modelValue: { type: [String, Array, Number], default: null },

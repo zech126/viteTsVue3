@@ -12,7 +12,11 @@
       <!-- 主体 -->
       <el-main class="app-main">
         <crumbs />
-        <div class="layout-main-pages" v-loading="loadingPage" :element-loading-text="loadingTxt">
+        <div
+          v-loading="loadingPage"
+          class="layout-main-pages"
+          :element-loading-text="data.loadingTxt"
+        >
           <noAccessView v-if="noAccess" />
           <nonExistView v-else-if="nonExist" />
           <slot v-else />
@@ -22,43 +26,23 @@
     </el-container>
   </el-container>
 </template>
-<script lang="ts">
-// computed, reactive, 
-import { defineComponent } from 'vue';
-import store from '@/store'
-import headerDemo from './header.vue'
-import sideNavDemo from './sideNav.vue'
-import crumbs from './crumbs.vue'
-import noAccessView from './401.vue'
-import nonExistView from './404.vue'
+<script lang="ts" setup>
+import { reactive, computed } from 'vue';
+import store from '@/store';
+import headerDemo from './header.vue';
+import sideNavDemo from './sideNav.vue';
+import crumbs from './crumbs.vue';
+import noAccessView from './401.vue';
+import nonExistView from './404.vue';
 
-export default defineComponent({
-  name: 'layout',
-  components: {headerDemo, sideNavDemo, crumbs, noAccessView, nonExistView},
-  data() {
-    return {
-      loadingTxt: '页面加载中，请稍后...'
-    }
-  },
-  computed: {
-    loadingPage () {      
-      return store.getters['routerModel/routerLoading'];
-    },
-    noAccess () {
-      return store.getters['layout/noAccess'];
-    },
-    nonExist () {
-      return store.getters['layout/nonExist'];
-    }
-  },
-  created() {},
-  // 页面渲染完
-  mounted() {},
-  // 组件销毁前
-  beforeUnmount () {},
-  methods: {}
+let data = reactive({
+  loadingTxt: '页面加载中，请稍后...'
 });
+const loadingPage = computed(() => store.getters['routerModel/routerLoading']);
+const noAccess = computed(() => store.getters['layout/noAccess']);
+const nonExist = computed(() => store.getters['layout/nonExist']);
 </script>
+
 <style lang="less" scoped>
 .app-container{
   position: relative;

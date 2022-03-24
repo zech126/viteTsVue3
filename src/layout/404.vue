@@ -44,21 +44,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-export default defineComponent({
-  name: 'nonExistView',
-  setup(props) {
-    const message = '这个页面走丢了......';
-    const goToPageHome = () => {
-      const location = window.location;
-      window.location.href = `${location.origin}${location.pathname}`;
-    }
-    return {
-      message, goToPageHome
-    }
-  }
-})
+<script lang="ts" setup>
+const message = '这个页面走丢了......';
+const goToPageHome = () => {
+  const location = window.location;
+  window.location.href = `${location.origin}${location.pathname}`;
+}
 </script>
 <style lang="less" scoped>
   .wscn-http404-container {

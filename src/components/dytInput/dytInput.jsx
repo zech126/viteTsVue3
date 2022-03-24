@@ -5,7 +5,6 @@
 // export default defineComponent({
 export default {
   name: 'DytInput',
-  isGlobal: true,
   data () {
     return {
       pageId: Math.random().toString(36).substring(2),
