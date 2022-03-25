@@ -4,10 +4,10 @@
     <slot>
       <template v-for="(item, index) in props.options">
         <el-option
-          v-if="(typeof item.value !== 'undefined')"
+          v-if="(typeof item[data.defaultProp.value] !== 'undefined')"
           :key="`${data.pageId}-${index}`"
-          :label="(typeof item.label !== 'undefined' ? item.label : item.value)"
-          :value="item.value"
+          :label="(typeof item[data.defaultProp.label] !== 'undefined' ? item[data.defaultProp.label] : item[data.defaultProp.value])"
+          :value="item[data.defaultProp.value]"
           :disabled="(typeof item.disabled !== 'boolean' ? item.disabled : false)"
         />
       </template>
@@ -22,10 +22,14 @@ import {computed, useSlots, useAttrs, reactive} from 'vue';
 import getProxy from "@/utils/proxy";
 
 const props = defineProps({
-  options: { type: Array, default: () => {return []} }
+  // 默认下拉数据
+  options: { type: Array, default: () => {return []} },
+  // 选项中和展示值道具
+  defaultProp: { type: Object,  default: () =>{return {}} }
 });
 const data = reactive({
-  pageId: Math.random().toString(36).substr(2) 
+  pageId: Math.random().toString(36).substr(2),
+  defaultProp: {value: 'value', label: 'label', ...props.defaultProp}
 })
 const proxy:any = getProxy();
 const slots = computed(() => Object.keys(useSlots()));
@@ -53,7 +57,7 @@ defineExpose({ focus, blur });
     width: 100%;
   }
   .el-select__tags{
-    padding-left: 11px;
+    padding-left: 0px;
   }
 }
 </style>
