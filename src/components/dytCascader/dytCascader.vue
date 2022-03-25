@@ -2,8 +2,7 @@
   <el-cascader ref="dytCascader" v-bind="selectConfig" class="dyt-cascader-demo">
     <template v-if="slots.includes('default')" v-slot="scope">
       <slot v-bind="scope">
-        <span>{{ scope.data.label }}</span>
-        <span v-if="!scope.node.isLeaf"> ({{ scope.data.children.length }})</span>
+        <span>{{ scope.data[data.defaultProp.label] }}{{`${scope.node.isLeaf}`}}</span>
       </slot>
     </template>
     <template v-for="tSlot in slots.filter(it => !unSlots.includes(it))" v-slot:[tSlot]="scope">
@@ -12,14 +11,22 @@
   </el-cascader>
 </template>
 <script lang="ts" setup>
-import {computed, useSlots, useAttrs} from 'vue';
+import {computed, useSlots, useAttrs, reactive} from 'vue';
 import getProxy from "@/utils/proxy";
 
 const unSlots = ['default'];
 const proxy:any = getProxy();
+const attrs = useAttrs();
 const slots = computed(() => Object.keys(useSlots()));
+const data = reactive({
+  defaultProp: {
+    label: 'label',
+    children: 'children',
+    ...attrs.props
+  }
+});
 const selectConfig = computed(() => {
-  let config = { ...{ disabled: false, readonly: false, size: 'default', clearable: true, placeholder: '请选择' }, ...useAttrs() };
+  let config = { ...{ disabled: false, readonly: false, size: 'default', clearable: true, placeholder: '请选择' }, ...attrs };
   if (config.disabled || config.readonly) {
     config.placeholder = '';
   }

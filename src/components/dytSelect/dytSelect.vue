@@ -8,7 +8,7 @@
           :key="`${data.pageId}-${index}`"
           :label="(typeof item[data.defaultProp.label] !== 'undefined' ? item[data.defaultProp.label] : item[data.defaultProp.value])"
           :value="item[data.defaultProp.value]"
-          :disabled="(typeof item.disabled !== 'boolean' ? item.disabled : false)"
+          :disabled="(typeof item[data.defaultProp.disabled] !== 'boolean' ? item[data.defaultProp.disabled] : false)"
         />
       </template>
     </slot>
@@ -29,7 +29,12 @@ const props = defineProps({
 });
 const data = reactive({
   pageId: Math.random().toString(36).substr(2),
-  defaultProp: {value: 'value', label: 'label', ...props.defaultProp}
+  defaultProp: {
+    value: 'value',
+    label: 'label',
+    disabled: 'disabled',
+    ...props.defaultProp
+  }
 })
 const proxy:any = getProxy();
 const slots = computed(() => Object.keys(useSlots()));
