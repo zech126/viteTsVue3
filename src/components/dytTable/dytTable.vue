@@ -20,7 +20,7 @@
         :page-id="pageId"
         :table-loading="tableLoading"
         :filter-config="filterConfig"
-        :filter-fields="filterFields"
+        :filter-fields="filterFieldConfig"
         :filter-model="filterModel"
         @performSearch="search"
         @filterExpand="filterExpand"
@@ -39,7 +39,7 @@
           <slot name="filter" />
         </template>
         <!-- 自定义插槽位置 -->
-        <template v-for="(fItem) in filterFields.filter(item => item.slot)" v-slot:[fItem.model]>
+        <template v-for="(fItem) in filterFieldConfig.filter((item:any) => item.slot)" v-slot:[fItem.model]>
           <slot :name="`filter-${fItem.model}`" />
         </template>
         <!-- 搜索按钮 -->
@@ -65,7 +65,7 @@
         :ref="`table_${pageId}`"
         v-loading="tableLoading"
         :page-id="pageId"
-        :table-columns="tableColumns"
+        :table-columns="tableColumnConfig"
         :table-data="pageTableData.rows"
         :table-height="tableHeight"
         :table-props="tableProps"
@@ -77,7 +77,7 @@
           <slot />
         </template>
         <!-- 自定义插槽列 -->
-        <template v-for="(item) in (tableColumns.filter(col => col.slot))" v-slot:[item.slot]="scope">
+        <template v-for="(item) in (tableColumnConfig.filter((col:any) => col.slot))" v-slot:[item.slot]="scope">
           <slot :name="item.slot" v-bind="scope"/>
         </template>
         <!-- 自定义表头的内容. 参数为 { column, $index } -->
@@ -139,13 +139,14 @@
   </div>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue';
 import filterBar from './filter.vue';
 import pagination from './pagination.vue'
 import tableView from './table.vue'
 
 const includeFun = ['filterReset', 'expandFilter', 'requested'];
 
-export default {
+export default defineComponent({
   name: 'dytTable',
   components: { filterBar, pagination, tableView },
   props: {
@@ -180,7 +181,7 @@ export default {
   emits: ['requested', 'expandFilter', 'filterReset'],
   data () {
     return {
-      pageId: Math.random().toString(36).substr(2),
+      pageId: Math.random().toString(36).substring(2),
       initLoading: false,
       firstLoading: true,
       tableLoading: false,
@@ -226,13 +227,19 @@ export default {
     slots () {
       return Object.keys(this.$slots)
     },
+    tableColumnConfig ():any {
+      return this.tableColumns;
+    },
+    filterFieldConfig ():any {
+      return this.filterFields;
+    },
     // 绑定到列表的事件
     tableListeners () {
       const attrs = Object.keys(this.$attrs);
       let tableFun = {};
       attrs.forEach(funKeys => {
-        if (!this.$common.isEmpty(funKeys) && funKeys.substr(0,2) === 'on') {
-          const newKey = `${funKeys.substr(2, 1).toLocaleLowerCase()}${funKeys.substr(3, funKeys.length)}`;
+        if (!this.$common.isEmpty(funKeys) && funKeys.substring(0,2) === 'on') {
+          const newKey = `${funKeys.substring(2, 1).toLocaleLowerCase()}${funKeys.substring(3, funKeys.length)}`;
           !includeFun.includes(newKey) && (tableFun[newKey] = this.$attrs[funKeys]);
         }
       })
@@ -481,7 +488,7 @@ export default {
       this.$refs[`table_${this.pageId}`] && this.$refs[`table_${this.pageId}`].sort(prop, order);
     }
   }
-};
+});
 </script>
 <style lang="less">
 .dyt-table-view{

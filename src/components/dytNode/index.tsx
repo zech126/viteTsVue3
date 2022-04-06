@@ -1,6 +1,6 @@
-// import { defineComponent } from 'vue';
-// export default defineComponent({
-export default{
+import { defineComponent } from 'vue';
+export default defineComponent({
+// export default {
   name: 'DytNode',
   props: {
     node: {type: Function, default: () => {}},
@@ -9,4 +9,4 @@ export default{
   render() {
     return this.node(this.nodeParameter);
   }
-}
+})

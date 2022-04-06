@@ -2,13 +2,13 @@
   <el-select :ref="data.pageId" v-bind="selectConfig" class="dyt-select-demo">
     <!-- 默认插槽 -->
     <slot>
-      <template v-for="(item, index) in props.options">
+      <template v-for="(item, index) in options">
         <el-option
-          v-if="(typeof item[data.defaultProp.value] !== 'undefined')"
+          v-if="(typeof item[defaultProp.value] !== 'undefined')"
           :key="`${data.pageId}-${index}`"
-          :label="(typeof item[data.defaultProp.label] !== 'undefined' ? item[data.defaultProp.label] : item[data.defaultProp.value])"
-          :value="item[data.defaultProp.value]"
-          :disabled="(typeof item[data.defaultProp.disabled] !== 'boolean' ? item[data.defaultProp.disabled] : false)"
+          :label="(typeof item[defaultProp.label] !== 'undefined' ? item[defaultProp.label] : item[defaultProp.value])"
+          :value="item[defaultProp.value]"
+          :disabled="(typeof item[defaultProp.disabled] !== 'boolean' ? item[defaultProp.disabled] : false)"
         />
       </template>
     </slot>
@@ -28,16 +28,19 @@ const props = defineProps({
   defaultProp: { type: Object,  default: () =>{return {}} }
 });
 const data = reactive({
-  pageId: Math.random().toString(36).substr(2),
-  defaultProp: {
+  pageId: Math.random().toString(36).substring(2)
+})
+const proxy:any = getProxy();
+const slots = computed(() => Object.keys(useSlots()));
+const options:any = computed(() => props.options);
+const defaultProp = computed(() => {
+  return {
     value: 'value',
     label: 'label',
     disabled: 'disabled',
     ...props.defaultProp
   }
-})
-const proxy:any = getProxy();
-const slots = computed(() => Object.keys(useSlots()));
+});
 const selectConfig = computed(() => {
   let config = { ...{ placeholder: '请选择', size: 'default', clearable: true, filterable: true, disabled: false, readonly: false }, ...useAttrs() };
   if (config.disabled || config.readonly) {

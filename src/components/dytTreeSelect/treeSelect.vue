@@ -73,6 +73,8 @@
   </div>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue'
+
 interface dataType {
   pageId: string;
   vModel: any;
@@ -84,7 +86,7 @@ interface dataType {
   defaultConfig: any;
   treeData: Array<any>
 }
-export default {
+export default defineComponent({
   name: 'DytTreeSelect',
   components: {},
   props: {
@@ -119,7 +121,7 @@ export default {
   emits: ['show', 'showAfter', 'hide', 'hideAfter', 'update:modelValue'],
   data ():dataType {
     return {
-      pageId: Math.random().toString(36).substr(2),
+      pageId: Math.random().toString(36).substring(2),
       vModel: [],
       isHoverTree: false,
       treeDataJson: {},
@@ -382,7 +384,7 @@ export default {
       this.$refs[`tree-${this.pageId}`] && this.$refs[`tree-${this.pageId}`].insertAfter(data, refNode);
     }
   }
-};
+});
 </script>
 <style lang="less">
 @lineHeight: 32px;

@@ -1,23 +1,16 @@
 <template>
   <div style="padding: 60px">
     JSX
-    <component1 :canshu="canshu" />
-    <component2 :canshu="canshu1" />
+    <component1 :canshu="data.canshu" />
+    <component2 :canshu="data.canshu1" />
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 import {component1, component2} from './test';
-export default {
-  components: {component1: component1, component2: component2},
-  name: "test",
-  props: {},
-  data() {
-    return {
-      canshu: '1233',
-      canshu1: 'sdregyte'
-    };
-  },
-  methods: {}
-};
+import {reactive} from 'vue';
+const data = reactive({
+  canshu: '1233',
+  canshu1: 'sdregyte'
+})
 </script>

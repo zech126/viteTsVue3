@@ -21,6 +21,7 @@
   </div>
 </template>
 <script lang="ts">
+import {defineComponent} from 'vue';
 
 interface dataType {
   align: Array<any>;
@@ -36,7 +37,7 @@ interface dataType {
   oldPageNum: number;
 }
 
-export default {
+export default defineComponent({
   name: 'pagination',
   components: {},
   props: {
@@ -122,7 +123,7 @@ export default {
       this.$emit('change', this.pageNum, this.pageSize);
     }
   }
-};
+});
 </script>
 <style lang="less">
 .dyt-pagination-container{

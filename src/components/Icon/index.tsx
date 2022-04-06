@@ -1,8 +1,8 @@
 
 // 对 element-plus icon 再次封装
 // import { h, resolveComponent, defineComponent } from 'vue';
-import { h, resolveComponent } from 'vue';
-export default {
+import { h, resolveComponent, defineComponent } from 'vue';
+export default defineComponent({
   name: 'Icon',
   props: {
     name: { type: String, required: true }
@@ -12,4 +12,4 @@ export default {
       {h(resolveComponent(this.name))}
     </el-icon>
   }
-}
+})

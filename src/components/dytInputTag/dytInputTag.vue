@@ -69,7 +69,7 @@
                   'input-empty-tag': vModel.length === 0
                 }"
                 :placeholder="vModel.length <= 0 ? placeholder : ''"
-                :style="`width:${ vModel.length && !inputValue.includes('\n') > 0 ? inputWidth: '100%;'}`"
+                :style="`width:${ vModel.length > 0 && !inputValue.includes('\n') ? inputWidth: '100%;'}`"
                 @keyup.enter="addTagHand"
                 @keyup="tagkeyup"
                 @blur="blur"
@@ -114,6 +114,7 @@
   </div>
 </template>
 <script lang="ts">
+import {defineComponent } from 'vue';
 /**
  * 方法 close 配置之后，点击关闭之后需自己处理， 参数返回 当前 tag
  * 方法 click， 参数返回 当前 tag
@@ -137,7 +138,7 @@ interface dataType {
     size: string;
   }
 }
-export default {
+export default defineComponent({
   name: 'DytInputTag',
   components: {},
   props: {
@@ -169,7 +170,7 @@ export default {
   emits: ['update:modelValue','change','click','clearableHand','close','keyup','keyupEnter','addTheTag','show','showAfter','hide','hideAfter'],
   data ():dataType {
     return {
-      pageId: Math.random().toString(36).substr(2),
+      pageId: Math.random().toString(36).substring(2),
       inputValue: '',
       vModel: [],
       inputWidth: '100%;',
@@ -269,13 +270,13 @@ export default {
         const newSplit = typeof this.split === 'string' ? [this.split] : this.split;
         if (index > -1) {
           let newTag:any = newSplit.filter(sp => {
-            return this.inputValue.includes(`${this.inputValue.substr(index, tag.length)}${sp}`);
+            return this.inputValue.includes(`${this.inputValue.substring(index, tag.length)}${sp}`);
           });
           if (newTag[0]) {
-            newTag = `${this.inputValue.substr(index, tag.length)}${newTag[0]}`;
-            this.inputValue = `${this.inputValue.substr(0, index)}${this.inputValue.substr(index + newTag.length)}`;
+            newTag = `${this.inputValue.substring(index, tag.length)}${newTag[0]}`;
+            this.inputValue = `${this.inputValue.substring(0, index)}${this.inputValue.substring(index + newTag.length)}`;
           } else {
-            this.inputValue = `${this.inputValue.substr(0, index)}${this.inputValue.substr(index + tag.length)}`;
+            this.inputValue = `${this.inputValue.substring(0, index)}${this.inputValue.substring(index + tag.length)}`;
           }
         }
       }
@@ -394,7 +395,7 @@ export default {
       })
     }
   }
-};
+});
 </script>
 <style lang="less">
 @inputHeight: 24px;

@@ -48,7 +48,7 @@
                     v-bind="{
                       ...(item.componentProps||{}),
                       placeholder: item.placeholder || `${item.label}`,
-                      style: this.componentStyle(item.style)
+                      style: componentStyle(item.style)
                     }"
                     v-on="(item.events||{})"
                   />
@@ -60,7 +60,7 @@
                       'collapse-tags': true,
                       ...(item.componentProps||{}),
                       placeholder: item.placeholder || `${item.label}`,
-                      style: this.componentStyle(item.style)
+                      style: componentStyle(item.style)
                     }"
                     :options="filterAsync[`${item.model}-options`].value"
                     :loading="filterAsync[`${item.model}-options`].loading"
@@ -73,7 +73,7 @@
                     v-bind="{
                       ...(item.componentProps||{}),
                       placeholder: item.placeholder || `${item.label}`,
-                      style: this.componentStyle(item.style)
+                      style: componentStyle(item.style)
                     }"
                     v-on="(item.events||{})"
                   />
@@ -87,7 +87,7 @@
                       type: 'textarea',
                       ...(item.componentProps||{}),
                       placeholder: item.placeholder || `${item.label}`,
-                      style: this.componentStyle(item.style)
+                      style: componentStyle(item.style)
                     }"
                     v-on="(item.events||{})"
                   />
@@ -98,7 +98,7 @@
                     v-bind="{
                       ...(item.componentProps||{}),
                       placeholder: item.placeholder || `${item.label}`,
-                      style: this.componentStyle(item.style)
+                      style: componentStyle(item.style)
                     }"
                     v-on="(item.events||{})"
                   />
@@ -125,14 +125,35 @@
   </div>
 </template>
 <script lang="ts">
+import {defineComponent} from 'vue';
 
-export default {
+interface dataType{
+  showMore: Boolean;
+  isExpand: Boolean;
+  config: {
+    // 显示搜索栏, 默认值 true
+    showFilter: Boolean;
+    // 显示搜索按钮, 默认值 true
+    showSearch: Boolean;
+    // 显示重置按钮, 默认值 true
+    showReset: Boolean;
+    validRules: Array<any>;
+  },
+  btnOffsetRight: Number;
+  formData: any;
+  oldFormData: any;
+  temporaryForm: any;
+  filterAsync: any;
+  filterItems: any
+}
+
+export default defineComponent({
   name: 'filterBar',
   // components: { dytParts },
   props: {
     //搜索栏
     filterFields: { type: Array, default: () => [] },
-    pageId: { type: String, default: Math.random().toString(36).substr(2) },
+    pageId: { type: String, default: Math.random().toString(36).substring(2) },
     tableLoading: { type: Boolean, default: false },
     filterConfig: { type: Object, default: () => {return {}} },
     filterModel: { type: Object, default: () => {return {}} },
@@ -144,7 +165,7 @@ export default {
     // }
   },
   emits: ['performSearch', 'resetFilter', 'filterExpand'],
-  data () {
+  data ():dataType {
     return {
       showMore: true,
       isExpand: false,
@@ -337,7 +358,7 @@ export default {
       this.filterSearch()
     },
     // 对象形式的样式转换成字符串
-    componentStyle (style:[string | object ], set:string) {
+    componentStyle (style:[string | object ], set:string = '') {
       let newStyle = '';
       if (!this.$common.isEmpty(set)) {
         newStyle = `${set}`;
@@ -352,7 +373,7 @@ export default {
       return newStyle;
     }
   }
-};
+});
 </script>
 <style lang="less">
 .dyt-filter-container{

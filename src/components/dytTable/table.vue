@@ -152,8 +152,8 @@ export default {
       const attrs = Object.keys(this.$attrs);
       let tableFun = {};
       attrs.forEach(funKeys => {
-        if (!this.$common.isEmpty(funKeys) && funKeys.substr(0,2) === 'on') {
-          const newKey = `${funKeys.substr(2, 1).toLocaleLowerCase()}${funKeys.substr(3, funKeys.length)}`;
+        if (!this.$common.isEmpty(funKeys) && funKeys.substring(0,2) === 'on') {
+          const newKey = `${funKeys.substring(2, 1).toLocaleLowerCase()}${funKeys.substring(3, funKeys.length)}`;
           tableFun[newKey] = this.$attrs[funKeys];
         }
       })

@@ -12,8 +12,8 @@ import getGlobal from "@/utils/global";
 
 const proxy:any = getProxy();
 const global: any = getGlobal();
-const attrs = useAttrs();
-const slots = computed(() => Object.keys(useSlots()));
+const attrs: any = useAttrs();
+const slots: any = computed(() => Object.keys(useSlots()));
 const dateAdd = (add:number = 0, type:string = 'day', oldDate:Date = new Date()) => {
   return new Date(global.$dayjs(oldDate).add(add, type));
 };

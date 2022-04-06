@@ -5,7 +5,7 @@
         <span>{{ scope.data[data.defaultProp.label] }}{{`${scope.node.isLeaf}`}}</span>
       </slot>
     </template>
-    <template v-for="tSlot in slots.filter(it => !unSlots.includes(it))" v-slot:[tSlot]="scope">
+    <template v-for="tSlot in slots.filter((it:string) => !unSlots.includes(it))" v-slot:[tSlot]="scope">
       <slot :name="tSlot" v-bind="scope" />
     </template>
   </el-cascader>
@@ -14,14 +14,14 @@
 import {computed, useSlots, useAttrs, reactive} from 'vue';
 import getProxy from "@/utils/proxy";
 
-const unSlots = ['default'];
+const unSlots:Array<any> = ['default'];
 const proxy:any = getProxy();
-const attrs = useAttrs();
-const slots = computed(() => Object.keys(useSlots()));
+const attrs:any = useAttrs();
+const slots:any = computed(() => Object.keys(useSlots()));
 const data = reactive({
   defaultProp: {
     label: 'label',
-    children: 'children',
+    children: 'children0',
     ...attrs.props
   }
 });
