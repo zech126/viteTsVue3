@@ -1,5 +1,5 @@
 <template>
-  <div :ref="`tag-${pageId}`">
+  <div :ref="`tag-${pageId}`" class="dyt-input-tag-demo">
     <el-popover
       placement="bottom"
       :width="popoverWidth"
@@ -12,11 +12,13 @@
       @hide="popoverHide"
     >
       <template #reference>
-        <div class="dyt-input-tag-content"
+        <div
+          class="dyt-input-tag-content"
           :class="{
             'dyt-tag-content-limit': limit > 0,
             'tag-content-focus': isFocus
           }"
+          :style="selectConfig.style"
           @click="focus"
         >
           <template v-if="limit > 0">
@@ -399,6 +401,9 @@ export default defineComponent({
 </script>
 <style lang="less">
 @inputHeight: 24px;
+.dyt-input-tag-demo{
+  width: 100%;
+}
 .dyt-input-tag-content{
   display: flex;
   padding: 3px 3px 0px 3px;

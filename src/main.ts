@@ -19,7 +19,7 @@ const app = createApp(App);
 // 注册 Element
 app.use(ElementPlus, {
   // 默认尺寸
-  size: 'medium',
+  size: 'default',
   // 弹窗初始值
   zIndex: 1000,
   // 国际化

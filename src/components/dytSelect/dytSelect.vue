@@ -12,8 +12,8 @@
         />
       </template>
     </slot>
-    <template v-for="slot in slots" v-slot:[slot]="scope">
-      <slot v-if="slot !== 'default'" :name="slot" v-bind="scope" />
+    <template v-for="slot in slots.filter((slotI:string) => !data.unIncludes.includes(slotI))" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
     </template>
   </el-select>
 </template>
@@ -28,11 +28,13 @@ const props = defineProps({
   defaultProp: { type: Object,  default: () =>{return {}} }
 });
 const data = reactive({
-  pageId: Math.random().toString(36).substring(2)
+  pageId: Math.random().toString(36).substring(2),
+  unIncludes: ['default']
 })
 const proxy:any = getProxy();
 const slots = computed(() => Object.keys(useSlots()));
 const options:any = computed(() => props.options);
+
 const defaultProp = computed(() => {
   return {
     value: 'value',

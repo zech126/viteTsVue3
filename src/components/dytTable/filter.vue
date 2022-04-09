@@ -24,7 +24,7 @@
         </div>
         <div v-if="showMore" style="margin-left: 10px;">
           <slot name="searchMore" :isExpand="isExpand">
-            <el-button type="primary" style="height: 32px; padding: 8px 6px;" :title="`${isExpand ? '展开' : '收起'}`" @click="expandHand">
+            <el-button size="small" type="primary" style="height: 30px; padding: 0px 6px;" :title="`${isExpand ? '展开' : '收起'}`" @click="expandHand">
               <Icon :name="`caret-${isExpand ? 'top' : 'bottom'}`" style="font-size: 25px;" />
             </el-button>
           </slot>
@@ -216,6 +216,7 @@ export default defineComponent({
     },
     // 插槽值或render的值改变时
     filterModel: {
+      immediate: true,
       deep: true,
       handler (val) {
         const slotKey = this.filterFields.filter((item:any) => {
@@ -293,7 +294,6 @@ export default defineComponent({
     },
     // 搜索
     filterSearch () {
-      // console.log(this.formData)
       if (this.tableLoading) return;
       if (!this.$common.isEmpty(this.fConfig.validRules) && this.$refs.filterForm) {
         this.$refs.filterForm.validate((valid:boolean) => {
@@ -306,7 +306,7 @@ export default defineComponent({
     },
     // 获取数据
     getFormData () {
-      return this.formData;
+      return { ...this.formData, ...this.filterModel };
     },
     // 重置(无法重置插槽渲染的组件值)
     resetHand () {

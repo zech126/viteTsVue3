@@ -187,7 +187,7 @@ export default defineComponent({
       tableLoading: false,
       isExpand: false,
       notCalculate: false,
-      tableHeight: null,
+      tableHeight: '',
       showPagination: true,
       filterHeight: 0,
       tableDataMap: { rows: 'data.list', total: 'data.total', errorInfos: 'msg' },

@@ -17,6 +17,7 @@
       @after-enter="afterEnter"
       @after-leave="afterLeave"
       @show="popoverShow"
+      @before-enter="showBefore"
       @hide="popoverHide"
     >
       <template #reference>
@@ -33,7 +34,7 @@
               <template v-for="(item, index) in vModel" :key="index">
                 <span class="tree-tag-item" v-if="limit === 0 || (index + 1) <= limit">
                   <span class="tag-item-text">
-                    {{treeDataJson[item] ? treeDataJson[item][config.defaultProps.label||'label'] : ''}}
+                    {{treeDataJson[item] ? treeDataJson[item][config.props.label||'label'] : ''}}
                   </span>
                   <span class="tag-item-close" @click.stop="removeTag(item)">
                     <Icon v-if="limit > 0 && config.multiple" name="close" />
@@ -58,11 +59,14 @@
           :ref="`tree-${pageId}`"
           class="filter-tree"
           :filter-node-method="filterNodeHand"
-          :data="data"
+          :data="treeOptions"
           v-bind="config"
           :style="`width: ${typeof popoverTreeWidth === 'number' ? `${popoverTreeWidth}px` : popoverTreeWidth};`"
           @node-click="nodeClick"
           @check="check"
+          @node-expand="nodeExpand"
+          @node-collapse="nodeCollapse"
+          @node-drag-end="nodeDragEnd"
         >
           <template v-for="slot in slots" v-slot:[slot]="scope">
             <slot :name="slot" v-bind="scope" />
@@ -111,14 +115,17 @@ export default defineComponent({
     filterNodeMethod: { type: Function, default: () => {} },
     // 展示数据,支持异步
     data: { type: Array, default: () => {return []} },
+    options: { type: Array, default: () => {return []} },
     // 设置树最大高度
     treeMaxHeight: { type: [String, Number], default: '35vh' },
     // 设置树最小高度
     treeMinHeight: { type: [String, Number], default: 50 },
     // 设置树宽度
     popoverTreeWidth: { type: [String, Number], default: null },
+    // Props 设置
+    defaultProps: { type: Object, default: () => {return {}} },
   },
-  emits: ['show', 'showAfter', 'hide', 'hideAfter', 'update:modelValue'],
+  emits: ['show', 'showBefore', 'showAfter', 'hide', 'hideAfter', 'update:modelValue', 'input'],
   data ():dataType {
     return {
       pageId: Math.random().toString(36).substring(2),
@@ -129,7 +136,7 @@ export default defineComponent({
       inputValue: '',
       popoverWidth: 200,
       defaultConfig: {
-        defaultProps: { label: 'label', value: 'value', children: 'children' },
+        props: { label: 'label', value: 'value', children: 'children' },
         'empty-text': '暂无数据!',
         'default-expand-all': true,
         'expand-on-click-node': false,
@@ -142,8 +149,11 @@ export default defineComponent({
     slots () {
       return Object.keys(this.$slots)
     },
+    treeOptions () {
+      return this.$common.isEmpty(this.data) ? this.options : this.data;
+    },
     config () {
-      let config = { ...this.defaultConfig, ...this.$attrs };
+      let config = { ...this.defaultConfig, props: this.defaultProps, ...this.$attrs };
       if (config.disabled || config.readonly) {
         config.placeholder = '';
       }
@@ -157,7 +167,7 @@ export default defineComponent({
         config['highlight-current'] = false;
       }
       if (!config['node-key']) {
-        config['node-key'] = config.defaultProps.value ? config.defaultProps.value : 'value';
+        config['node-key'] = config.props.value ? config.props.value : 'value';
       }
       delete config.style;
       return config;
@@ -179,12 +189,13 @@ export default defineComponent({
         if (!this.config.multiple) {
           this.vModel = this.vModel[0] ? [this.vModel[0]] : [];
         }
-        if (this.config.multiple) {
+        this.$nextTick(() => {
           this.vModel.forEach((key:any) => {
-            this.setChecked(key, true, !this.config['check-strictly']);
+            this.config.multiple && this.setChecked(key, true, !this.config['check-strictly']);
+            !this.config.multiple && this.setCurrentKey(key);
           });
-          this.checkedNodeHand();
-        }
+          this.config.multiple && this.checkedNodeHand();
+        })
       }
     },
     inputValue: {
@@ -193,7 +204,7 @@ export default defineComponent({
         this.filter(val);
       }
     },
-    data: {
+    treeOptions: {
       deep: true,
       immediate: true,
       handler (val) {
@@ -206,20 +217,33 @@ export default defineComponent({
   mounted () {
     // 弹出宽度设置
     this.$refs[`tag-${this.pageId}`] && (this.popoverWidth = this.$refs[`tag-${this.pageId}`].offsetWidth);
-    if (this.config.multiple) {
+    this.$nextTick(() => {
       this.vModel.forEach((key:any) => {
-        this.setChecked(key, true, !this.config['check-strictly']);
+        this.config.multiple && this.setChecked(key, true, !this.config['check-strictly']);
       })
-      this.checkedNodeHand();
-    }
+      this.config.multiple && this.checkedNodeHand();
+    });
   },
   methods: {
     initTreeData (arr = []) {
       arr.forEach(item => {
-        this.treeDataJson[item[this.config.defaultProps.value||'value']] = item;
-        if (!this.$common.isEmpty(item[this.config.defaultProps.children||'children'])) {
-          this.initTreeData(item[this.config.defaultProps.children||'children']);
+        this.treeDataJson[item[this.config.props.value||'value']] = item;
+        if (!this.$common.isEmpty(item[this.config.props.children||'children'])) {
+          this.initTreeData(item[this.config.props.children||'children']);
         }
+      })
+    },
+    showBefore () {
+      this.$refs[`tag-${this.pageId}`] && (this.popoverWidth = this.$refs[`tag-${this.pageId}`].offsetWidth);
+      this.$emit('showBefore');
+      this.$nextTick(() => {
+        if (this.$common.isEmpty(this.vModel)) {
+          !this.config.multiple && this.setCurrentKey(null);
+          return;
+        }
+        this.vModel.forEach((key:any) => {
+          !this.config.multiple && this.setCurrentKey(key);
+        })
       })
     },
     // 显示时触发
@@ -250,21 +274,45 @@ export default defineComponent({
       const isPass = this.filterNodeMethod(value, data);
       if (typeof isPass === 'boolean') return isPass;
       if (this.$common.isEmpty(value, true)) return true;
-      if (this.$common.isEmpty(this.config.defaultProps.label)) return data.label.indexOf(value) !== -1;
-      return data[this.config.defaultProps.label].indexOf(value) !== -1;
+      if (this.$common.isEmpty(this.config.props.label)) return data.label.indexOf(value) !== -1;
+      return data[this.config.props.label].indexOf(value) !== -1;
     },
     // 选择(单选时)
     nodeClick (node:any, data:any, event:any) {
       if (this.config.multiple) return;
-      const newValue = this.$common.isEmpty(this.config.defaultProps.value) ? node[this.config.defaultProps.value] : node.value;
+      const newValue = !this.$common.isEmpty(this.config.props.value) ? node[this.config.props.value] : node.value;
       this.vModel = [newValue];
-      this.backArray ? this.$emit('update:modelValue', this.vModel) : this.$emit('update:modelValue', newValue);
+      this.updateVal(this.backArray ? [newValue] : newValue);
+      this.$nextTick(() => {
+        this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+      });
     },
     // 点击节点复选框之后触发(多单选时)
     check (node:any) {
       if (!this.config.multiple) return;
       // 处理选择值
       this.checkedNodeHand();
+      this.$nextTick(() => {
+        this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+      });
+    },
+    // 节点被展开时
+    nodeExpand () {
+      this.$nextTick(() => {
+        this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+      });
+    },
+    // 节点被关闭时
+    nodeCollapse () {
+      this.$nextTick(() => {
+        this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+      });
+    },
+    // 拖拽结束时（可能未成功）
+    nodeDragEnd () {
+      this.$nextTick(() => {
+        this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+      });
     },
     hoverTree () {
       this.isHoverTree = true;
@@ -275,11 +323,13 @@ export default defineComponent({
     // 清空
     clearTree () {
       if (!this.isHoverTree || this.vModel.length === 0) return;
-      this.vModel.forEach((key:any) => {
-        this.setChecked(key, false, !this.config['check-strictly']);
-      })
       this.vModel = [];
-      this.$emit('update:modelValue', this.config.multiple ? this.string ? '' : [] : '');
+      this.updateVal(this.config.multiple ? this.string ? '' : [] : this.backArray ? [] : '');
+    },
+    // 更新值
+    updateVal (val:any) {
+      this.$emit('update:modelValue', val);
+      this.$emit('input', val);
     },
     // 移除选项
     removeTag (key:any) {
@@ -291,8 +341,8 @@ export default defineComponent({
     checkedNodeHand () {
       this.$nextTick(() => {
         const checkNodes = this.getCheckedNodes();
-        const valKey = this.config.defaultProps.value ? this.config.defaultProps.value : 'value';
-        const childKey = this.config.defaultProps.children ? this.config.defaultProps.children : 'children';
+        const valKey = this.config.props.value ? this.config.props.value : 'value';
+        const childKey = this.config.props.children ? this.config.props.children : 'children';
         let checkKeys = this.getCheckedKeys();
         const handArr = (arr:Array<any>, isRemove = false) => {
           arr.forEach((item:any) => {
@@ -305,7 +355,7 @@ export default defineComponent({
         !this.config['check-strictly'] && handArr(checkNodes);
         this.vModel = checkKeys;
         if (JSON.stringify(this.modelValue) === JSON.stringify(this.vModel)) return;
-        this.$emit('update:modelValue', this.string ? this.vModel.split(this.split) : this.vModel);
+        this.updateVal(this.string ? this.vModel.split(this.split) : this.vModel);
       })
     },
 

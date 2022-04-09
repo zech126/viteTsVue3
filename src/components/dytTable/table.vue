@@ -17,7 +17,7 @@
           v-bind="tableAttr"
           v-on="tableListeners"
           :data="tableData"
-          :height="tableHeight"
+          :height="$common.isEmpty(tableHeight) ? null : tableHeight"
           :max-height="(tableAttr['max-height'] || tableAttr['maxHeight'] || null)"
           style="width: 100%;"
         >
@@ -56,9 +56,9 @@
                 <template v-slot="scope">
                   <dyt-node v-if="typeof cloumnsRender[`render-${index}`] === 'function'" :node="cloumnsRender[`render-${index}`]" :node-parameter="scope"/>
                   <div v-else class="table-ellipsis-tips"
-                    v-on="cloumnsEvents[[`events-${index}`]] ? {
-                      click: (e) => {
-                        cloumnsEvents[[`events-${index}`]].click && cloumnsEvents[[`events-${index}`]].click(scope, e);
+                    v-on="cloumnsEvents[`events-${index}`] ? {
+                      click: (e:any) => {
+                        cloumnsEvents[`events-${index}`].click && cloumnsEvents[`events-${index}`].click(scope, e);
                       }
                     }: {}"
                   >
@@ -92,6 +92,7 @@
   </div>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue';
 
 interface dataType{
   columnAlign: Array<any>;
@@ -105,12 +106,12 @@ interface dataType{
     //   return row.userId
     // },
     stripe: boolean;
-    // size: 'small',
+    size: string;
     border: boolean;
   }
 }
 
-export default {
+export default defineComponent({
   name: 'TableView',
   props: {
     // 表格其他设置
@@ -138,7 +139,7 @@ export default {
         //   return row.userId
         // },
         stripe: true,
-        // size: 'small',
+        size: 'small',
         border: true
       }
     }
@@ -237,7 +238,7 @@ export default {
       return this.tableConfog.selectable ? this.tableConfog.selectable(row, index) : true;
     }
   }
-};
+});
 </script>
 <style lang="less">
 .dyt-table-container{
