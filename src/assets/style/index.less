@@ -252,12 +252,14 @@ body {
     }
   }
   .dyt-table-container{
+    &.dyt-table-empty{
+      .el-scrollbar__view{
+        height: 100%;
+      }
+    }
     .el-table__body-wrapper{
       position: static;
       min-height: 200px;
-    }
-    .el-scrollbar__view{
-      height: 100%;
     }
     .el-table__empty-text {
       background-image: url('../images/nullength.png');

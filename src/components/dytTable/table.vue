@@ -1,5 +1,5 @@
 <template>
-  <div :id="`table_${pageId}`" class="dyt-table-container">
+  <div :id="`table_${pageId}`" class="dyt-table-container" :class="{'dyt-table-empty': tableData.length === 0}">
     <!-- 表格头部 -->
     <div v-if="slots.includes('tableTop')" class="table-top-container">
       <slot name="tableTop" />
