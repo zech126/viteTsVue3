@@ -53,14 +53,17 @@ button {
 }
 
 body {
-  height: 100%;
+  height: 100vh;
+  width: 100vw;
   font-size: @font-size;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   &.again-login-body{
-    // .again-login-message {}
+    #app {
+      filter: blur(3px);
+    }
     .again-login-content{
       padding: 0;
       margin: 0;
@@ -75,9 +78,16 @@ body {
       }
     }
   }
+  #driver-popover-item{
+    &.step-popover-class{
+      max-width: 600px;
+    }
+  }
   #app {
     height: 100%;
     width: 100%;
+    min-width: 700px;
+    color: @font-corlor;
     overflow: auto;
   }
   // el 按钮设置
@@ -107,15 +117,225 @@ body {
   .el-pagination{
     justify-content: flex-end;
   }
+  // 信息提示层级提升
+  .el-message{
+    z-index: 99999999999 !important;
+  }
+  .el-input--small {
+    font-size: @font-size;
+  }
+
+  .mian-container-table{
+    td {
+      .el-button{
+        padding: 4px 5px;
+        font-size: 12px;
+        &+.el-button{
+          padding: 4px 5px;
+          margin-left: 5px;
+        }
+      }
+      .el-dropdown{
+        .el-tooltip__trigger{
+          .el-button{
+            height: 24px;
+          }
+        }
+      }
+    }
+  }
+  // 文本省略号
+  .text-ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  // 文本居中
+  .text-center {
+    text-align: center
+  }
+  // 文本不换行
+  .text-nowarp {
+    white-space: nowrap
+  }
+  .again-login-message{
+    &.el-message-box{
+      width: auto;
+      padding: 0;
+      border: none;
+      .el-message-box__content{
+        padding: 0px;
+      }
+      .el-message-box__btns,
+      .el-message-box__header{
+        display: none;
+      }
+      .el-message-box__message{
+        p{
+          line-height: 0;
+        }
+      }
+    }
+  }
+    // vue-treeselect 组件样式修改 start
+    .dty-tree-demo{
+      .vue-treeselect{
+        .vue-treeselect__control{
+          height: 32px;
+          line-height: normal;
+          .vue-treeselect__multi-value-item{
+            .vue-treeselect__value-remove{
+              border-left: 0px solid #fff;
+            }
+          }
+          .vue-treeselect__input{
+            cursor: pointer;
+          }
+          .vue-treeselect__multi-value-item{
+            padding: 1px 0;
+          }
+          .vue-treeselect__placeholder{
+            padding-left: 10px;
+            line-height: 30px;
+            font-size: @font-size;
+            color: @placeholder-color;
+          }
+          .vue-treeselect__single-value{
+            padding-left: 10px;
+            line-height: 30px;
+            font-size: @font-size;
+            color: @input-color;
+          }
+          .vue-treeselect__input-container{
+            padding-left: 10px;
+          }
+        }
+      }
+    }
+  
+  .el-input--medium{
+    .el-input__inner{
+      height: 32px;
+      line-height: 32px;
+    }
+  }
+  .table-loading{
+    .el-loading-mask{
+      background-color: #fff;
+      .el-loading-spinner{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        max-width: 400px;
+        height: calc(100% - 100px);
+        background-image: url('../images/table_loding.gif');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        transform: translate(-50%, -50%);
+      }
+      .circular{
+        display: none;
+      }
+    }
+  }
+  .first-loading{
+    .dyt-table-container{
+      .el-table__empty-text {
+        background-image: url('../images/search.png');
+      }
+    }
+  }
+  .dyt-table-container{
+    .el-table__body-wrapper{
+      position: static;
+      min-height: 200px;
+    }
+    .el-scrollbar__view{
+      height: 100%;
+    }
+    .el-table__empty-text {
+      background-image: url('../images/nullength.png');
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: 400px;
+      height: calc(100% - 100px);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+      color: rgba(#000, 0);
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  }
+  .vue-treeselect__portal-target{
+    z-index: 9999999999 !important;
+  }
+  .el-popconfirm__action{
+    margin-top: 15px;
+  }
+  .el-input.is-disabled{
+    .el-input__inner {
+      color: @input-color;
+      background-color: #f9f9f9;
+      cursor: default;
+    }
+  }
+  // 表单样式
   .el-form-item{
+    margin-bottom: 18px;
+    &.is-success{
+      .el-input__inner,
+      .el-textarea__inner{
+        border-color: #DCDFE6;
+      }
+      .el-input__inner:focus,
+      .el-textarea__inner:focus{
+        border-color: #409EFF;
+      }
+    }
+    .el-form-item__label,
+    .el-form-item__content{
+      line-height: 32px;
+    }
+    .el-form-item__error{
+      padding-top: 2px;
+    }
+    // 自定义表单组件验证失败边框颜色设置
     &.is-error{
+      .dyt-tree-content{
+        border-color: @form-error-color;
+      }
+      .vue-treeselect__control,
       .dyt-input-tag-content{
-        border-color: #f20;
+        border-color: @form-error-color;
         .el-input__inner{
           box-shadow: none;
         }
       }
     }
   }
+  .lapa{
+    &.icon-loading{
+      display: inline-block;
+      animation:iconLoading 1.2s linear infinite;
+    }
+  }
+}
+
+@keyframes iconLoading {
+	0% {transform: rotate(0deg);}
+	100% {transform: rotate(360deg);}
 }
 

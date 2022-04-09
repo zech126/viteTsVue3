@@ -311,8 +311,8 @@ const certification = {
         type: 'warning',
         buttonSize: 'default'
       }).then(() => {
-        const content = `<div style="padding: 10px 30px; line-height: 1.2em;">
-          <i class="el-icon-loading" style="margin-right:10px; font-size: 24px; color: #2d8cf0;vertical-align: middle;"></i>
+        const content = `<div style="padding: 10px 30px 10px 15px; line-height: 1.2em;">
+          <i class="lapa icon-loading" style="margin-right:10px; font-size: 24px; color: #2d8cf0;vertical-align: middle;"></i>
           <span style="vertical-align: middle;">正在退出系统...</span>
         </div>`;
         tool.addModal({ content: content, title: '' });

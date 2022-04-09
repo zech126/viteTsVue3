@@ -118,6 +118,12 @@ export default defineConfig({
       less: {
         javascriptEnabled: true,
         additionalData: `@import "${path.resolve(__dirname, 'src/assets/style/variable.less')}";`
+      },
+      // scss 全局变量
+      scss: {
+        javascriptEnabled: true,
+        // additionalData: `@import "${path.resolve(__dirname, 'src/assets/style/variables.scss')}";`
+        additionalData: '@import "./src/assets/style/variables.scss";'
       }
     }
   },
