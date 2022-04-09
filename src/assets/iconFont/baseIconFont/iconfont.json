@@ -6,6 +6,20 @@
   "description": "lapa UPMS项目",
   "glyphs": [
     {
+      "icon_id": "13253782",
+      "name": "loading",
+      "font_class": "loading",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "980460",
+      "name": "image",
+      "font_class": "image",
+      "unicode": "e6fb",
+      "unicode_decimal": 59131
+    },
+    {
       "icon_id": "2569862",
       "name": "返回",
       "font_class": "fanhui",
