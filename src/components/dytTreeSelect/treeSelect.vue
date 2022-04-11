@@ -1,18 +1,20 @@
 <template>
   <div
     :ref="`tag-${pageId}`"
-    class="dty-tree-demo"
+    class="dyt-tree-demo"
     :class="{
       'tree-demo-hover': isHoverTree
     }"
     @mouseover="hoverTree"
     @mouseout="outTree"
+    v-click-outside="clickPopoverOutside"
   >
     <el-popover
+      ref="popoverRef"
       placement="bottom-start"
       :width="popoverWidth"
       :hide-after="100"
-      trigger="click"
+      v-model:visible="popoverVisible"
       popper-class="tree-popper-content"
       @after-enter="afterEnter"
       @after-leave="afterLeave"
@@ -21,7 +23,12 @@
       @hide="popoverHide"
     >
       <template #reference>
-        <div class="dyt-tree-content" :class="{'content-active': isShow}">
+        <div
+          class="dyt-tree-content"
+          :class="{'content-active': isShow}"
+          @click="showPopover"
+          
+        >
           <div
             class="tree-content-value"
             :class="{
@@ -53,31 +60,33 @@
           </div>
         </div>
       </template>
-      <dyt-input v-if="filterable" :ref="`input-${pageId}`" v-model="inputValue" type="text" placeholder="请输入关键字" />
-      <el-scrollbar :max-height="treeMaxHeight" :min-height="treeMinHeight" style="margin-top: 10px;">
-        <el-tree
-          :ref="`tree-${pageId}`"
-          class="filter-tree"
-          :filter-node-method="filterNodeHand"
-          :data="treeOptions"
-          v-bind="config"
-          :style="`width: ${typeof popoverTreeWidth === 'number' ? `${popoverTreeWidth}px` : popoverTreeWidth};`"
-          @node-click="nodeClick"
-          @check="check"
-          @node-expand="nodeExpand"
-          @node-collapse="nodeCollapse"
-          @node-drag-end="nodeDragEnd"
-        >
-          <template v-for="slot in slots" v-slot:[slot]="scope">
-            <slot :name="slot" v-bind="scope" />
-          </template>
-        </el-tree>
-      </el-scrollbar>
+      <div class="dyt-tree-popover" :ref="`popover-${pageId}`">
+        <dyt-input v-if="filterable" :ref="`input-${pageId}`" v-model="inputValue" type="text" placeholder="请输入关键字" />
+        <el-scrollbar :max-height="treeMaxHeight" :min-height="treeMinHeight" style="margin-top: 10px;">
+          <el-tree
+            :ref="`tree-${pageId}`"
+            class="filter-tree"
+            :filter-node-method="filterNodeHand"
+            :data="treeOptions"
+            v-bind="config"
+            :style="`width: ${typeof popoverTreeWidth === 'number' ? `${popoverTreeWidth}px` : popoverTreeWidth};`"
+            @node-click="nodeClick"
+            @check="check"
+            @node-expand="nodeExpand"
+            @node-collapse="nodeCollapse"
+            @node-drag-end="nodeDragEnd"
+          >
+            <template v-for="slot in slots" v-slot:[slot]="scope">
+              <slot :name="slot" v-bind="scope" />
+            </template>
+          </el-tree>
+        </el-scrollbar>
+      </div>
     </el-popover>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
 
 interface dataType {
   pageId: string;
@@ -88,7 +97,8 @@ interface dataType {
   inputValue: string;
   popoverWidth: number;
   defaultConfig: any;
-  treeData: Array<any>
+  treeData: Array<any>;
+  popoverVisible: boolean;
 }
 export default defineComponent({
   name: 'DytTreeSelect',
@@ -128,6 +138,7 @@ export default defineComponent({
   emits: ['show', 'showBefore', 'showAfter', 'hide', 'hideAfter', 'update:modelValue', 'input'],
   data ():dataType {
     return {
+      popoverVisible: false,
       pageId: Math.random().toString(36).substring(2),
       vModel: [],
       isHoverTree: false,
@@ -284,7 +295,7 @@ export default defineComponent({
       this.vModel = [newValue];
       this.updateVal(this.backArray ? [newValue] : newValue);
       this.$nextTick(() => {
-        this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+        this.popoverVisible = false;
       });
     },
     // 点击节点复选框之后触发(多单选时)
@@ -323,6 +334,11 @@ export default defineComponent({
     // 清空
     clearTree () {
       if (!this.isHoverTree || this.vModel.length === 0) return;
+      // 清空选中
+      this.vModel.forEach((key:any) => {
+        this.config.multiple && this.setChecked(key, false, !this.config['check-strictly']);
+        !this.config.multiple && this.setCurrentKey(null);
+      });
       this.vModel = [];
       this.updateVal(this.config.multiple ? this.string ? '' : [] : this.backArray ? [] : '');
     },
@@ -358,8 +374,16 @@ export default defineComponent({
         this.updateVal(this.string ? this.vModel.split(this.split) : this.vModel);
       })
     },
-
-
+    // 显示隐藏
+    showPopover () {
+      this.popoverVisible = !this.popoverVisible;
+    },
+    // 点击当前组件之外的元素
+    clickPopoverOutside (e:any) {
+      // 点击弹窗处不隐藏
+      if (this.$refs[`popover-${this.pageId}`].contains(e.target) || !this.popoverVisible) return;
+      this.popoverVisible = false;
+    },
     // el-tree 的方法
     // 过滤所有树节点，过滤后的节点将被隐藏
     filter (val:any = null) {
@@ -438,7 +462,7 @@ export default defineComponent({
 </script>
 <style lang="less">
 @lineHeight: 32px;
-.dty-tree-demo {
+.dyt-tree-demo {
   position: relative;
   width: 100%;
   cursor: pointer;

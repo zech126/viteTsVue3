@@ -13,6 +13,7 @@ import 'element-plus/theme-chalk/index.css';
 import ElementPlus from 'element-plus';
 // import elFormValidate from "@/utils/elFormValidate";
 import zhCn from 'element-plus/es/locale/lang/zh-cn'; // 引入中文包，否则默认文本为英文
+import { ClickOutside as vClickOutside } from 'element-plus'
 // console.log(import.meta.env);
 
 const app = createApp(App);
@@ -37,7 +38,8 @@ app.use(store);
 app.use(router);
 // 注册自定义全局组件
 app.use(customComponents);
-
+// 注册点击元素之外的指令
+app.directive('clickOutside', vClickOutside);
 app.mount('#app');
 // console.log(import.meta.env);
 
