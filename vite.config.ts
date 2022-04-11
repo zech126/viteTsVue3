@@ -19,6 +19,10 @@ export default defineConfig({
   logLevel: "info",
   // 设为false 可以避免 vite 清屏而错过在终端中打印某些关键信息
   // clearScreen:true,
+  // 用于加载 env 文件的目录。可以是一个绝对路径，也可以是相对于项目根的路径。默认 root
+  envDir: './evnConfig/',
+  // 自定义 env 变量的前缀
+  // envPrefix: [],
   // 配置文件别名
   resolve: {
     // 忽略文件导入后缀名称（设置之将覆盖默认设置，建议使用默认）
