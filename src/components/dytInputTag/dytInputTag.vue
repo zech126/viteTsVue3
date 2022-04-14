@@ -156,10 +156,10 @@ export default defineComponent({
     readonly: { type: Boolean, default: false },
     // 是否可以添加 tag
     addTag: { type: Boolean, default: true },
+    // 对输入值进行分割字符集合
+    split: { type: [Array, String], default: () => {return [',', '，', '\n']} },
     // 是否返回字符串
     string: { type: Boolean, default: false },
-    // 对输入值进行分割字符集合
-    split: { type: [String, Array], default: () => {return [',', '，', '\n']}},
     // 返回字符串时的分隔符号（string 为 true 时生效）
     separStr: { type: String, default: ',' },
     // 值为对象时，string 必须为 false，键值替换
@@ -209,7 +209,7 @@ export default defineComponent({
         }
         // 赋值
         if(!this.preview && this.type === 'textarea' && this.limit > 0 && !this.isFocus) {
-          this.inputValue = typeof val === 'string' ? val : this.$common.isEmpty(val) ? '' : this.vModel.join('\n');
+          this.inputValue = typeof val === 'string' ? `${val}` : this.$common.isEmpty(val) ? '' : this.vModel.join('\n');
         }
         this.inputWidth = this.$common.isEmpty(this.vModel) ? '100%;' : '50px;';
       }
@@ -293,10 +293,10 @@ export default defineComponent({
     // 字符串分割
     strSplit (str:any, splitStr:any) {
       if (this.$common.isEmpty(str)) return [];
-      if (typeof str !== 'string') return [str];
+      if (typeof str !== 'string') return str;
       if (typeof splitStr === 'string') return str.split(splitStr);
       if (this.$common.isArray(splitStr)) {
-        if (splitStr.length === 0) return str;
+        if (splitStr.length === 0) return [str];
         let newStr = str;
         const newSplit = splitStr[0];
         splitStr.slice(1).forEach((sp:string) => {
@@ -307,6 +307,48 @@ export default defineComponent({
         return newStr.split(newSplit).filter(item => !this.$common.isEmpty(item, true));
       }
       return [str];
+    },
+    // 处理多行文本内容
+    changeInputVal () {
+      let tagList:any = this.vModel;
+      let newVal:string = '';
+      let getValList:any = [];
+      const textValue = this.inputValue.trim();
+      if (this.defaultProp.value || this.defaultProp.label) {
+        tagList = this.vModel.map((item:any) => item[this.defaultProp.value || this.defaultProp.label]);
+      }
+      const listL = tagList.length - 1;
+      if (listL < 1) return textValue;
+      tagList.forEach((item:string, index:number) => {
+        if (typeof this.split === 'string') {
+          if (!getValList.includes(item)) {
+            if (index === listL && textValue.includes(`${this.split}${item}`)) {
+              getValList.push(item);
+              newVal = `${newVal}${item}\n`;
+            } else if (textValue.includes(`${this.split}${item}${this.split}`) || textValue.includes(`${item}${this.split}`)) {
+              getValList.push(item);
+              newVal = `${newVal}${item}${this.split}`;
+            }
+          }
+        } else if (this.$common.isArray(this.split)) {
+          const split:Array<any> = this.split;
+          if (split.length === 0) return textValue;
+          split.forEach((sp1:string) => {
+            split.forEach((sp2:string) => {
+              if (!getValList.includes(item)) {
+                if (index === listL && textValue.includes(`${sp2}${item}`)) {
+                  getValList.push(item);
+                  newVal = `${newVal}${item}\n`;
+                } else if (textValue.includes(`${sp1}${item}${sp2}`) || textValue.includes(`${item}${sp2}`)) {
+                  getValList.push(item);
+                  newVal = `${newVal}${item}${sp2}`;
+                }
+              }
+            })
+          })
+        }
+      });
+      return newVal;
     },
     // 
     addTagHand (e:any = {}) {
@@ -321,7 +363,13 @@ export default defineComponent({
         return;
       }
       const newAddItems:any = this.strSplit(this.inputValue, this.split) || [];
-      let addItems:Array<any> = newAddItems.map((item:any) => item.trim());
+      let addItems:Array<any> = this.$common.arrRemoveRepeat(newAddItems.map((item:any) => item.trim()));
+      let vModelStr = this.vModel;
+      if (this.defaultProp.value || this.defaultProp.label) {
+        vModelStr = this.vModel.map((item:any) => item[this.defaultProp.value || this.defaultProp.label]);
+      }
+      addItems = addItems.filter((item:any) => !vModelStr.includes(item));
+
       if (this.$attrs.onAddTheTag) {
         this.$emit('addTheTag', addItems);
         this.inputValue = '';
@@ -341,7 +389,10 @@ export default defineComponent({
           })
         }
         if(!this.preview && this.type === 'textarea' && this.limit > 0) {
-          this.vModel = addItems;
+          this.vModel = [...this.vModel, ...addItems];
+          setTimeout(() => {
+            this.inputValue = this.changeInputVal();
+          }, 300);
         } else {
           this.vModel = [...this.vModel, ...(this.defaultProp.value ? newTags : addItems)];
           this.inputValue = '';
