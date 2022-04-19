@@ -493,7 +493,7 @@ export default defineComponent({
 <style lang="less">
 .dyt-table-view{
   position: relative;
-  padding: 0;
+  padding: 15px 20px 10px 20px;
   margin: 0;
   height: 100%;
   .table-view-head{

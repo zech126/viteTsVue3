@@ -69,9 +69,10 @@ const nonExist = computed(() => store.getters['layout/nonExist']);
       padding: 0;
       height: 100%;
       .layout-main-pages{
-        padding: 15px 20px 10px 20px;
+        padding: 0;
         height: calc(100% - @crumbs-height);
         background: #fff;
+        overflow: auto;
       }
     }
   }

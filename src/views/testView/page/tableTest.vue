@@ -121,6 +121,7 @@
 
 
 <script lang="tsx">
+import { defineComponent } from 'vue';
 // 注意：如需要使用 jsx 请在 script 标签上标注上 lang="tsx"
 
 const options = [
@@ -164,7 +165,7 @@ const options = [
         }
       ];
 
-export default {
+export default defineComponent({
   name: "tableTest",
   components: {},
   props: {},
@@ -417,7 +418,7 @@ export default {
       this.dialogVisible = true;
     },
   }
-};
+});
 </script>
 <style>
 .cell {

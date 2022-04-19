@@ -267,5 +267,10 @@ export default defineComponent({
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .el-table{
+    .cell{
+      line-height: 30px;
+    }
+  }
 }
 </style>

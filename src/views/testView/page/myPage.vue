@@ -44,7 +44,21 @@
     <div style="margin-top:10px;">
       <dyt-select
         v-model="data.dytSelect"
+        :virtual="true"
+        :defaultProp="data.defaultProp"
+        :options="data.selectOptions2"
+      ></dyt-select>
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-select
+        v-model="data.dytSelect"
         :options="data.selectOptions"
+      ></dyt-select>
+    </div>
+    <div style="margin-top:10px;">
+      <dyt-select
+        v-model="data.dytSelect1"
+        :options="data.selectOptions1"
       />
     </div>
     <div style="margin-top: 10px">
@@ -53,7 +67,18 @@
         :data="data.options"
         :defaultProps="data.defaultProps"
         :limit="1"
+        :virtual="true"
         :multiple="true"
+        :check-strictly="false"
+      />
+    </div>
+    <div style="margin-top: 10px">
+      <dytTreeSelect
+        v-model="data.treeSelectVal1"
+        :data="data.options"
+        :defaultProps="data.defaultProps"
+        :multiple="true"
+        :limit="1"
         :check-strictly="false"
       />
     </div>
@@ -72,6 +97,12 @@ const data = reactive({
   canshu1: 'component2',
   inputVal: '',
   cascader: '',
+  defaultProp: {
+    value: 'value1',
+    label: 'label1',
+    disabled: 'disabled1',
+    options: 'options1',
+  },
   options: [
     {
       value: 'value-1',
@@ -87,7 +118,7 @@ const data = reactive({
             },
             {
               value: 'value-1-1-2',
-              label: 'label-1-1-2'
+              label: 'label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2label-1-1-2'
             }
           ]
         },
@@ -110,6 +141,54 @@ const data = reactive({
           label: 'label-2-2'
         }
       ]
+    },
+    {
+      value: 'value-3',
+      label: 'label-3',
+      children: [
+        {
+          value: 'value-3-1',
+          label: 'label-3-1',
+          children: [
+            {
+              value: 'value-3-1-1',
+              label: 'label-3-1-1'
+            },
+            {
+              value: 'value-3-1-2',
+              label: 'label-3-1-2'
+            }
+          ]
+        },
+        {
+          value: 'value-3-2',
+          label: 'label-3-2'
+        }
+      ]
+    },
+    {
+      value: 'value-4',
+      label: 'label-4',
+      children: [
+        {
+          value: 'value-4-1',
+          label: 'label-4-1',
+          children: [
+            {
+              value: 'value-4-1-1',
+              label: 'label-4-1-1'
+            },
+            {
+              value: 'value-4-1-2',
+              label: 'label-4-1-2'
+            }
+          ]
+        },
+        {
+          value: 'value-4-2',
+          label: 'label-4-2'
+        }
+      ]
     }
   ],
   picker: '',
@@ -117,12 +196,100 @@ const data = reactive({
   inputTag: '',
   inputTagP: '',
   dytSelect: '',
+  dytSelect1: '',
   selectOptions: [
     {label: 'label-1', value: 'value-1'},
     {label: 'label-2', value: 'value-2'},
-    {label: 'label-3', value: 'value-3'}
+    {label: 'label-3', value: 'value-3'},
+    {label: 'label-4', value: 'value-4'},
+    {label: 'label-5', value: 'value-5'},
+    {label: 'label-6', value: 'value-6'},
+    {label: 'label-7', value: 'value-7'},
+    {label: 'label-8', value: 'value-8'},
+    {label: 'label-9', value: 'value-9'},
+    {label: 'label-10', value: 'value-10'}
+  ],
+  selectOptions2: [
+    {label1: 'label-1', value1: 'value-1'},
+    {label1: 'label-2', value1: 'value-2'},
+    {label1: 'label-3', value1: 'value-3'},
+    {label1: 'label-4', value1: 'value-4'},
+    {label1: 'label-5', value1: 'value-5'},
+    {label1: 'label-6', value1: 'value-6'},
+    {label1: 'label-7', value1: 'value-7'},
+    {label1: 'label-8', value1: 'value-8'},
+    {
+      label1: 'label-9',
+      options1: [
+        {label1: 'label-1', value1: 'value-1'},
+        {label1: 'label-2', value1: 'value-2'},
+        {label1: 'label-3', value1: 'value-3'},
+        {label1: 'label-4', value1: 'value-4'},
+        {label1: 'label-6', value1: 'value-6'},
+        {label1: 'label-7', value1: 'value-7'},
+        {label1: 'label-8', value1: 'value-8'},
+        {label1: 'label-9', value1: 'value-9'}
+      ]
+    },
+    {
+      label1: 'label-10',
+      options1: [
+        {label1: 'label-1', value1: 'value-1'},
+        {label1: 'label-2', value1: 'value-2'},
+        {label1: 'label-3', value1: 'value-3'},
+        {label1: 'label-4', value1: 'value-4'},
+        {label1: 'label-5', value1: 'value-5'},
+        {label1: 'label-6', value1: 'value-6'},
+        {label1: 'label-7', value1: 'value-7'},
+        {label1: 'label-8', value1: 'value-8'},
+        {label1: 'label-9', value1: 'value-9'}
+      ]
+    }
+  ],
+  selectOptions1: [
+    {
+      label: 'label-1',
+      options: [
+        {label: 'label-1-1', value: 'label-1-1'},
+        {label: 'label-1-2', value: 'label-1-2'},
+        {label: 'label-1-3', value: 'label-1-3'}
+      ]
+    },
+    {
+      label: 'label-2',
+      options: [
+        {label: 'label-2-1', value: 'label-2-1'},
+        {label: 'label-2-2', value: 'label-2-2'},
+        {label: 'label-2-3', value: 'label-2-3'}
+      ]
+    },
+    {
+      label: 'label-3',
+      options: [
+        {label: 'label-3-1', value: 'label-3-1'},
+        {label: 'label-3-2', value: 'label-3-2'},
+        {label: 'label-3-3', value: 'label-3-3'}
+      ]
+    },
+    {
+      label: 'label-4',
+      options: [
+        {label: 'label-4-1', value: 'label-4-1'},
+        {label: 'label-4-2', value: 'label-4-2'},
+        {label: 'label-4-3', value: 'label-4-3'}
+      ]
+    },
+    {
+      label: 'label-5',
+      options: [
+        {label: 'label-5-1', value: 'label-5-1'},
+        {label: 'label-5-2', value: 'label-5-2'},
+        {label: 'label-5-3', value: 'label-5-3'}
+      ]
+    }
   ],
   treeSelectVal: [],
+  treeSelectVal1: [],
   defaultProps: {
     value: 'value',
     label: 'label',

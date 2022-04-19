@@ -11,7 +11,7 @@
   >
     <el-popover
       ref="popoverRef"
-      placement="bottom-start"
+      :placement="popoverPlacement"
       :width="popoverWidth"
       :hide-after="100"
       v-model:visible="popoverVisible"
@@ -64,6 +64,7 @@
         <dyt-input v-if="filterable" :ref="`input-${pageId}`" v-model="inputValue" type="text" placeholder="请输入关键字" />
         <el-scrollbar :max-height="treeMaxHeight" :min-height="treeMinHeight" style="margin-top: 10px;">
           <el-tree
+            v-if="!virtual"
             :ref="`tree-${pageId}`"
             class="filter-tree"
             :filter-node-method="filterNodeHand"
@@ -80,6 +81,25 @@
               <slot :name="slot" v-bind="scope" />
             </template>
           </el-tree>
+          <el-tree-v2
+            v-else
+            :ref="`tree-${pageId}`"
+            class="filter-tree"
+            :filter-method="filterNodeHand"
+            :data="treeOptions"
+            v-bind="config"
+            :style="`width: ${typeof popoverTreeWidth === 'number' ? `${popoverTreeWidth}px` : popoverTreeWidth};`"
+            @node-click="nodeClick"
+            @check="check"
+            @node-expand="nodeExpand"
+            @node-collapse="nodeCollapse"
+            @node-drag-end="nodeDragEnd"
+            :height="328"
+          >
+            <template v-for="slot in slots" v-slot:[slot]="scope">
+              <slot :name="slot" v-bind="scope" />
+            </template>
+          </el-tree-v2>
         </el-scrollbar>
       </div>
     </el-popover>
@@ -99,6 +119,10 @@ interface dataType {
   defaultConfig: any;
   treeData: Array<any>;
   popoverVisible: boolean;
+  popoverPlacement: string;
+  treeMaxHeight: string | number;
+  treeMinHeight: string | number;
+  popoverTreeWidth: string | number | null;
 }
 export default defineComponent({
   name: 'DytTreeSelect',
@@ -126,19 +150,17 @@ export default defineComponent({
     // 展示数据,支持异步
     data: { type: Array, default: () => {return []} },
     options: { type: Array, default: () => {return []} },
-    // 设置树最大高度
-    treeMaxHeight: { type: [String, Number], default: '35vh' },
-    // 设置树最小高度
-    treeMinHeight: { type: [String, Number], default: 50 },
-    // 设置树宽度
-    popoverTreeWidth: { type: [String, Number], default: null },
+    // popoverTreeWidth: { type: [String, Number], default: null },
     // Props 设置
     defaultProps: { type: Object, default: () => {return {}} },
+    // 是否使用虚拟滚动
+    virtual: { type: Boolean,  default: false }
   },
   emits: ['show', 'showBefore', 'showAfter', 'hide', 'hideAfter', 'update:modelValue', 'input'],
   data ():dataType {
     return {
       popoverVisible: false,
+      popoverPlacement: 'bottom-start',
       pageId: Math.random().toString(36).substring(2),
       vModel: [],
       isHoverTree: false,
@@ -146,6 +168,9 @@ export default defineComponent({
       isShow: false,
       inputValue: '',
       popoverWidth: 200,
+      treeMaxHeight: '328px',
+      treeMinHeight: 50,
+      popoverTreeWidth: null,
       defaultConfig: {
         props: { label: 'label', value: 'value', children: 'children' },
         'empty-text': '暂无数据!',
@@ -233,9 +258,11 @@ export default defineComponent({
         this.config.multiple && this.setChecked(key, true, !this.config['check-strictly']);
       })
       this.config.multiple && this.checkedNodeHand();
+      this.popoverAdjust();
     });
   },
   methods: {
+    // 数据初始化
     initTreeData (arr = []) {
       arr.forEach(item => {
         this.treeDataJson[item[this.config.props.value||'value']] = item;
@@ -244,6 +271,16 @@ export default defineComponent({
         }
       })
     },
+    // 弹窗位置调整
+    popoverAdjust () {
+      const body:any = document.querySelector('body');
+      const content:any = this.$refs[`popover-${this.pageId}`].parentNode;
+      const transformTop = Number(content.style.transform.split(',')[1].replace('px)', ''));
+      if (transformTop + 396 > this.$common.getElementStyle(body,'height', true)) {
+        this.popoverPlacement = 'top-start';
+      }
+    },
+    // 弹窗前
     showBefore () {
       this.$refs[`tag-${this.pageId}`] && (this.popoverWidth = this.$refs[`tag-${this.pageId}`].offsetWidth);
       this.$emit('showBefore');
@@ -261,6 +298,21 @@ export default defineComponent({
     popoverShow () {
       this.isShow = true;
       this.$emit('show');
+      this.setTreeWidth();
+    },
+    // 设置宽度
+    setTreeWidth () {
+      let itemList:Array<any> = [];
+      const content:any = this.$refs[`popover-${this.pageId}`];
+      const itemDemo:any = content.querySelectorAll('.el-tree-node__content .el-tree-node__label');
+      itemDemo.forEach((item:any) => {
+        itemList.push(item.offsetWidth + 110);
+      })
+      itemList.push(this.$common.getElementStyle(content.querySelector('.el-scrollbar__wrap'), 'width', true));
+      this.popoverTreeWidth = Math.max.apply('', this.$common.arrRemoveRepeat(itemList));
+      const treeView = content.querySelector('.el-scrollbar__view');
+      treeView.style.width = `${this.popoverTreeWidth}px`;
+      // console.log(Math.max.apply('', this.$common.arrRemoveRepeat(itemList)))
     },
     // 显示动画播放完毕后触发
     afterEnter () {
@@ -311,12 +363,18 @@ export default defineComponent({
     nodeExpand () {
       this.$nextTick(() => {
         this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+        setTimeout(() => {
+          this.setTreeWidth();
+        }, 350)
       });
     },
     // 节点被关闭时
     nodeCollapse () {
       this.$nextTick(() => {
         this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
+        setTimeout(() => {
+          this.setTreeWidth();
+        }, 350)
       });
     },
     // 拖拽结束时（可能未成功）
@@ -325,9 +383,11 @@ export default defineComponent({
         this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
       });
     },
+    // 移进
     hoverTree () {
       this.isHoverTree = true;
     },
+    // 移出
     outTree () {
       this.isHoverTree = false;
     },
