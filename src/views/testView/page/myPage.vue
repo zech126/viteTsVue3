@@ -68,18 +68,16 @@
         :defaultProps="data.defaultProps"
         :limit="1"
         :virtual="true"
-        :multiple="true"
-        :check-strictly="false"
+        :multiple="false"
       />
     </div>
     <div style="margin-top: 10px">
       <dytTreeSelect
         v-model="data.treeSelectVal1"
-        :data="data.options"
+        :options="data.options"
         :defaultProps="data.defaultProps"
         :multiple="true"
         :limit="1"
-        :check-strictly="false"
       />
     </div>
   </div>

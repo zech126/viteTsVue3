@@ -30,7 +30,7 @@
                 <Icon v-if="selectConfig.closable" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
               </span>
             </div>
-            <span v-else class="input-new-tag el-input__inner" style="padding-left: 12px; color: #ccc;">
+            <span v-else class="input-new-tag tag-text-view">
               {{ placeholder }} 
             </span>
             <div v-if="vModel.length - limit > 0 && limit > 0" class="more-tag" @click="moreHand">
@@ -551,8 +551,15 @@ export default defineComponent({
   .input-new-tag{
     min-width: 50px;
     max-width: 100%;
+    &.tag-text-view{
+      padding-left: 12px;
+      height: @inputHeight;
+      line-height: @inputHeight;
+      color: var(--el-input-icon-color,var(--el-text-color-placeholder));
+    }
     &.input-empty-tag{
       .el-input__inner,
+      .el-input__wrapper
       .el-textarea__inner{
         padding-left: 12px;
         margin-bottom: 0;
@@ -563,7 +570,8 @@ export default defineComponent({
         overflow: hidden;
       }
     }
-    &.el-input__inner{
+    &.el-input__inner,
+    &.el-input__wrapper{
       padding: 0 5px;
       height: @inputHeight;
       line-height: @inputHeight;
@@ -572,7 +580,8 @@ export default defineComponent({
     }
   }
   .input-writing-tag{
-    .el-input__inner{
+    .el-input__inner,
+    .el-input__wrapper{
       padding: 0;
       height: @inputHeight;
       line-height: @inputHeight;
