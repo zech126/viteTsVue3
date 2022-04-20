@@ -126,7 +126,7 @@ export default {
     width: 120px;
     .el-input__inner {
       color: #838a9d;
-      padding: 0 20px 0 10px;
+      padding: 0;
     }
     .el-input__icon {
       width: 15px;

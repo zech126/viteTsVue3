@@ -306,7 +306,7 @@ export default defineComponent({
     },
     // 获取数据
     getFormData () {
-      return { ...this.formData, ...this.filterModel };
+      return { ...this.filterModel, ...this.formData };
     },
     // 重置(无法重置插槽渲染的组件值)
     resetHand () {
