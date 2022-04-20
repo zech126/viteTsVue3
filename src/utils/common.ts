@@ -287,7 +287,32 @@ const common = {
     })
     if (isPass) return style;
     return backVal.length === 1 ? backVal[0] : backVal;
+  },
+  // 获取元素坐标(元素的左上角为基点)
+  getElementOffset (element:any) {
+    const newElement = typeof element === 'string' ? document.querySelector(element) : element;
+    let offset = { x: 0, y: 0 }
+    let current = newElement.offsetParent;
+    offset.x += newElement.offsetLeft;
+    offset.y += newElement.offsetTop;
+    while (current !== null) {
+      offset.x += current.offsetLeft || 0;
+      offset.y += current.offsetTop || 0;
+      current = current.offsetParent;
+    }
+    return offset;
+  },
+  // 获取元素所在被滚动距离
+  getElementScrollTop (element:any) {
+    const newElement = typeof element === 'string' ? document.querySelector(element) : element;
+    let top = 0;
+    let current = newElement.parentNode;
+    while (current !== null) {
+      top += current.scrollTop || 0;
+      current = current.parentNode;
+    }
+    return top;
   }
 }
-// export default common;
+
 export default common;

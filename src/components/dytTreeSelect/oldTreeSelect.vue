@@ -27,7 +27,6 @@
           class="dyt-tree-content"
           :class="{'content-active': isShow}"
           @click="showPopover"
-          
         >
           <div
             class="tree-content-value"
@@ -40,24 +39,29 @@
             <div
               v-else
               class="tree-tag-content"
-              :style="`max-width:calc(100% - ${((vModel.length - config.limit).toString().length + 1) * 14}px);`"
             >
               <template v-for="(item, index) in vModel" :key="index">
-                <span class="tree-tag-item" v-if="config.limit === 0 || (index + 1) <= config.limit">
+                <span
+                  class="tree-tag-item"
+                  v-if="config.limit === 0 || (index + 1) <= config.limit"
+                  :style="`max-width:${config.limit <= 0 ? 100 : (100 / Math.min(vModel.length, config.limit))}%;`"
+                >
                   <span class="tag-item-text">
                     {{treeDataJson[item] ? treeDataJson[item][config.props.label||'label'] : ''}}
                   </span>
-                  <span class="tag-item-close" @click.stop="removeTag(item)">
-                    <Icon v-if="config.limit > 0 && config.multiple" name="close" />
+                  <span class="tag-item-close" @click.stop="removeTag(item)" v-if="config.limit > 0 && config.multiple">
+                    <Icon name="close" />
                   </span>
                 </span>
               </template>
-              <span
-                :style="`color: #ddd; white-space: nowrap;`"
-                v-if="config.limit > 0 && (vModel.length - config.limit) > 0 && config.multiple"
-              > + {{vModel.length - config.limit}}</span>
             </div>
+            
           </div>
+          <!-- :style="`width:${((vModel.length - config.limit).toString().length + 1) * 14}px;color: #ddd; white-space: nowrap;`" -->
+          <span
+            class="limit-tips"
+            v-if="config.limit > 0 && (vModel.length - config.limit) > 0 && config.multiple"
+          > + {{vModel.length - config.limit}}</span>
           <div class="suffix-inner">
             <Icon @click.stop="clearTree" v-if="isHoverTree && vModel.length > 0" name="circle-close" />
             <Icon v-else :name="`${isShow ? 'arrow-up' : 'arrow-down'}`" />
@@ -66,7 +70,12 @@
       </template>
       <div class="dyt-tree-popover" :ref="`popover-${pageId}`">
         <dyt-input v-if="filterable" :ref="`input-${pageId}`" v-model="inputValue" type="text" placeholder="请输入关键字" />
-        <el-scrollbar :max-height="treeMaxHeight" :min-height="treeMinHeight" style="margin-top: 10px;">
+        <el-scrollbar
+          :max-height="treeMaxHeight"
+          :min-height="treeMinHeight"
+          :style="`margin-top: 10px;`"
+          :wrap-class="`${virtual? 'includes-virtual' : 'not-virtual'}`"
+        >
           <el-tree
             v-if="!virtual"
             :ref="`tree-${pageId}`"
@@ -193,7 +202,7 @@ export default defineComponent({
       return this.$common.isEmpty(this.data) ? this.options : this.data;
     },
     config () {
-      let config = { ...this.defaultConfig, props: this.defaultProps, ...this.$attrs };
+      let config = { ...this.defaultConfig, props: this.defaultProps, limit: this.limit, ...this.$attrs };
       if (config.disabled || config.readonly) {
         config.placeholder = '';
       }
@@ -263,7 +272,6 @@ export default defineComponent({
         this.config.multiple && this.setChecked(key, true, !this.config['check-strictly']);
       })
       this.config.multiple && this.checkedNodeHand();
-      this.popoverAdjust();
     });
   },
   methods: {
@@ -278,15 +286,18 @@ export default defineComponent({
     },
     // 弹窗位置调整
     popoverAdjust () {
-      const body:any = document.querySelector('body');
-      const content:any = this.$refs[`popover-${this.pageId}`].parentNode;
-      const transformTop = Number(content.style.transform.split(',')[1].replace('px)', ''));
-      if (transformTop + 396 > this.$common.getElementStyle(body,'height', true)) {
-        this.popoverPlacement = 'top-start';
-      }
+      this.$nextTick(() => {
+        const ele = this.$refs[`tag-${this.pageId}`];
+        const content:any = this.$refs[`popover-${this.pageId}`].parentNode;
+        const scrollTop = this.$common.getElementScrollTop(ele);
+        const viewH = window.innerHeight;
+        const coordinates = this.$common.getElementOffset(ele);
+        this.popoverPlacement = `${(coordinates.y + content.offsetHeight + ele.offsetHeight + 30 > (scrollTop + viewH)) ? 'top' : 'bottom'}-start`;
+      })
     },
     // 弹窗前
     showBefore () {
+      this.popoverAdjust();
       this.$refs[`tag-${this.pageId}`] && (this.popoverWidth = this.$refs[`tag-${this.pageId}`].offsetWidth);
       this.$emit('showBefore');
       this.$nextTick(() => {
@@ -339,6 +350,10 @@ export default defineComponent({
     },
     // 检索匹配方法
     filterNodeHand (value:string, data:any) {
+      setTimeout(() => {
+        this.setTreeWidth();
+        this.popoverAdjust();
+      }, 400)
       const isPass = this.filterNodeMethod(value, data);
       if (typeof isPass === 'boolean') return isPass;
       if (this.$common.isEmpty(value, true)) return true;
@@ -370,6 +385,7 @@ export default defineComponent({
         this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
         setTimeout(() => {
           this.setTreeWidth();
+          this.popoverAdjust();
         }, 350)
       });
     },
@@ -379,6 +395,7 @@ export default defineComponent({
         this.$refs[`input-${this.pageId}`] && this.$refs[`input-${this.pageId}`].focus();
         setTimeout(() => {
           this.setTreeWidth();
+          this.popoverAdjust();
         }, 350)
       });
     },
@@ -554,15 +571,16 @@ export default defineComponent({
     .tree-content-value{
       display: flex;
       flex: 100;
-      padding: 0 25px 0 11px;
+      padding: 0 0 0 11px;
+      margin-right: 10px;
       height: calc(@lineHeight - 2px);
       line-height: calc(@lineHeight - 2px);
       overflow: hidden;
       .tree-tag-content{
+        flex: 100;
         max-width: calc(100% - 5px);
         .tree-tag-item{
           display: inline-block;
-          max-width: calc(100% - 10px);
           .tag-item-text{
             display: inline-block;
             max-width: 100%;
@@ -583,7 +601,6 @@ export default defineComponent({
           display: flex;
           padding: 0 0 0 5px;
           margin: 3px 6px 3px 0;
-          max-width: calc(100% - 10px);
           line-height: calc(@lineHeight - 12px);
           border-radius: 3px;
         }
@@ -592,7 +609,6 @@ export default defineComponent({
         .tree-tag-content{
           .tree-tag-item{
             flex: 100;
-            // max-width: calc(100% - 75px);
             background: #f4f4f5;
             border: 1px solid #e9e9eb;
             color: #909399;
@@ -628,13 +644,18 @@ export default defineComponent({
         }
       }
     }
-    
+    .limit-tips{
+      margin: 0 10px 0 0;
+      line-height: 30px;
+      color: #ddd;
+      white-space: nowrap;
+    }
     .suffix-inner{
       display: inline-flex;
-      position: absolute;
-      height: 100%;
-      right: 0;
-      top: 0;
+      // position: absolute;
+      // height: 100%;
+      // right: 0;
+      // top: 0;
       padding-right: 10px;
       text-align: center;
       color: var(--el-input-icon-color,var(--el-text-color-placeholder));
@@ -648,6 +669,14 @@ export default defineComponent({
   
 }
 .tree-popper-content{
+  .includes-virtual{
+    margin-bottom: 10px;
+  }
+  .not-virtual{
+    .filter-tree{
+      margin-bottom: 10px;
+    }
+  }
   .el-tree-node__content>.el-tree-node__expand-icon{
     padding: 3px;
     font-size: 18px;

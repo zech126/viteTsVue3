@@ -62,6 +62,7 @@
       />
     </div>
     <div style="margin-top: 10px">
+      <!-- 使用虚拟滚动，当出现横向滚动条时，竖向滚动条再右边被遮挡BUG -->
       <dytTreeSelect
         v-model="data.treeSelectVal"
         :data="data.options"
@@ -77,7 +78,6 @@
         :options="data.options"
         :defaultProps="data.defaultProps"
         :multiple="true"
-        :limit="1"
       />
     </div>
   </div>

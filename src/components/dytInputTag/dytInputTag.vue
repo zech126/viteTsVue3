@@ -1,7 +1,7 @@
 <template>
   <div :ref="`tag-${pageId}`" class="dyt-input-tag-demo">
     <el-popover
-      placement="bottom"
+      :placement="popoverPlacement"
       :width="popoverWidth"
       :hide-after="100"
       trigger="click"
@@ -10,6 +10,7 @@
       @after-leave="afterLeave"
       @show="popoverShow"
       @hide="popoverHide"
+      @before-enter="showBefore"
     >
       <template #reference>
         <div
@@ -83,7 +84,7 @@
           </template>
         </div>
       </template>
-      <template v-if="limit > 0">
+      <div v-if="limit > 0" :ref="`popover-${pageId}`">
         <dyt-input
           v-if="!disabled && !readonly && selectConfig.addTag"
           :ref="`popoverTagInput-${pageId}`"
@@ -111,7 +112,7 @@
           </template>
           <span v-else>暂无数据!</span>
         </div>
-      </template>
+      </div>
     </el-popover>
   </div>
 </template>
@@ -134,6 +135,7 @@ interface dataType {
   inputWidth: string;
   isFocus: boolean;
   popoverWidth: number;
+  popoverPlacement: string;
   defaultConfig: {
     type: string;
     closable: boolean;
@@ -174,6 +176,7 @@ export default defineComponent({
     return {
       pageId: Math.random().toString(36).substring(2),
       inputValue: '',
+      popoverPlacement: 'bottom',
       vModel: [],
       inputWidth: '100%;',
       isFocus: false,
@@ -229,6 +232,7 @@ export default defineComponent({
       deep: true,
       handler (val:string) {
         this.inputWidth = this.initInputWidth(val);
+        this.popoverAdjust();
       }
     }
   },
@@ -364,11 +368,6 @@ export default defineComponent({
       }
       const newAddItems:any = this.strSplit(this.inputValue, this.split) || [];
       let addItems:Array<any> = this.$common.arrRemoveRepeat(newAddItems.map((item:any) => item.trim()));
-      let vModelStr = this.vModel;
-      if (this.defaultProp.value || this.defaultProp.label) {
-        vModelStr = this.vModel.map((item:any) => item[this.defaultProp.value || this.defaultProp.label]);
-      }
-      addItems = addItems.filter((item:any) => !vModelStr.includes(item));
 
       if (this.$attrs.onAddTheTag) {
         this.$emit('addTheTag', addItems);
@@ -389,7 +388,8 @@ export default defineComponent({
           })
         }
         if(!this.preview && this.type === 'textarea' && this.limit > 0) {
-          this.vModel = [...this.vModel, ...addItems];
+          // this.vModel = [...this.vModel, ...addItems];
+          this.vModel = this.$common.copy(addItems);
           setTimeout(() => {
             this.inputValue = this.changeInputVal();
           }, 300);
@@ -420,6 +420,21 @@ export default defineComponent({
       this.$nextTick(() => {
         this.$parent.$emit("el.form.focus");
       })
+    },
+    // 弹窗位置调整
+    popoverAdjust () {
+      this.$nextTick(() => {
+        const ele = this.$refs[`tag-${this.pageId}`];
+        const content:any = this.$refs[`popover-${this.pageId}`].parentNode;
+        const scrollTop = this.$common.getElementScrollTop(ele);
+        const viewH = window.innerHeight;
+        const coordinates = this.$common.getElementOffset(ele);
+        this.popoverPlacement = `${(coordinates.y + content.offsetHeight + ele.offsetHeight + 30 > (scrollTop + viewH)) ? 'top' : 'bottom'}`;
+      })
+    },
+    // 弹窗前
+    showBefore () {
+      this.popoverAdjust();
     },
     // 显示时触发
     popoverShow () {

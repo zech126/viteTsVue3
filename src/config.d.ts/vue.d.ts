@@ -1,13 +1,12 @@
 import { AxiosInstance } from "axios";
 // import { Router } from 'vue-router'
-import commonObject from './commonObject'
 
 //全局配置（typescript使用）
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $http: AxiosInstance;
     $dayjs: Function;
-    $common: commonObject;
+    $common: any;
     $message: any;
     api: any;
     $api: any;
