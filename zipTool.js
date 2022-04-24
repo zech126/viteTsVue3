@@ -38,7 +38,7 @@ const startZIP = () => {
   const currPath = __dirname;
   const zipName = `${currPath}/${projectName}.zip`;
   // 删除压缩文件
-  if(fs.statSync(zipName).isFile()) {
+  if(fs.existsSync(zipName) && fs.statSync(zipName).isFile()) {
     fs.unlinkSync(zipName);
   }
   // 资源目录
