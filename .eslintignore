@@ -6,3 +6,5 @@
 /node_modules/
 */*/iconFont/
 *.d.ts
+vite.config.ts
+zipTool.js

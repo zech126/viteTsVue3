@@ -638,13 +638,6 @@ export default defineComponent({
       vertical-align: top;
     }
   }
-  .dyt-button-demo{
-    width: calc(100% - @inputHeight);
-    margin-left: 12px;
-    .el-icon-circle-check{
-      display: none;
-    }
-  }
   .el-input__validateIcon{
     display: none;
   }

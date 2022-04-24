@@ -126,12 +126,16 @@ const common = {
     return new Promise(resolve => {
       // execCommand 方法有可能弃用，，
       if (document.execCommand) {
-        let staging = document.createElement('input');
+        let staging = document.createElement('textarea');
         // const dome = document.querySelector('body')
-        staging.setAttribute('value', copyTxt);
+        // staging.setAttribute('value', copyTxt);
+        staging.innerHTML = copyTxt;
         document.body.appendChild(staging);
         staging.style.position = 'absolute';
-        staging.style.top = '-500px';
+        staging.style.maxHeight = '30vh';
+        staging.style.maxWidth = '30vw';
+        staging.style.top = '-1000vh';
+        staging.style.left = '1000vw';
         staging.select();
         document.execCommand('copy');
         document.body.removeChild(staging);

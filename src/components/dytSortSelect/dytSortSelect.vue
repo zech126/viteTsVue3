@@ -29,6 +29,7 @@
   </div>
 </template>
 <script>
+import { defineComponent } from 'vue';
 /**
  * @description 排序下拉按钮组件（使用方法可参考 orderGrossDetail.vue）
  * @param {Boolean} needDefaultSort // 非必填，是否需要默认排序，true / false，默认 false
@@ -53,7 +54,7 @@
       },
     ],
  */
-export default {
+export default defineComponent({
   name: "DytSortSelect",
   props: {
     // 排序按钮列表
@@ -117,7 +118,7 @@ export default {
       this.$emit('sortInfo', {sortType: this.currentSortType, sortStr: this.currentSortField});
     }
   }
-}
+});
 </script>
 <style lang="scss">
 .sort-select-box{

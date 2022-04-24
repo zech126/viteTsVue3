@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode dev",
     "build:test": "vite build --mode test",
     "build:pre": "vite build --mode pre",
-    "build:prod": "vite build --mode prod",
+    "build:prod": "vite build --mode prod && node zipTool.js",
     "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx --ext .vue src",
     "vueTsc": "vue-tsc --noEmit",
     "prepare": "husky install"
@@ -38,11 +38,13 @@
     "eslint": "^8.10.0",
     "eslint-plugin-vue": "^8.5.0",
     "husky": "^7.0.4",
+    "jszip": "^3.9.1",
     "less": "^4.1.2",
     "sass": "^1.49.9",
     "typescript": "^4.6.2",
     "vite": "^2.8.6",
     "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-imagemin": "^0.6.1",
     "vue-tsc": "^0.32.1"
   }
 }

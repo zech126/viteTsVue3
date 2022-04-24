@@ -3,10 +3,27 @@
     <div>
       图标组件：
       <el-button type="danger" circle><Icon name="delete" /></el-button>
-      <el-button type="danger"><Icon name="delete" />删除</el-button>
+      <dyt-button type="danger" icon="delete" circle />
+      <dyt-button type="danger" icon="delete">删除</dyt-button>
+      <dyt-button type="danger">删除</dyt-button>
+      <dyt-button type="danger">
+        <template v-slot:icon><Icon name="delete" /></template>
+        插槽
+      </dyt-button>
+      <el-button type="danger" loading>
+        Loading
+      </el-button>
+      <el-button type="danger" loading>
+        <template #loading>
+          <i class="lapa icon-loading" />
+        </template>
+        Loading
+      </el-button>
     </div>
-    <div>
-      UI自带图标： <Icon :size="100" color="red" name="edit" />
+    <div style="margin-top: 10px;">
+      UI自带图标： <Icon style="font-size:50px;" color="red" name="edit" /> <Icon style="font-size:50px;" color="red" name="loading" />
+      <p/>
+      fontIcon： <i style="font-size:50px;" class="lapa icon-loading" />
     </div>
     <div style="margin-top: 10px;">
       JSX 组件：<br /><br />
@@ -78,6 +95,27 @@
         :options="data.options"
         :defaultProps="data.defaultProps"
         :multiple="true"
+      />
+    </div>
+    <div style="margin-top: 10px">
+      <dytImage
+        :src="data.imageList[0]"
+        fit="contain"
+        class="dytImage"
+      />
+      <dytImage
+        src="1221"
+        fit="contain"
+        class="dytImage"
+      />
+      <dytImage
+        v-for="(image, index) in data.imageList"
+        :key="index"
+        :src="image"
+        :preview-src-list="data.imageList"
+        :initial-index="index"
+        fit="contain"
+        class="dytImage"
       />
     </div>
   </div>
@@ -292,7 +330,15 @@ const data = reactive({
     value: 'value',
     label: 'label',
     children: 'children'
-  }
+  },
+  imageList: [
+    new URL('../../../assets/images/bg.png', import.meta.url).href,
+    new URL('../../../assets/images/404.png', import.meta.url).href,
+    new URL('../../../assets/images/401.gif', import.meta.url).href,
+    new URL('../../../assets/images/search.png', import.meta.url).href,
+    new URL('../../../assets/images/nullength.png', import.meta.url).href,
+    new URL('../../../assets/images/table_loding.gif', import.meta.url).href
+  ]
 })
 
 const cascaderChange = (val:any) => {
@@ -306,4 +352,23 @@ setTimeout(() => {
   data.canshu = '我改变了';
   data.canshu1 = '我在哪里';
 }, 2000)
+//  const zipFolder = (sourceFolder, destZip) => {
+//     var zip = new admZip();
+  
+//     zip.addLocalFolder(sourceFolder);
+//     zip.writeZip(destZip);
+// }
 </script>
+<style lang="less" scoped>
+.dytImage{
+  display: inline-block;
+  width: 200px;
+  height: 200px;
+  padding: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+</style>

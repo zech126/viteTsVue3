@@ -4,16 +4,18 @@
     v-bind="selectConfig"
     class="dyt-button-demo"
   >
-    <Icon class="el-button-icon" v-if="icon" :name="icon" />
-    <slot />
+    <template v-slot:icon v-if="slots.includes('icon') || !$common.isEmpty(icon)">
+      <Icon v-if="!slots.includes('icon') && !$common.isEmpty(icon)" :name="icon" />
+      <slot v-else name="icon" />
+    </template>
     <template v-for="tSlot in slots.filter(slot => !nuinclude.includes(slot))" v-slot:[tSlot]>
       <slot :name="tSlot" />
     </template>
   </el-button>
 </template>
 <script>
-
-export default {
+import { defineComponent } from 'vue';
+export default defineComponent({
   name: 'DytButton',
   components: {},
   props: {
@@ -23,7 +25,7 @@ export default {
   data () {
     return {
       pageId: Math.random().toString(36).substring(2),
-      nuinclude: ['default'],
+      nuinclude: ['icon'],
       defaultConfig: {
         size: 'default'
       }
@@ -45,12 +47,10 @@ export default {
   created () {},
   mounted () {},
   methods: {}
-};
+});
 </script>
-<style lang="scss" scoped>
-.dyt-button-demo{
-  .el-button-icon{
-    margin-right:5px;
-  }
+<style>
+.el-button i[class*=lapa]+span{
+  margin-left: 6px;
 }
 </style>
