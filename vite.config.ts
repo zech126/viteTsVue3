@@ -3,7 +3,6 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from "@vitejs/plugin-vue-jsx"; // 用于支持 vueJsx 文件打包
 import codecompression  from "vite-plugin-codecompression"; // 压缩代码，生成 .gz 格式并将输出目录打包成 zip 包
 
-
 const path = require('path');
 // 输出目录
 const projectName = 'dist';
