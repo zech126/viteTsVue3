@@ -9,7 +9,6 @@ const path = require('path');
 const projectName = 'dist';
 const assetsName = 'static';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
