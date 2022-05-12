@@ -76,10 +76,14 @@ const tool = {
             document.body.appendChild(iframe);
             // 页面加载后向目标页面发送数据
             iframe.onload = (e:any) => {
-              iframe.contentWindow.postMessage({ [`${key}`]: { ...config.data, type: config.type } }, '*');
+              setTimeout(() => {
+                iframe.contentWindow.postMessage({ [`${key}`]: { ...config.data, type: config.type } }, '*');
+              }, 200)
             }
           } else {
-            oldIframe.contentWindow.postMessage({ [`${key}`]: { ...config.data, type: config.type } }, '*');
+            setTimeout(() => {
+              oldIframe.contentWindow.postMessage({ [`${key}`]: { ...config.data, type: config.type } }, '*');
+            }, 200)
           }
         }).catch(() => {
           store.commit('routerModel/routerLoading', false);
