@@ -257,6 +257,10 @@ export default defineComponent({
       immediate: true,
       handler (val) {
         this.initLoading = val;
+        this.$nextTick(() => {
+          // 刷新布局
+          val && this.changeTableHeight();
+        })
       }
     },
     tableConfog: {
@@ -309,14 +313,10 @@ export default defineComponent({
   mounted () {
     // 绑定事件
     window.addEventListener('resize', this.changeTableHeight);
-    setTimeout(() => {
-      // 刷新布局
-      this.changeTableHeight();
-      this.$nextTick(() => {
+    this.$nextTick(() => {
       // 打开页面立即加载数据
-        this.tableOtherConfog.autoload && this.filterSearch();
-      })
-    }, 100)
+      this.tableOtherConfog.autoload && this.filterSearch();
+    })
   },
   // 组件销毁前
   beforeUnmount () {
