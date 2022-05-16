@@ -90,7 +90,14 @@
             @node-collapse="nodeCollapse"
             @node-drag-end="nodeDragEnd"
           >
-            <template v-for="slot in slots" v-slot:[slot]="scope">
+            <template v-slot:default="scope">
+              <span class="el-tree-node__label" :class="{'is-disabled': scope.data[config.props.disabled]}">
+                <slot v-bind="scope">
+                  {{scope.data[config.props.label]}}
+                </slot>
+              </span>
+            </template>
+            <template v-for="slot in slots.filter((s) => !['default'].includes(s))" v-slot:[slot]="scope">
               <slot :name="slot" v-bind="scope" />
             </template>
           </el-tree>
@@ -109,7 +116,14 @@
             @node-drag-end="nodeDragEnd"
             :height="328"
           >
-            <template v-for="slot in slots" v-slot:[slot]="scope">
+            <template v-slot:default="scope">
+              <span class="el-tree-node__label" :class="{'is-disabled': scope.data[config.props.disabled]}">
+                <slot v-bind="scope">
+                  {{scope.data[config.props.label]}}
+                </slot>
+              </span>
+            </template>
+            <template v-for="slot in slots.filter((s) => !['default'].includes(s))" v-slot:[slot]="scope">
               <slot :name="slot" v-bind="scope" />
             </template>
           </el-tree-v2>
@@ -130,6 +144,7 @@ interface dataType {
   inputValue: string;
   popoverWidth: number;
   defaultConfig: any;
+  treeProps: any,
   treeData: Array<any>;
   popoverVisible: boolean;
   popoverPlacement: string;
@@ -185,12 +200,12 @@ export default defineComponent({
       treeMinHeight: 50,
       popoverTreeWidth: null,
       defaultConfig: {
-        props: { label: 'label', value: 'value', children: 'children' },
         'empty-text': '暂无数据!',
         'default-expand-all': true,
         'expand-on-click-node': false,
         'highlight-current': true
       },
+      treeProps: { label: 'label', value: 'value', children: 'children', disabled: 'disabled', isLeaf: 'isLeaf', class: 'class' },
       treeData: [],
     }
   },
@@ -199,10 +214,17 @@ export default defineComponent({
       return Object.keys(this.$slots)
     },
     treeOptions () {
-      return this.$common.isEmpty(this.data) ? this.options : this.data;
+      const treeData = this.initTreeData(this.$common.isEmpty(this.data) ? this.options : this.data);
+      // console.log(treeData, this.config.props, this.defaultProps)
+      return treeData;
     },
     config () {
-      let config = { ...this.defaultConfig, props: this.defaultProps, limit: this.limit, ...this.$attrs };
+      let config = {
+        ...this.defaultConfig,
+        props: {...this.treeProps, ...this.defaultProps},
+        limit: this.limit,
+        ...this.$attrs
+      };
       if (config.disabled || config.readonly) {
         config.placeholder = '';
       }
@@ -253,14 +275,6 @@ export default defineComponent({
       handler (val) {
         this.filter(val);
       }
-    },
-    treeOptions: {
-      deep: true,
-      immediate: true,
-      handler (val) {
-        this.treeDataJson = {};
-        this.initTreeData(val);
-      }
     }
   },
   created () {},
@@ -276,13 +290,17 @@ export default defineComponent({
   },
   methods: {
     // 数据初始化
-    initTreeData (arr = []) {
-      arr.forEach(item => {
-        this.treeDataJson[item[this.config.props.value||'value']] = item;
-        if (!this.$common.isEmpty(item[this.config.props.children||'children'])) {
-          this.initTreeData(item[this.config.props.children||'children']);
+    initTreeData (arr:Array<any> = [], disabled: boolean = false) {
+      arr.forEach((item: any) => {
+        if (disabled) {
+          item[this.config.props.disabled] = disabled;
         }
+        if (!this.$common.isEmpty(item[this.config.props.children])) {
+          this.initTreeData(item[this.config.props.children], item[this.config.props.disabled]);
+        }
+        this.treeDataJson[item[this.config.props.value]] = item;
       })
+      return arr;
     },
     // 弹窗位置调整
     popoverAdjust () {
@@ -314,7 +332,9 @@ export default defineComponent({
     popoverShow () {
       this.isShow = true;
       this.$emit('show');
-      this.setTreeWidth();
+      this.$nextTick(() => {
+        this.setTreeWidth();
+      });
     },
     // 设置宽度
     setTreeWidth () {
@@ -363,6 +383,12 @@ export default defineComponent({
     // 选择(单选时)
     nodeClick (node:any, data:any, event:any) {
       if (this.config.multiple) return;
+      if (node[this.config.props.disabled]) {
+        this.vModel.forEach((key:any) => {
+          this.setCurrentKey(key);
+        });
+        return;
+      }
       const newValue = !this.$common.isEmpty(this.config.props.value) ? node[this.config.props.value] : node.value;
       this.vModel = [newValue];
       this.updateVal(this.backArray ? [newValue] : newValue);
@@ -669,6 +695,10 @@ export default defineComponent({
   
 }
 .tree-popper-content{
+  .is-disabled {
+    color:  var(--el-text-color-placeholder);
+    cursor: no-drop;
+  }
   .includes-virtual{
     margin-bottom: 10px;
   }
