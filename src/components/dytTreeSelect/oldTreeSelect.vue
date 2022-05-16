@@ -3,6 +3,7 @@
     :ref="`tag-${pageId}`"
     class="dyt-tree-demo"
     :class="{
+      'is-disabled-tree': disabled,
       'tree-demo-hover': isHoverTree
     }"
     @mouseover="hoverTree"
@@ -441,7 +442,7 @@ export default defineComponent({
     },
     // 清空
     clearTree () {
-      if (!this.isHoverTree || this.vModel.length === 0) return;
+      if (!this.isHoverTree || this.vModel.length === 0 || this.disabled) return;
       // 清空选中
       this.vModel.forEach((key:any) => {
         this.config.multiple && this.setChecked(key, false, !this.config['check-strictly']);
@@ -484,7 +485,7 @@ export default defineComponent({
     },
     // 显示隐藏
     showPopover () {
-      this.popoverVisible = !this.popoverVisible;
+      this.popoverVisible = this.disabled ? false : !this.popoverVisible;
     },
     // 点击当前组件之外的元素
     clickPopoverOutside (e:any) {
@@ -574,6 +575,15 @@ export default defineComponent({
   position: relative;
   width: 100%;
   cursor: pointer;
+  &.is-disabled-tree{
+    .dyt-tree-content{
+      background-color: var(--el-disabled-bg-color);
+      cursor: no-drop;
+      .tag-item-text{
+        color:  var(--el-text-color-placeholder);
+      }
+    }
+  }
   // &.tree-demo-hover{}
   .dyt-tree-content{
     position: relative;
