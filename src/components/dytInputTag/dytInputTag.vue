@@ -539,7 +539,7 @@ export default defineComponent({
   .el-tag{
     position: relative;
     max-width: 100%;
-    font-size: @font-size;
+    font-size: var(--dyt-font-size);
     cursor: pointer;
     overflow: hidden;
     .el-tag-text{
@@ -547,14 +547,14 @@ export default defineComponent({
       max-width: calc(100% - 15px);
       white-space: nowrap;
       // white-space: pre;
-      font-size: @font-size;
+      font-size: var(--dyt-font-size);
       text-overflow: ellipsis;
       overflow: hidden;
     }
     .el-icon-close{
       right: initial;
       // top: 3px;
-      font-size: @font-size;
+      font-size: var(--dyt-font-size);
       vertical-align: top;
     }
     &.el-tag--info{
@@ -621,7 +621,7 @@ export default defineComponent({
     margin-right: 8px;
     margin-bottom: 8px;
     max-width: 100%;
-    font-size: @font-size;
+    font-size: var(--dyt-font-size);
     cursor: pointer;
     overflow: hidden;
     .el-tag-text{

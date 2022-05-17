@@ -42,8 +42,8 @@ const getUserInfo = computed(() => {
 <style lang="less" scoped>
 .head-container {
   display: flex;
-  height: @head-height;
-  background: @head-background;
+  height: var(--layout-head-height);
+  background: var(--layout-head-background);
   .logo {
     margin: 10px 10px 0 20px;
     height: 30px;

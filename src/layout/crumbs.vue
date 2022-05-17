@@ -25,15 +25,15 @@ const getCrumbs = computed(() => {
 <style lang="less" scoped>
 .crumbs-container{
   position: relative;
-  height: @crumbs-height;
-  line-height: @crumbs-height;
+  height: var(--layout-crumbs-height);
+  line-height: var(--layout-crumbs-height);
   padding: 0 20px;
   color: #888;
   font-size: 12px;
-  box-shadow: 0 1px 5px 1px @layout-shadow inset;
+  box-shadow: 0 1px 5px 1px var(--layout-shadow-color) inset;
   z-index: 7;
   .crumbs-active{
-    color: @font-corlor;
+    color: var(--dyt-font-corlor);
   }
 }
 </style>

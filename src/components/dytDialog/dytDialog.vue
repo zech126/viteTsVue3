@@ -109,7 +109,7 @@ export default defineComponent({
       padding: 0;
       height: @headDefaultH;
       margin-right: 0;
-      box-shadow: 0 0 5px 1px @layout-shadow, 0 1px 5px 0 @layout-shadow;
+      box-shadow: 0 0 5px 1px var(--layout-shadow-color), 0 1px 5px 0 var(--layout-shadow-color);
       .el-dialog__title{
         display: inline-block;
         padding-left: 10px;
@@ -126,7 +126,7 @@ export default defineComponent({
     }
     .el-dialog__footer{
       position: relative;
-      box-shadow: 0 0 5px 1px @layout-shadow, 0 1px 5px 0 @layout-shadow;
+      box-shadow: 0 0 5px 1px var(--layout-shadow-color), 0 1px 5px 0 var(--layout-shadow-color);
     }
     .elDialogHeaderbtn(@headDefaultH, @headDefaultH);
     &.dialog-custom-class-small{

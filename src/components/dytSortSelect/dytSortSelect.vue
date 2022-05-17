@@ -142,9 +142,9 @@ export default defineComponent({
   .sort-button {
     margin-left: 10px;
     padding: 8px 10px;
-    font-size: $font-size;
+    font-size: var(--dyt-font-size);
     i.iconfont {
-      font-size: $font-size;
+      font-size: var(--dyt-font-size);
       margin-left: -2px;
       margin-right: -3px;
     }

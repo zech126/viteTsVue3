@@ -96,4 +96,12 @@ defineExpose({ focus });
   left: 50%;
   transform: translateX(-50%);
 }
+.dyt-date-picker-demo{
+  &.el-range-editor{
+    &.el-input__inner{
+      padding: 0 10px;
+    }
+  }
+}
+
 </style>

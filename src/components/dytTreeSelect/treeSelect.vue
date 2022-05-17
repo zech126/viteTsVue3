@@ -80,10 +80,10 @@ defineExpose({ focus, blur });
 }
 .tree-select-popper{
   &.el-popper{
-    font-size: @font-size;
+    font-size: var(--dyt-font-size);
     .el-select-group__title{
       padding-left: 15px;
-      font-size: calc(@font-size + 1px);
+      font-size: calc(var(--dyt-font-size) + 1px);
       font-weight: bold;
     }
     .el-select-group__wrap{

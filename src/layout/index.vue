@@ -47,21 +47,21 @@ const nonExist = computed(() => store.getters['layout/nonExist']);
 .app-container{
   position: relative;
   height: 100%;
-  background: @main-background;
+  background: var(--dyt-main-background-color);
   .app-header{
-    height: @head-height;
-    line-height: @head-height;
-    background: @head-background;
+    height: var(--layout-head-height);
+    line-height: var(--layout-head-height);
+    background: var(--layout-head-background);
   }
   .app-main-container{
-    height: calc(100% - @head-height);
+    height: calc(100% - var(--layout-head-height));
     .app-aside{
       position: relative;
-      width: @aside-width;
+      width: var(--layout-aside-width);
       height: 100%;
-      background: @aside-background;
+      background: var(--layout-aside-background);
       border-radius: 0 0 5px 5px;
-      box-shadow: 1px 0 5px 1px @layout-shadow;
+      box-shadow: 1px 0 5px 1px var(--layout-shadow-color);
       overflow: hidden;
       z-index: 10;
     }
@@ -70,8 +70,8 @@ const nonExist = computed(() => store.getters['layout/nonExist']);
       height: 100%;
       .layout-main-pages{
         padding: 0;
-        height: calc(100% - @crumbs-height);
-        background: #fff;
+        height: calc(100% - var(--layout-crumbs-height));
+        background: var(--layout-main-background-color);
         overflow: auto;
       }
     }

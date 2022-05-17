@@ -235,7 +235,7 @@ const goToPageHome = () => {
         text-align: center;
         color: #ffffff;
         opacity: 0;
-        font-size: @font-size;
+        font-size: var(--dyt-font-size);
         line-height: 36px;
         cursor: pointer;
         animation-name: slideUp;

@@ -385,8 +385,8 @@ export default defineComponent({
   }
   .dyt-form-inner{
     box-sizing: content-box;
-    height: 45px;
-    padding-top: 5px;
+    height: 42px;
+    padding-top: 9px;
     margin-bottom: 10px;
     overflow: hidden;
     &.expand-form-inner{
@@ -409,9 +409,9 @@ export default defineComponent({
     }
     .filter-item-label {
       position: absolute;
-      top: 0;
+      top: -3px;
       left: 10px;
-      z-index: 1;
+      z-index: 10;
       padding: 0 0.2em;
       font-size: 12px;
       line-height: 12px;

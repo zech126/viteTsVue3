@@ -1,3 +1,5 @@
+@import './variable.less';
+
 html {
   height: 100%;
   box-sizing: border-box;
@@ -55,7 +57,7 @@ button {
 body {
   height: 100vh;
   width: 100vw;
-  font-size: @font-size;
+  font-size: var(--dyt-font-size);
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -86,8 +88,8 @@ body {
   #app {
     height: 100%;
     width: 100%;
-    min-width: 700px;
-    color: @font-corlor;
+    min-width: var(--page-min-width);
+    color: var(--dyt-font-corlor);
     overflow: auto;
   }
   // el 按钮设置
@@ -122,7 +124,7 @@ body {
     z-index: 99999999999 !important;
   }
   .el-input--small {
-    font-size: @font-size;
+    font-size: var(--dyt-font-size);
   }
 
   .mian-container-table{
@@ -177,42 +179,7 @@ body {
       }
     }
   }
-    // vue-treeselect 组件样式修改 start
-    .dty-tree-demo{
-      .vue-treeselect{
-        .vue-treeselect__control{
-          height: 32px;
-          line-height: normal;
-          .vue-treeselect__multi-value-item{
-            .vue-treeselect__value-remove{
-              border-left: 0px solid #fff;
-            }
-          }
-          .vue-treeselect__input{
-            cursor: pointer;
-          }
-          .vue-treeselect__multi-value-item{
-            padding: 1px 0;
-          }
-          .vue-treeselect__placeholder{
-            padding-left: 10px;
-            line-height: 30px;
-            font-size: @font-size;
-            color: @placeholder-color;
-          }
-          .vue-treeselect__single-value{
-            padding-left: 10px;
-            line-height: 30px;
-            font-size: @font-size;
-            color: @input-color;
-          }
-          .vue-treeselect__input-container{
-            padding-left: 10px;
-          }
-        }
-      }
-    }
-  
+    
   .el-input--medium{
     .el-input__inner{
       height: 32px;
@@ -289,9 +256,7 @@ body {
   }
   .el-input.is-disabled{
     .el-input__inner {
-      color: @input-color;
-      background-color: #f9f9f9;
-      cursor: default;
+      cursor: no-drop;
     }
   }
   // 表单样式
@@ -317,11 +282,11 @@ body {
     // 自定义表单组件验证失败边框颜色设置
     &.is-error{
       .dyt-tree-content{
-        border-color: @form-error-color;
+        border-color: var(--el-color-danger);
       }
       .vue-treeselect__control,
       .dyt-input-tag-content{
-        border-color: @form-error-color;
+        border-color: var(--el-color-danger);
         .el-input__inner,
         .el-input__wrapper{
           box-shadow: none;

@@ -36,7 +36,7 @@
               'tree-content-limit': config.limit > 0 && config.multiple
             }"
           >
-            <span v-if="vModel.length === 0" style="color: #ccc;">{{placeholder}}</span>
+            <span v-if="vModel.length === 0" class="tree-placeholder">{{placeholder}}</span>
             <div
               v-else
               class="tree-tag-content"
@@ -570,7 +570,6 @@ export default defineComponent({
 });
 </script>
 <style lang="less">
-@lineHeight: 32px;
 .dyt-tree-demo {
   position: relative;
   width: 100%;
@@ -589,29 +588,31 @@ export default defineComponent({
     position: relative;
     display: flex;
     width: 100%;
-    // min-width: 200px;
-    min-height: @lineHeight;
+    min-height: var(--dyt-form-item-height);
     line-height: 1em;
     -webkit-appearance: none;
-    border: 1px solid #DCDFE6;
+    border: var(--el-border);
     box-sizing: border-box;
-    color: #606266;
+    color: var(--el-input-text-color, var(--el-text-color-regular));
     font-size: inherit;
     background-color: #FFF;
     background-image: none;
     border-radius: 4px;
     transition: border-color .2s cubic-bezier(.645,.045,.355,1);
     &.content-active{
-      border-color: var(--el-input-focus-border,var(--el-color-primary));
+      border-color: var(--el-input-focus-border, var(--el-color-primary));
     }
     .tree-content-value{
       display: flex;
       flex: 100;
       padding: 0 0 0 11px;
       margin-right: 10px;
-      height: calc(@lineHeight - 2px);
-      line-height: calc(@lineHeight - 2px);
+      height: calc(var(--dyt-form-item-height) - 2px);
+      line-height: calc(var(--dyt-form-item-height) - 2px);
       overflow: hidden;
+      .tree-placeholder{
+        color: var(--dyt-placeholder-color);
+      }
       .tree-tag-content{
         flex: 100;
         max-width: calc(100% - 5px);
@@ -632,12 +633,12 @@ export default defineComponent({
         display: flex;
         flex: 100;
         // max-width: calc(100% - 50px);
-        // height: calc(@lineHeight - 6px);
+        // height: calc(var(--dyt-form-item-height) - 6px);
         .tree-tag-item{
           display: flex;
           padding: 0 0 0 5px;
           margin: 3px 6px 3px 0;
-          line-height: calc(@lineHeight - 12px);
+          line-height: calc(var(--dyt-form-item-height) - 12px);
           border-radius: 3px;
         }
       }
