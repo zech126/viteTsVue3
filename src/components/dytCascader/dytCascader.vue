@@ -45,4 +45,8 @@ defineExpose({ getCheckedNodes });
   display: inline-block;
   width: 100%;
 }
+.el-cascader-panel{
+  max-width: calc(100vw - 50px);
+  overflow: auto;
+}
 </style>

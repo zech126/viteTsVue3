@@ -231,18 +231,20 @@ export default defineComponent({
     formData: {
       deep: true,
       handler (val) {
-        if (!this.$refs.filterForm) return;
-        const keys = Object.keys(this.temporaryForm);
-        Object.keys(val).forEach(key => {
-          if (keys.includes(key)) {
-            if (JSON.stringify(this.temporaryForm[key]) !== JSON.stringify(val[key])) {
-              // 改变的值验证
+        this.$nextTick(() => {
+          if (!this.$refs.filterForm) return;
+          const keys = Object.keys(this.temporaryForm);
+          Object.keys(val).forEach(key => {
+            if (keys.includes(key)) {
+              if (JSON.stringify(this.temporaryForm[key]) !== JSON.stringify(val[key])) {
+                // 改变的值验证
+                this.$refs.filterForm.validateField([key], (errorMessage:any) => {});
+              }
+            } else {
+              // 新增值验证
               this.$refs.filterForm.validateField([key], (errorMessage:any) => {});
             }
-          } else {
-            // 新增值验证
-            this.$refs.filterForm.validateField([key], (errorMessage:any) => {});
-          }
+          })
         });
       }
     }
@@ -400,6 +402,9 @@ export default defineComponent({
   }
   .dyt-filter-form{
     position: relative;
+    .dyt-input-demo {
+      width: 214px;
+    }
     .el-form-item{
       margin-bottom: 18px;
       margin-right: 20px;

@@ -59,6 +59,9 @@
       <dyt-input-tag style="margin: 10px 0; width: 500px;" :limit="1" type="textarea" v-model="data.inputTagP" :string="true" />
     </div>
     <div style="margin-top:10px;">
+      <dyt-input-tag style="margin: 10px 0; width: 500px;" type="textarea" v-model="data.inputTagTxt" :string="true" />
+    </div>
+    <div style="margin-top:10px;">
       <dyt-select
         v-model="data.dytSelect"
         :virtual="true"
@@ -231,6 +234,7 @@ const data = reactive({
   daterange: [],
   inputTag: '',
   inputTagP: '',
+  inputTagTxt: '',
   dytSelect: '',
   dytSelect1: '',
   selectOptions: [

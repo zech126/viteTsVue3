@@ -28,7 +28,7 @@
                 <span class="el-tag-text" :title="defaultProp.label ? tag[defaultProp.label] : tag">
                   {{ defaultProp.label ? tag[defaultProp.label] : tag }}
                 </span>
-                <Icon v-if="selectConfig.closable" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
+                <Icon v-if="selectConfig.closable" title="移除" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
               </span>
             </div>
             <span v-else class="input-new-tag tag-text-view">
@@ -57,6 +57,7 @@
                   v-if="selectConfig.closable"
                   class="el-tag__close el-icon-close"
                   name="close"
+                  title="移除"
                   @click.stop="closeTag(tag)"
                 />
               </span>
@@ -107,7 +108,7 @@
               <span class="el-tag-text" :title="(defaultProp.label || defaultProp.value) ? tag[defaultProp.label || defaultProp.value] : tag">
                 {{ (defaultProp.label || defaultProp.value) ? tag[defaultProp.label || defaultProp.value] : tag }}
               </span>
-              <Icon v-if="selectConfig.closable" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
+              <Icon v-if="selectConfig.closable" title="移除" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
             </span>
           </template>
           <span v-else>暂无数据!</span>
@@ -222,10 +223,6 @@ export default defineComponent({
       handler (val) {
         this.$emit('update:modelValue', this.string ? val.join(this.separStr) : val);
         this.$emit('change', this.string ? val.join(this.separStr) : val);
-        // 触发 表单验证
-        this.$nextTick(() => {
-          this.$parent.$emit("el.form.change");
-        })
       }
     },
     inputValue: {
@@ -295,7 +292,8 @@ export default defineComponent({
       this.$emit('keyup', e);
     },
     // 字符串分割
-    strSplit (str:any, splitStr:any) {
+    strSplit (str:string, splitStr:any) {
+      if (this.$common.isEmpty(splitStr)) return [str];
       if (this.$common.isEmpty(str)) return [];
       if (typeof str !== 'string') return str;
       if (typeof splitStr === 'string') return str.split(splitStr);
@@ -322,7 +320,7 @@ export default defineComponent({
         tagList = this.vModel.map((item:any) => item[this.defaultProp.value || this.defaultProp.label]);
       }
       const listL = tagList.length - 1;
-      if (listL < 1) return textValue;
+      if (listL < 1) return this.$common.isEmpty(tagList[0]) ?  '' : `${tagList[0]}\n`;
       tagList.forEach((item:string, index:number) => {
         if (typeof this.split === 'string') {
           if (!getValList.includes(item)) {
@@ -366,7 +364,7 @@ export default defineComponent({
         }
         return;
       }
-      const newAddItems:any = this.strSplit(this.inputValue, this.split) || [];
+      const newAddItems:any = this.strSplit(this.inputValue, this.split).filter(item => !this.$common.isEmpty(item, true));
       let addItems:Array<any> = this.$common.arrRemoveRepeat(newAddItems.map((item:any) => item.trim()));
 
       if (this.$attrs.onAddTheTag) {
@@ -388,13 +386,12 @@ export default defineComponent({
           })
         }
         if(!this.preview && this.type === 'textarea' && this.limit > 0) {
-          // this.vModel = [...this.vModel, ...addItems];
           this.vModel = this.$common.copy(addItems);
           setTimeout(() => {
             this.inputValue = this.changeInputVal();
           }, 300);
         } else {
-          this.vModel = [...this.vModel, ...(this.defaultProp.value ? newTags : addItems)];
+          this.vModel = this.$common.arrRemoveRepeat([...this.vModel, ...(this.defaultProp.value ? newTags : addItems)]);
           this.inputValue = '';
         }
       }
@@ -405,10 +402,6 @@ export default defineComponent({
       this.$refs[`saveTagInput-${this.pageId}`] && this.$refs[`saveTagInput-${this.pageId}`].blur();
       this.addTagHand();
       this.isFocus = false;
-      // 失去焦点触发表单验证
-      this.$nextTick(() => {
-        this.$parent.$emit("el.form.blur");
-      })
     },
     // 获取焦点
     focus () {
@@ -416,20 +409,18 @@ export default defineComponent({
         this.$refs[`saveTagInput-${this.pageId}`] && this.$refs[`saveTagInput-${this.pageId}`].focus();
         this.isFocus = (!this.disabled && !this.readonly && this.selectConfig.addTag);
       }
-      // 获取焦点触发表单验证
-      this.$nextTick(() => {
-        this.$parent.$emit("el.form.focus");
-      })
     },
     // 弹窗位置调整
     popoverAdjust () {
       this.$nextTick(() => {
+        const content:any = this.$refs[`popover-${this.pageId}`];
+        if (!content) return;
         const ele = this.$refs[`tag-${this.pageId}`];
-        const content:any = this.$refs[`popover-${this.pageId}`].parentNode;
+        const parentNode:any = content.parentNode;
         const scrollTop = this.$common.getElementScrollTop(ele);
         const viewH = window.innerHeight;
         const coordinates = this.$common.getElementOffset(ele);
-        this.popoverPlacement = `${(coordinates.y + content.offsetHeight + ele.offsetHeight + 30 > (scrollTop + viewH)) ? 'top' : 'bottom'}`;
+        this.popoverPlacement = `${(coordinates.y + parentNode.offsetHeight + ele.offsetHeight + 30 > (scrollTop + viewH)) ? 'top' : 'bottom'}`;
       })
     },
     // 弹窗前
@@ -444,10 +435,6 @@ export default defineComponent({
     // 显示动画播放完毕后触发
     afterEnter () {
       this.$refs[`popoverTagInput-${this.pageId}`] && this.$refs[`popoverTagInput-${this.pageId}`].focus();
-      // 获取焦点触发表单验证
-      this.$nextTick(() => {
-        this.$parent.$emit("el.form.focus");
-      })
       this.$emit('showAfter');
     },
     // 隐藏时触发
@@ -456,9 +443,8 @@ export default defineComponent({
     },
     // 隐藏动画播放完毕后触发
     afterLeave () {
-      // 获取焦点触发表单验证
+      // 获取焦点触发
       this.$nextTick(() => {
-        this.$parent.$emit("el.form.blur");
         this.$emit('hideAfter');
       })
     }
@@ -604,9 +590,10 @@ export default defineComponent({
       box-shadow: none;
     }
     .el-textarea__inner{
-      padding: 0;
-      margin-bottom: 3px;
+      padding: 0 0 3px 12px;
       border: none;
+      box-shadow: none;
+      outline: none;
     }
   }
 }

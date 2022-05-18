@@ -363,9 +363,8 @@ export default defineComponent({
     },
     // 隐藏动画播放完毕后触发
     afterLeave () {
-      // 获取焦点触发表单验证
+      // 获取焦点触发
       this.$nextTick(() => {
-        this.$parent.$emit("el.form.blur");
         this.$emit('hideAfter');
       })
     },
