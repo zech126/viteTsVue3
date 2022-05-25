@@ -218,12 +218,16 @@ body {
       }
     }
   }
-  .dyt-table-container{
+  .dyt-table-view{
     &.dyt-table-empty{
-      .el-scrollbar__view{
-        height: 100%;
+      .el-table__body-wrapper{
+        .el-scrollbar__view{
+          height: 100%;
+        }
       }
     }
+  }
+  .dyt-table-container{
     .el-table__body-wrapper{
       position: static;
       min-height: 200px;
@@ -292,6 +296,13 @@ body {
           box-shadow: none;
         }
       }
+      .dyt-date-picker-demo{
+        &.el-range-editor{
+          &.el-input__inner{
+            box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+          }
+        }
+      }
     }
   }
   .lapa{
@@ -299,6 +310,23 @@ body {
       display: inline-block;
       animation:iconLoading 1.2s linear infinite;
     }
+  }
+// tip 提示
+.popper-limit-tips{
+  .popper-tips-content{
+    max-width: 500px;
+    max-height: 50vh;
+    overflow: auto;
+  }
+  .limit-tips-item{
+    display: inline-block;
+    margin: 5px;
+    padding: 0 8px;
+    font-size: var(--dyt-font-size);
+    color: #909399;
+    background: #f4f4f5;
+    border-radius: 5px;
+  }
   }
 }
 

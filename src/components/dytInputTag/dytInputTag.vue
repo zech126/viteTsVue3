@@ -1,11 +1,12 @@
 <template>
-  <div :ref="`tag-${pageId}`" class="dyt-input-tag-demo">
+  <div :ref="`tag-${base.pageId}`" class="dyt-input-tag-demo">
+  <!-- :style="selectConfig.style" -->
     <el-popover
-      :placement="popoverPlacement"
-      :width="popoverWidth"
+      :placement="base.popoverPlacement"
+      :width="base.popoverWidth"
       :hide-after="100"
       trigger="click"
-      :popper-class="`${limit > 0 ? ' ' : 'hidden-popper-content '}tag-popper-content`"
+      :popper-class="`${props.limit > 0 ? ' ' : 'hidden-popper-content '}tag-popper-content${!selectConfig.disabled ? '' : ' is-disabled-tag'}`"
       @after-enter="afterEnter"
       @after-leave="afterLeave"
       @show="popoverShow"
@@ -16,43 +17,60 @@
         <div
           class="dyt-input-tag-content"
           :class="{
-            'dyt-tag-content-limit': limit > 0,
-            'tag-content-focus': isFocus
+            'dyt-tag-content-limit': props.limit > 0,
+            'tag-content-focus': base.isFocus,
+            'is-disabled-tag': selectConfig.disabled
           }"
-          :style="selectConfig.style"
           @click="focus"
         >
-          <template v-if="limit > 0">
-            <div v-if="vModel.length > 0" class="tag-limit">
-              <span v-for="(tag, index) in vModel.slice(0, limit)" :key="`tag-${index}`" class="el-tag el-tag--info" @click="clickTag(tag)">
-                <span class="el-tag-text" :title="defaultProp.label ? tag[defaultProp.label] : tag">
-                  {{ defaultProp.label ? tag[defaultProp.label] : tag }}
+          <template v-if="props.limit > 0">
+            <div v-if="base.vModel.length > 0" class="tag-limit">
+              <span v-for="(tag, index) in base.vModel.slice(0, props.limit)" :key="`tag-${index}`" class="el-tag el-tag--info" @click="clickTag(tag)">
+                <span class="el-tag-text" :title="props.defaultProp.label ? tag[props.defaultProp.label] : tag">
+                  {{ props.defaultProp.label ? tag[props.defaultProp.label] : tag }}
                 </span>
                 <Icon v-if="selectConfig.closable" title="移除" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
               </span>
             </div>
             <span v-else class="input-new-tag tag-text-view">
-              {{ placeholder }} 
+              {{ props.placeholder }} 
             </span>
-            <div v-if="vModel.length - limit > 0 && limit > 0" class="more-tag" @click="moreHand">
-              + {{ vModel.length - limit }}
+            <div v-if="base.vModel.length - props.limit > 0 && props.limit > 0" class="more-tag">
+              <el-tooltip
+                trigger="hover"
+                effect="light"
+                placement="bottom"
+                popper-class="popper-limit-tips"
+                :disabled="props.disabledTip || base.isShow"
+              >
+                + {{ base.vModel.length - props.limit }}
+                <template v-slot:content>
+                  <div class="popper-tips-content">
+                    <template v-for="(tip, tIndex) in base.vModel" :key="`tip-${tIndex}`">
+                      <span class="limit-tips-item">
+                        {{props.defaultProp.label ?  tip[props.defaultProp.label] || '' : tip}}
+                      </span>
+                    </template>
+                  </div>
+                </template>
+              </el-tooltip>
             </div>
-            <div v-if="vModel.length" class="clearable-all">
+            <div v-if="base.vModel.length && selectConfig.closable" class="clearable-all">
               <Icon class="el-tag__close el-icon-close" title="清空" name="circle-close" @click.stop="clearableHand"/>
             </div>
           </template>
           <template v-else>
             <div class="default-tag-constent">
               <span
-                v-for="(tag, index) in vModel"
+                v-for="(tag, index) in base.vModel"
                 :key="`tag-${index}`"
                 class="el-tag el-tag--info"
                 @click="clickTag(tag)"
               >
                 <span
                   class="el-tag-text"
-                  :title="(defaultProp.label || defaultProp.value) ? tag[defaultProp.label || defaultProp.value] : tag"
-                >{{ (defaultProp.label || defaultProp.value) ? tag[defaultProp.label || defaultProp.value] : tag }}</span>
+                  :title="(props.defaultProp.label || props.defaultProp.value) ? tag[props.defaultProp.label || props.defaultProp.value] : tag"
+                >{{ (props.defaultProp.label || props.defaultProp.value) ? tag[props.defaultProp.label || props.defaultProp.value] : tag }}</span>
                 <Icon
                   v-if="selectConfig.closable"
                   class="el-tag__close el-icon-close"
@@ -62,51 +80,56 @@
                 />
               </span>
               <el-input
-                v-if="!disabled && !readonly && !(limit > 0) && selectConfig.addTag"
-                :ref="`saveTagInput-${pageId}`"
-                v-model="inputValue"
+                v-if="!(props.limit > 0) && selectConfig.addTag"
+                :ref="`saveTagInput-${base.pageId}`"
+                v-model="base.inputValue"
                 :autosize="true"
                 resize="none"
-                :type="type"
+                :type="props.type"
                 class="input-new-tag input-writing-tag"
                 :class="{
-                  'input-empty-tag': vModel.length === 0
+                  'input-empty-tag': base.vModel.length === 0
                 }"
-                :placeholder="vModel.length <= 0 ? placeholder : ''"
-                :style="`width:${ vModel.length > 0 && !inputValue.includes('\n') ? inputWidth: '100%;'}`"
+                :placeholder="base.vModel.length <= 0 ? props.placeholder : ''"
+                :style="`width:${ base.vModel.length > 0 && !base.inputValue.includes('\n') ? base.inputWidth: '100%;'}`"
                 @keyup.enter="addTagHand"
                 @keyup="tagkeyup"
                 @blur="blur"
               />
             </div>
-            <div v-if="vModel.length" class="clearable-all">
+            <div v-if="base.vModel.length && selectConfig.closable" class="clearable-all">
               <Icon class="el-tag__close el-icon-close" title="清空" name="circle-close" @click.stop="clearableHand"/>
             </div>
           </template>
+          <dyt-input v-model="base.valueValidation" type="text" style="display:none;" />
         </div>
       </template>
-      <div v-if="limit > 0" :ref="`popover-${pageId}`">
+      <div v-if="props.limit > 0" :ref="`popover-${base.pageId}`">
         <dyt-input
-          v-if="!disabled && !readonly && selectConfig.addTag"
-          :ref="`popoverTagInput-${pageId}`"
-          v-model="inputValue"
+          v-if="selectConfig.addTag || ['textarea'].includes(props.type)"
+          :ref="`popoverTagInput-${base.pageId}`"
+          v-model="base.inputValue"
           :class="{
-            'input-empty-tag': vModel.length === 0
+            'input-empty-tag': base.vModel.length === 0
           }"
-          :type="type"
-          :placeholder="placeholder"
+          :type="props.type"
+          :placeholder="props.placeholder"
           style="margin-bottom: 10px;"
-          :autosize="{minRows: 2, maxRows: (preview ? 4 : 15)}"
+          :disabled="selectConfig.disabled"
+          :autosize="{minRows: 2, maxRows: (props.preview ? 4 : 15)}"
           resize="none"
           @keyup.enter="addTagHand"
           @keyup="tagkeyup"
           @blur="blur"
         />
-        <div v-if="(preview && type === 'textarea') || type !== 'textarea'" style="max-height: 300px;overflow-y: auto;overflow-x: hidden;">
-          <template v-if="vModel.length > 0">
-            <span v-for="(tag, index) in vModel" :key="`tag-${index}`" class="el-tag el-tag--info" @click="clickTag(tag)">
-              <span class="el-tag-text" :title="(defaultProp.label || defaultProp.value) ? tag[defaultProp.label || defaultProp.value] : tag">
-                {{ (defaultProp.label || defaultProp.value) ? tag[defaultProp.label || defaultProp.value] : tag }}
+        <div v-if="(props.preview && props.type === 'textarea') || props.type !== 'textarea'" style="max-height: 300px;overflow-y: auto;overflow-x: hidden;">
+          <template v-if="base.vModel.length > 0">
+            <span v-for="(tag, index) in base.vModel" :key="`tag-${index}`" class="el-tag el-tag--info" @click="clickTag(tag)">
+              <span
+                class="el-tag-text"
+                :title="(props.defaultProp.label || props.defaultProp.value) ? tag[props.defaultProp.label || props.defaultProp.value] : tag"
+                >
+                {{ (props.defaultProp.label || props.defaultProp.value) ? tag[props.defaultProp.label || props.defaultProp.value] : tag }}
               </span>
               <Icon v-if="selectConfig.closable" title="移除" class="el-tag__close el-icon-close" name="close" @click.stop="closeTag(tag)"/>
             </span>
@@ -117,8 +140,11 @@
     </el-popover>
   </div>
 </template>
-<script lang="ts">
-import {defineComponent } from 'vue';
+<script lang="ts" setup>
+import { reactive, useAttrs, computed, watch, onMounted, nextTick } from 'vue';
+import getGlobal from "@/utils/global";
+import getProxy from "@/utils/proxy";
+
 /**
  * 方法 close 配置之后，点击关闭之后需自己处理， 参数返回 当前 tag
  * 方法 click， 参数返回 当前 tag
@@ -130,6 +156,7 @@ import {defineComponent } from 'vue';
  * limit 最多显示 tag 个数，数据类型 Number，默认值 0，设置大于 0 数字才生效，设置后内容不换行
  */
 interface dataType {
+  valueValidation: string;
   vModel: Array<any>;
   pageId: string;
   inputValue: string;
@@ -137,320 +164,398 @@ interface dataType {
   isFocus: boolean;
   popoverWidth: number;
   popoverPlacement: string;
+  isShow: boolean;
   defaultConfig: {
+    disabled: boolean;
     type: string;
     closable: boolean;
     size: string;
   }
 }
-export default defineComponent({
-  name: 'DytInputTag',
-  components: {},
-  props: {
-    // 绑定值， 使用 v-model 或 modelValue 绑定
-    modelValue: { type: [Array, String], default: () => {return []}},
-    // 占位符提示
-    placeholder: { type: String, default: '请输入后按回车或使用逗号分隔'},
-    // 最多显示格式， 0 为不限制
-    limit: { type: Number, default: 0 },
-    // 禁用
-    disabled: { type: Boolean, default: false },
-    // 只读
-    readonly: { type: Boolean, default: false },
-    // 是否可以添加 tag
-    addTag: { type: Boolean, default: true },
-    // 对输入值进行分割字符集合
-    split: { type: [Array, String], default: () => {return [',', '，', '\n']} },
-    // 是否返回字符串
-    string: { type: Boolean, default: false },
-    // 返回字符串时的分隔符号（string 为 true 时生效）
-    separStr: { type: String, default: ',' },
-    // 值为对象时，string 必须为 false，键值替换
-    defaultProp: { type: Object, default: () => {return {}} },
-    // 输入框的类型, 可选值：textarea、text
-    type: { type: String, default: 'text'},
-    // 当 type 为 textarea 并且 limit 大于 0 生效， 下拉是否展示 tag 默认 false
-    preview: { type: Boolean, default: false }
-  },
-  emits: ['update:modelValue','change','click','clearableHand','close','keyup','keyupEnter','addTheTag','show','showAfter','hide','hideAfter'],
-  data ():dataType {
-    return {
-      pageId: Math.random().toString(36).substring(2),
-      inputValue: '',
-      popoverPlacement: 'bottom',
-      vModel: [],
-      inputWidth: '100%;',
-      isFocus: false,
-      popoverWidth: 200,
-      defaultConfig: {
-        type: 'info',
-        closable: true,
-        size: 'small'
-      }
-    }
-  },
-  computed: {
-    selectConfig () {
-      let config = { ...this.defaultConfig, ...this.$attrs, addTag: this.addTag };
-      if (this.disabled || this.readonly) {
-        config.closable = false;
-        config.addTag = false;
-      }
-      return config;
-    }
-  },
-  watch: {
-    modelValue: {
-      deep: true,
-      immediate: true,
-      handler (val) {
-        if (this.string) {
-          if (val === this.vModel.join(this.separStr)) return;
-          this.vModel = this.$common.isEmpty(val) ? [] : val.split(this.separStr);
-        } else {
-          if (JSON.stringify(val) === JSON.stringify(this.vModel)) return;
-          this.vModel = val;
-        }
-        // 赋值
-        if(!this.preview && this.type === 'textarea' && this.limit > 0 && !this.isFocus) {
-          this.inputValue = typeof val === 'string' ? `${val}` : this.$common.isEmpty(val) ? '' : this.vModel.join('\n');
-        }
-        this.inputWidth = this.$common.isEmpty(this.vModel) ? '100%;' : '50px;';
-      }
-    },
-    vModel: {
-      deep: true,
-      handler (val) {
-        this.$emit('update:modelValue', this.string ? val.join(this.separStr) : val);
-        this.$emit('change', this.string ? val.join(this.separStr) : val);
-      }
-    },
-    inputValue: {
-      deep: true,
-      handler (val:string) {
-        this.inputWidth = this.initInputWidth(val);
-        this.popoverAdjust();
-      }
-    }
-  },
-  created () {},
-  mounted () {
-    // 弹出宽度设置
-    this.$refs[`tag-${this.pageId}`] && (this.popoverWidth = this.$refs[`tag-${this.pageId}`].offsetWidth);
-  },
-  methods: {
-    initInputWidth (val:string) {
-      if (this.limit > 0) return '';
-      const cn = val.replace(/[^\u4e00-\u9fa5]/gi,"");
-      const valLength = val.length;
-      return`${val ? (cn.length * 14.2 + (valLength - cn.length) * 7 + 37) + 'px;' : '50px;'}`;
-    },
-    clickTag (tag:any) {
-      this.$emit('click', tag);
-    },
-    // 清空
-    clearableHand () {
-      this.$emit('clearableHand');
-      this.inputValue = '';
-      this.vModel = [];
-    },
-    // 移除单个 tag
-    closeTag (tag:any) {
-      if (this.$attrs.onClose) {
-        this.$emit('close', tag);
-      } else {
-        if (this.defaultProp.value) {
-          this.vModel = this.vModel.filter(item => {
-            return item[this.defaultProp.value] !== tag[this.defaultProp.value];
-          })
-        } else {
-          this.vModel.splice(this.vModel.indexOf(tag), 1);
-        }
-      }
-      // 如果是多行文本，不清空输入值的情况
-      if(!this.preview && this.type === 'textarea' && this.limit > 0) {
-        let index = this.inputValue.indexOf(tag);
-        const newSplit = typeof this.split === 'string' ? [this.split] : this.split;
-        if (index > -1) {
-          let newTag:any = newSplit.filter(sp => {
-            return this.inputValue.includes(`${this.inputValue.substring(index, tag.length)}${sp}`);
-          });
-          if (newTag[0]) {
-            newTag = `${this.inputValue.substring(index, tag.length)}${newTag[0]}`;
-            this.inputValue = `${this.inputValue.substring(0, index)}${this.inputValue.substring(index + newTag.length)}`;
-          } else {
-            this.inputValue = `${this.inputValue.substring(0, index)}${this.inputValue.substring(index + tag.length)}`;
-          }
-        }
-      }
-      this.$nextTick(() => {
-        this.limit > 0 && this.$refs[`popoverTagInput-${this.pageId}`] && this.$refs[`popoverTagInput-${this.pageId}`].focus();
-      })
-    },
-    // 键盘事件
-    tagkeyup (e:Object) {
-      this.$emit('keyup', e);
-    },
-    // 字符串分割
-    strSplit (str:string, splitStr:any) {
-      if (this.$common.isEmpty(splitStr)) return [str];
-      if (this.$common.isEmpty(str)) return [];
-      if (typeof str !== 'string') return str;
-      if (typeof splitStr === 'string') return str.split(splitStr);
-      if (this.$common.isArray(splitStr)) {
-        if (splitStr.length === 0) return [str];
-        let newStr = str;
-        const newSplit = splitStr[0];
-        splitStr.slice(1).forEach((sp:string) => {
-          if(str.includes(sp)){
-            newStr = newStr.replace(new RegExp(sp,'g'), newSplit);
-          }
-        });
-        return newStr.split(newSplit).filter(item => !this.$common.isEmpty(item, true));
-      }
-      return [str];
-    },
-    // 处理多行文本内容
-    changeInputVal () {
-      let tagList:any = this.vModel;
-      let newVal:string = '';
-      let getValList:any = [];
-      const textValue = this.inputValue.trim();
-      if (this.defaultProp.value || this.defaultProp.label) {
-        tagList = this.vModel.map((item:any) => item[this.defaultProp.value || this.defaultProp.label]);
-      }
-      const listL = tagList.length - 1;
-      if (listL < 1) return this.$common.isEmpty(tagList[0]) ?  '' : `${tagList[0]}\n`;
-      tagList.forEach((item:string, index:number) => {
-        if (typeof this.split === 'string') {
-          if (!getValList.includes(item)) {
-            if (index === listL && textValue.includes(`${this.split}${item}`)) {
-              getValList.push(item);
-              newVal = `${newVal}${item}\n`;
-            } else if (textValue.includes(`${this.split}${item}${this.split}`) || textValue.includes(`${item}${this.split}`)) {
-              getValList.push(item);
-              newVal = `${newVal}${item}${this.split}`;
-            }
-          }
-        } else if (this.$common.isArray(this.split)) {
-          const split:Array<any> = this.split;
-          if (split.length === 0) return textValue;
-          split.forEach((sp1:string) => {
-            split.forEach((sp2:string) => {
-              if (!getValList.includes(item)) {
-                if (index === listL && textValue.includes(`${sp2}${item}`)) {
-                  getValList.push(item);
-                  newVal = `${newVal}${item}\n`;
-                } else if (textValue.includes(`${sp1}${item}${sp2}`) || textValue.includes(`${item}${sp2}`)) {
-                  getValList.push(item);
-                  newVal = `${newVal}${item}${sp2}`;
-                }
-              }
-            })
-          })
-        }
-      });
-      return newVal;
-    },
-    // 
-    addTagHand (e:any = {}) {
-      if (e && e.key === 'Enter'){
-        this.$emit('keyupEnter', e);
-        if (this.type === 'textarea') return;
-      }
-      if (this.$common.isEmpty(this.inputValue)) {
-        if(!this.preview && this.type === 'textarea' && this.limit > 0) {
-          this.vModel = [];
-        }
-        return;
-      }
-      const newAddItems:any = this.strSplit(this.inputValue, this.split).filter(item => !this.$common.isEmpty(item, true));
-      let addItems:Array<any> = this.$common.arrRemoveRepeat(newAddItems.map((item:any) => item.trim()));
 
-      if (this.$attrs.onAddTheTag) {
-        this.$emit('addTheTag', addItems);
-        this.inputValue = '';
-      } else {
-        let newTags:Array<any> = [];
-        if (this.defaultProp.value || this.defaultProp.label) {
-          const keys:Array<any> = this.vModel.map(tag => {
-            return tag[this.defaultProp.value || this.defaultProp.label];
-          })
-          addItems.forEach((item:any) => {
-            if (!keys.includes(item)) {
-              let newTag = {};
-              this.defaultProp.value && (newTag[this.defaultProp.value] = item);
-              this.defaultProp.label && (newTag[this.defaultProp.label] = item);
-              !this.$common.isEmpty(newTag) && newTags.push(newTag);
-            }
-          })
-        }
-        if(!this.preview && this.type === 'textarea' && this.limit > 0) {
-          this.vModel = this.$common.copy(addItems);
-          setTimeout(() => {
-            this.inputValue = this.changeInputVal();
-          }, 300);
-        } else {
-          this.vModel = this.$common.arrRemoveRepeat([...this.vModel, ...(this.defaultProp.value ? newTags : addItems)]);
-          this.inputValue = '';
-        }
-      }
-    },
-    moreHand () {},
-    // 失去焦点
-    blur () {
-      this.$refs[`saveTagInput-${this.pageId}`] && this.$refs[`saveTagInput-${this.pageId}`].blur();
-      this.addTagHand();
-      this.isFocus = false;
-    },
-    // 获取焦点
-    focus () {
-      if (this.limit <= 0) {
-        this.$refs[`saveTagInput-${this.pageId}`] && this.$refs[`saveTagInput-${this.pageId}`].focus();
-        this.isFocus = (!this.disabled && !this.readonly && this.selectConfig.addTag);
-      }
-    },
-    // 弹窗位置调整
-    popoverAdjust () {
-      this.$nextTick(() => {
-        const content:any = this.$refs[`popover-${this.pageId}`];
-        if (!content) return;
-        const ele = this.$refs[`tag-${this.pageId}`];
-        const parentNode:any = content.parentNode;
-        const scrollTop = this.$common.getElementScrollTop(ele);
-        const viewH = window.innerHeight;
-        const coordinates = this.$common.getElementOffset(ele);
-        this.popoverPlacement = `${(coordinates.y + parentNode.offsetHeight + ele.offsetHeight + 30 > (scrollTop + viewH)) ? 'top' : 'bottom'}`;
-      })
-    },
-    // 弹窗前
-    showBefore () {
-      this.popoverAdjust();
-    },
-    // 显示时触发
-    popoverShow () {
-      this.isFocus = true;
-      this.$emit('show');
-    },
-    // 显示动画播放完毕后触发
-    afterEnter () {
-      this.$refs[`popoverTagInput-${this.pageId}`] && this.$refs[`popoverTagInput-${this.pageId}`].focus();
-      this.$emit('showAfter');
-    },
-    // 隐藏时触发
-    popoverHide () {
-      this.$emit('hide');
-    },
-    // 隐藏动画播放完毕后触发
-    afterLeave () {
-      // 获取焦点触发
-      this.$nextTick(() => {
-        this.$emit('hideAfter');
-      })
-    }
+const global:any = getGlobal();
+const proxy:any = getProxy();
+const $attrs = useAttrs();
+const props = defineProps({
+  // 绑定值， 使用 v-model 或 modelValue 绑定
+  modelValue: { type: [Array, String], default: () => {return []}},
+  // 占位符提示
+  placeholder: { type: String, default: '请输入后按回车或使用逗号分隔'},
+  // 最多显示格式， 0 为不限制
+  limit: { type: Number, default: 0 },
+  // 禁用
+  disabled: { type: Boolean, default: false },
+  // 只读
+  readonly: { type: Boolean, default: false },
+  // 是否可以添加 tag
+  addTag: { type: Boolean, default: true },
+  // 对输入值进行分割字符集合
+  split: { type: [Array, String], default: () => {return [',', '，', '\n']} },
+  // change 事件是否返回字符串
+  string: { type: Boolean, default: false },
+  // 返回字符串时的分隔符号（string 为 true 时生效）
+  separStr: { type: String, default: ',' },
+  // 值为对象时，string 必须为 false，键值替换
+  defaultProp: { type: Object, default: () => {return {}} },
+  // 输入框的类型, 可选值：textarea、text
+  type: { type: String, default: 'text'},
+  // 当 type 为 textarea 并且 limit 大于 0 生效， 下拉是否展示 tag 默认 false
+  preview: { type: Boolean, default: false },
+  // 是否禁用 tip
+  disabledTip: { type: Boolean, default: false }
+});
+const base:dataType = reactive({
+  pageId: Math.random().toString(36).substring(2),
+  valueValidation: '',
+  inputValue: '',
+  popoverPlacement: 'bottom',
+  vModel: [],
+  inputWidth: '100%;',
+  isFocus: false,
+  isShow: false,
+  popoverWidth: 200,
+  defaultConfig: {
+    disabled: false,
+    type: 'info',
+    closable: true,
+    size: 'small'
   }
 });
+const $emit = defineEmits(['update:modelValue','change','click','clearableHand','close','keyup','keyupEnter','addTheTag','show','showAfter','hide','hideAfter']);
+const selectConfig:any = computed(() => {
+  let config = { ...base.defaultConfig, ...$attrs, addTag: props.addTag };
+  if (props.disabled || props.readonly) {
+    config.closable = false;
+    config.addTag = false;
+    config.disabled = true;
+  }
+  return config;
+});
+
+onMounted(() => {
+  handPopoverWidth();
+});
+
+const handPopoverWidth = () => {
+  // 弹出宽度设置
+  proxy.$refs[`tag-${base.pageId}`] && (base.popoverWidth = proxy.$refs[`tag-${base.pageId}`].offsetWidth);
+}
+
+const initInputWidth = (val:string) => {
+  if (props.limit > 0) return '';
+  const cn = val.replace(/[^\u4e00-\u9fa5]/gi,"");
+  const valLength = val.length;
+  return`${val ? (cn.length * 14.2 + (valLength - cn.length) * 7 + 37) + 'px;' : '50px;'}`;
+}
+const clickTag = (tag:any) => {
+  $emit('click', tag);
+}
+// 清空
+const clearableHand = () => {
+  if (!selectConfig.value.closable) return;
+  nextTick(() => {
+    $emit('clearableHand');
+    base.vModel = [];
+  });
+}
+// 移除单个 tag
+const closeTag = (tag:any) => {
+  if (!selectConfig.value.closable) return;
+  if ($attrs.onClose) {
+    $emit('close', tag);
+  } else {
+    if (props.defaultProp.value) {
+      base.vModel = base.vModel.filter(item => {
+        return item[props.defaultProp.value] !== tag[props.defaultProp.value];
+      })
+    } else {
+      base.vModel.splice(base.vModel.indexOf(tag), 1);
+    }
+  }
+  // 如果是多行文本，不清空输入值的情况
+  if(!props.preview && props.type === 'textarea' && props.limit > 0) {
+    let index = base.inputValue.indexOf(tag);
+    const newSplit = typeof props.split === 'string' ? [props.split] : props.split;
+    if (index > -1) {
+      let newTag:any = newSplit.filter(sp => {
+        return base.inputValue.includes(`${base.inputValue.substring(index, tag.length)}${sp}`);
+      });
+      if (newTag[0]) {
+        newTag = `${base.inputValue.substring(index, tag.length)}${newTag[0]}`;
+        base.inputValue = `${base.inputValue.substring(0, index)}${base.inputValue.substring(index + newTag.length)}`;
+      } else {
+        base.inputValue = `${base.inputValue.substring(0, index)}${base.inputValue.substring(index + tag.length)}`;
+      }
+    }
+  }
+  nextTick(() => {
+    props.limit > 0 && proxy.$refs[`popoverTagInput-${base.pageId}`] && proxy.$refs[`popoverTagInput-${base.pageId}`].focus();
+  })
+}
+// 键盘事件
+const tagkeyup = (e:Object) => {
+  $emit('keyup', e);
+}
+// 字符串分割
+const strSplit = (str:string, splitStr:any) => {
+  if (global.$common.isEmpty(splitStr)) return [str];
+  if (global.$common.isEmpty(str)) return [];
+  if (typeof str !== 'string') return str;
+  if (typeof splitStr === 'string') return str.split(splitStr);
+  if (global.$common.isArray(splitStr)) {
+    if (splitStr.length === 0) return [str];
+    let newStr = str;
+    const newSplit = splitStr[0];
+    splitStr.slice(1).forEach((sp:string) => {
+      if(str.includes(sp)){
+        newStr = newStr.replace(new RegExp(sp,'g'), newSplit);
+      }
+    });
+    return newStr.split(newSplit).filter(item => !global.$common.isEmpty(item, true));
+  }
+  return [str];
+}
+// 处理多行文本内容
+const changeInputVal = (matchingSplit:Array<any>) => {
+  let tagList:any = matchingSplit;
+  let newVal:string = '';
+  let getValList:any = [];
+  const textValue = base.inputValue;
+  const listL = tagList.length - 1;
+  if (listL < 1) return global.$common.isEmpty(tagList[0]) ?  '' : `${tagList[0]}\n`;
+  tagList.forEach((item:string, index:number) => {
+    if (typeof props.split === 'string') {
+      if (!getValList.includes(item)) {
+        if (index === listL) {
+          getValList.push(item);
+          newVal = `${newVal}${item}${props.split}`;
+        } else if (textValue.includes(`${props.split}${item}${props.split}`) || (index === 0 && textValue.includes(`${item}${props.split}`))) {
+          getValList.push(item);
+          newVal = `${newVal}${item}${props.split}`;
+        }
+      }
+    } else if (global.$common.isArray(props.split)) {
+      const split:Array<any> = props.split;
+      if (split.length === 0) return textValue;
+      split.forEach((sp1:string) => {
+        split.forEach((sp2:string) => {
+          if (!getValList.includes(item)) {
+            if (index === listL) {
+              getValList.push(item);
+              newVal = `${newVal}${item}\n`;
+            } else if (textValue.includes(`${sp1}${item}${sp2}`) || (index === 0 && textValue.includes(`${item}${sp2}`))) {
+              getValList.push(item);
+              newVal = `${newVal}${item}${sp2}`;
+            }
+          }
+        })
+      })
+    }
+  });
+  return newVal;
+}
+// 
+const addTagHand = (e:any = {}) => {
+  if (e && e.key === 'Enter'){
+    $emit('keyupEnter', e);
+    if (props.type === 'textarea') return;
+  }
+  if (global.$common.isEmpty(base.inputValue)) {
+    if(!props.preview && props.type === 'textarea' && props.limit > 0) {
+      base.vModel = [];
+    }
+    return;
+  }
+  const newAddItems:any = strSplit(base.inputValue, props.split).filter(item => !global.$common.isEmpty(item, true));
+  let addItems:Array<any> = [];
+  let matchingSplit:Array<any> = [];
+  newAddItems.forEach((item:any) => {
+    if (!addItems.includes(item.trim())) {
+      addItems.push(item.trim());
+      matchingSplit.push(item);
+    }
+  });
+  if ($attrs.onAddTheTag) {
+    $emit('addTheTag', addItems);
+    base.inputValue = '';
+  } else {
+    let newTags:Array<any> = [];
+    if (props.defaultProp.value || props.defaultProp.label) {
+      const keys:Array<any> = base.vModel.map(tag => {
+        return tag[props.defaultProp.value || props.defaultProp.label];
+      });
+      addItems.forEach((item:any) => {
+        if (!keys.includes(item) || props.type === 'textarea') {
+          let newTag = {};
+          props.defaultProp.value && (newTag[props.defaultProp.value] = item);
+          props.defaultProp.label && (newTag[props.defaultProp.label] = item);
+          !global.$common.isEmpty(newTag) && newTags.push(newTag);
+        }
+      })
+    }
+    if(!props.preview && props.type === 'textarea' && props.limit > 0) {
+      base.vModel = props.defaultProp.value ? newTags : global.$common.copy(addItems);
+      setTimeout(() => {
+        base.inputValue = changeInputVal(matchingSplit);
+      }, 300);
+    } else {
+      base.vModel = props.defaultProp.value ? [...base.vModel, ...newTags] : global.$common.arrRemoveRepeat([...base.vModel, ...addItems]);
+      base.inputValue = '';
+    }
+  }
+}
+// 失去焦点
+const blur = () => {
+  proxy.$refs[`saveTagInput-${base.pageId}`] && proxy.$refs[`saveTagInput-${base.pageId}`].blur();
+  addTagHand();
+  base.isFocus = false;
+}
+// 获取焦点
+const focus = () => {
+  if (props.limit <= 0) {
+    proxy.$refs[`saveTagInput-${base.pageId}`] && proxy.$refs[`saveTagInput-${base.pageId}`].focus();
+    base.isFocus = (!props.disabled && !props.readonly && selectConfig.value.addTag);
+  }
+}
+// 弹窗位置调整
+const popoverAdjust = () => {
+  nextTick(() => {
+    const content:any = proxy.$refs[`popover-${base.pageId}`];
+    if (!content) return;
+    const ele = proxy.$refs[`tag-${base.pageId}`];
+    const parentNode:any = content.parentNode;
+    const scrollTop = global.$common.getElementScrollTop(ele);
+    const viewH = window.innerHeight;
+    const coordinates = global.$common.getElementOffset(ele);
+    base.popoverPlacement = `${(coordinates.y + parentNode.offsetHeight + ele.offsetHeight + 30 > (scrollTop + viewH)) ? 'top' : 'bottom'}`;
+  })
+}
+// 弹窗前
+const showBefore = () => {
+  popoverAdjust();
+}
+// 显示时触发
+const popoverShow = () => {
+  base.isFocus = !selectConfig.value.disabled;
+  base.isShow = true;
+  $emit('show');
+}
+// 显示动画播放完毕后触发
+const afterEnter = () => {
+  proxy.$refs[`popoverTagInput-${base.pageId}`] && proxy.$refs[`popoverTagInput-${base.pageId}`].focus();
+  $emit('showAfter');
+}
+// 隐藏时触发
+const popoverHide = () => {
+  $emit('hide');
+  base.isShow = false;
+}
+// 隐藏动画播放完毕后触发
+const afterLeave = () => {
+  // 获取焦点触发
+  nextTick(() => {
+    $emit('hideAfter');
+  })
+}
+
+watch(() => props.modelValue, (val:any) => {
+  if (typeof val === 'string') {
+    if (val === base.vModel.join(props.separStr)) return;
+    base.inputValue = val;
+  } else {
+    if (JSON.stringify(val) === JSON.stringify(base.vModel)) return;
+    let textVal = '';
+    val.forEach((item:any, index:number) => {
+      if (typeof item === 'string') {
+        // @ts-ignore
+        props.split.forEach((str:string) => {
+          item.includes(str) && (item = item.replace(new RegExp(`${str}`,'g'), ''));
+        })
+        textVal = index > 0 ? `${textVal}${item}\n` : `${item}\n`;
+        base.inputValue = textVal;
+      } else if (props.defaultProp.label && !global.$common.isEmpty(item[props.defaultProp.label])) {
+        let newI = item[props.defaultProp.label];
+        // @ts-ignore
+        props.split.forEach((str:string) => {
+          newI.includes(str) && (newI = newI.replace(new RegExp(`${str}`,'g'), ''));
+        });
+        textVal = index > 0 ? `${textVal}${newI}\n` : `${newI}\n`;
+        base.inputValue = textVal;
+      } else if (global.$common.isEmpty(props.defaultProp.label) && props.defaultProp.value && !global.$common.isEmpty(item[props.defaultProp.value])) {
+        let newI = item[props.defaultProp.value];
+        // @ts-ignore
+        props.split.forEach((str:string) => {
+          newI.includes(str) && (newI = newI.replace(new RegExp(`${str}`,'g'), ''));
+        });
+        textVal = index > 0 ? `${textVal}${newI}\n` : `${newI}\n`;
+        base.inputValue = textVal;
+      }
+    });
+  }
+  nextTick(() => {
+    if (!selectConfig.value.addTag) {
+      base.vModel = val;
+    } else {
+      addTagHand();
+    }
+    nextTick(() => {
+      base.inputWidth = global.$common.isEmpty(base.vModel) ? '100%;' : '50px;';
+    })
+  })
+}, {deep: true, immediate: true});
+
+watch(() => base.vModel, (val:Array<any>) => {
+  if (global.$common.isEmpty(val)) {
+    base.inputValue = `${base.inputValue}inputValue`;
+    nextTick(() => {
+      base.inputValue = '';
+    })
+  }
+  const isString = typeof props.modelValue === 'string';
+  if (props.defaultProp.value || props.defaultProp.label) {
+    let backVal = '';
+    if (props.string) {
+      val.forEach((item:any, index:number) => {
+        if (!global.$common.isEmpty(item[props.defaultProp.value])) {
+          backVal += index === 0 ? `${item[props.defaultProp.value]}` : `${props.separStr}${item[props.defaultProp.value]}`;
+        } else if (!global.$common.isEmpty(item[props.defaultProp.label])) {
+          backVal += index === 0 ? `${item[props.defaultProp.label]}` : `${props.separStr}${item[props.defaultProp.label]}`;
+        }
+      });
+    }
+    $emit('update:modelValue', isString ? (props.type === 'textarea' ? base.inputValue : backVal) : val);
+    $emit('change', props.string ? backVal : val);
+  } else {
+    $emit('update:modelValue', isString ? val.join(props.separStr) : val);
+    $emit('change', props.string ? val.join(props.separStr) : val);
+  }
+  // 由于使用了 elInput 作为输入框输入，表单验证时在输入都都会触发验证，如不多次触发验，改组件后续需要将 elInput 更改为 input
+  nextTick(() => {
+    base.valueValidation = `${Math.random().toString(36).substring(2)}${Math.random().toString(36).substring(2)}`;
+  })
+}, {deep: true});
+
+watch(() => base.inputValue, (val:any) => {
+  nextTick(() => {
+    base.inputWidth = initInputWidth(val);
+    popoverAdjust();
+  })
+}, {deep: true});
+
+defineExpose({
+  clickTag,
+  clearableHand,
+  closeTag,
+  tagkeyup,
+  blur,
+  focus,
+  popoverShow,
+  afterEnter,
+  popoverHide,
+  afterLeave
+});
 </script>
+
 <style lang="less">
 @inputHeight: 24px;
 .dyt-input-tag-demo{
@@ -472,6 +577,13 @@ export default defineComponent({
   background-image: none;
   border-radius: 4px;
   transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+  &.is-disabled-tag{
+    cursor: no-drop;
+    background-color: var(--el-disabled-bg-color);
+    .el-tag{
+      cursor: no-drop;
+    }
+  }
   .default-tag-constent{
     width: calc(100% - 18px);
   }
@@ -498,6 +610,9 @@ export default defineComponent({
   &.dyt-tag-content-limit{
     display: flex;
     cursor: pointer;
+    &.is-disabled-tag{
+      cursor: no-drop;
+    }
     .tag-limit{
       display: flex;
       flex: 100;
@@ -604,6 +719,14 @@ export default defineComponent({
   &.hidden-popper-content{
     display: none !important;
   }
+  &.is-disabled-tag{
+    .el-tag{
+      cursor: default;
+      .el-tag-text{
+        max-width: 100%;
+      }
+    }
+  }
   .el-tag{
     margin-right: 8px;
     margin-bottom: 8px;
@@ -621,7 +744,7 @@ export default defineComponent({
     }
     .el-icon-close{
       right: initial;
-      top: 3px;
+      // top: 3px;
       vertical-align: top;
     }
   }

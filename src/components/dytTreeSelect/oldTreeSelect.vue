@@ -252,6 +252,7 @@ export default defineComponent({
       immediate: true,
       handler (val) {
         if (JSON.stringify(val) === JSON.stringify(this.vModel)) return;
+        const oldtModel = this.$common.copy(this.vModel);
         if (this.string && this.config.multiple) {
           this.vModel = this.$common.isEmpty(val) ? [] : val.split(this.split);
         } else if (!Array.isArray(val)) {
@@ -262,13 +263,19 @@ export default defineComponent({
         if (!this.config.multiple) {
           this.vModel = this.vModel[0] ? [this.vModel[0]] : [];
         }
-        this.$nextTick(() => {
-          this.vModel.forEach((key:any) => {
-            this.config.multiple && this.setChecked(key, true, !this.config['check-strictly']);
-            !this.config.multiple && this.setCurrentKey(key);
-          });
-          this.config.multiple && this.checkedNodeHand();
-        })
+        // 选中值处理
+        this.vModel.forEach((key:any) => {
+          this.config.multiple && this.setChecked(key, true, !this.config['check-strictly']);
+          !this.config.multiple && this.setCurrentKey(key);
+        });
+        // 不选中值处理
+        oldtModel.forEach((key:any) => {
+          if (!this.vModel.includes(key)) {
+            this.config.multiple && this.setChecked(key, false, !this.config['check-strictly']);
+            !this.config.multiple && this.setCurrentKey(key, false);
+          }
+        });
+        this.config.multiple && this.checkedNodeHand();
       }
     },
     inputValue: {

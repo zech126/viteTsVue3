@@ -1,2 +1,2 @@
-import treeSelect from '../dytTreeSelect/oldTreeSelect.vue';
+import treeSelect from './treeSelect.vue';
 export default treeSelect;

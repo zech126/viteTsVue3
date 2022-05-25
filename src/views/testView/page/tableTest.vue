@@ -23,7 +23,7 @@
           </template>
         </dyt-date-picker>
         <dyt-input-tag
-          style="margin: 10px 0; width: 500px;"
+          style="margin:0 0 0 10px; width: 300px; display:inline-block; vertical-align: top;"
           v-model="inputTag"
           :string="true"
         />
@@ -103,7 +103,7 @@
       </template>
     </dyt-table>
 
-    <el-dialog
+    <dyt-dialog
       v-model="dialogVisible"
       title="Tips"
       width="30%"
@@ -115,7 +115,7 @@
           <el-button type="primary" @click="dialogVisible = false">Confirm</el-button>
         </span>
       </template>
-    </el-dialog>
+    </dyt-dialog>
   </div>
 </template>
 
@@ -186,8 +186,8 @@ export default defineComponent({
             {required: true, trigger: 'change', message: '请输入'}
           ],
           superAdmin2: [
-            {required: true, trigger: 'blur', message: '请输入'},
-            {required: true, trigger: 'change', message: '请输入'}
+            {required: true, trigger: 'blur', message: '请选择'},
+            {required: true, trigger: 'change', message: '请选择'}
           ],
           superAdmin3: [
             {required: true, trigger: 'blur', message: '请输入'},
@@ -196,16 +196,36 @@ export default defineComponent({
           superAdmin4: [
             {required: true, trigger: 'blur', message: '请输入'},
             {required: true, trigger: 'change', message: '请输入'}
+          ],
+          superAdmin5000: [
+            // {required: true, trigger: 'blur', message: '请选择'},
+            {required: true, trigger: 'change', message: '请选择'}
+          ],
+          commonStr2: [
+            {required: true, trigger: 'blur', message: '请输入'},
+            {required: true, trigger: 'change', message: '请输入'}
+          ],
+          commonStr10: [
+            {required: true, trigger: 'blur', message: '请选择日期'},
+            {required: true, trigger: 'change', message: '请选择日期'}
+          ],
+          commonStr1: [
+            {required: true, trigger: 'blur', message: '请选择日期'},
+            {required: true, trigger: 'change', message: '请选择日期'}
           ]
         }
       },
       filterModel: {
         commonStrA: 'ghdf',
-        commonStr6: 'commonStr6',
+        commonStr6: 'common-Str6',
         commonStr2: 'commonStr2',
+        commonStr1: new Date(),
+        commonStr10: [new Date(), new Date()],
         superAdmin2: ['1'],
-        superAdmin3: 'superAdmin',
-        superAdmin4: 'textarea, sretg, srtyu'
+        superAdmin3: 'superAdmin, areyghesgfher, 你好大发生过',
+        superAdmin4: '  textarea  , ,   sretg ,  srtyu  ,  sretg8 ',
+        // superAdmin4: ['textarea, ,', 'sre tg', 'srtyu  ', ' srtyu ', ' sretg8 '],
+        superAdmin5000: ['value-1-1-1']
       },
       filterFields: [
         {
@@ -229,10 +249,30 @@ export default defineComponent({
             />
           }
         },
-        { type: 'date', model: 'commonStr1', label: '日期选择'},
+        {
+          type: 'date', model: 'commonStr1', label: '日期选择',
+          events: {
+            change: (val:string|number|Date|Array<string|number|Date>) => {
+              console.log('日期选择', val)
+            }
+          },
+          componentProps: {
+            // format: 'YYYY-MM-DD',
+            'value-format': 'YYYY-MM-DD HH:mm:ss'
+          }
+        },
         {
           type: 'date', model: 'commonStr10', label: '日期范围选择',
-          componentProps: { type: 'daterange' }
+          events: {
+            change: (val:string|number|Date|Array<string|number|Date>) => {
+              console.log('日期范围选择', val)
+            }
+          },
+          componentProps: {
+            type: 'daterange',
+            format: 'YYYY-MM-DD',
+            'value-format': 'YYYY-MM-DD HH:mm:ss'
+          }
         },
         {
           type: 'select',
@@ -265,7 +305,9 @@ export default defineComponent({
               style="width: 500px;"
               v-model={filterModel.superAdmin3}
               string={true}
+              disabled={false}
               limit={1}
+              defaultProp = {{value: 'value', label: 'label'}}
               onChange={(val:any) => {
                 filterModel.superAdmin3 = val;
               }}
@@ -275,10 +317,10 @@ export default defineComponent({
         {
           type: 'tag', model: 'superAdmin4', label: 'input-tag-textarea',
           style: { width: '300px' },
-          componentProps: { string: true, limit: 2 }
+          componentProps: { disabled: false, string: true, limit: 2}
         },
         {
-          type: 'treeSelect', model: 'superAdmin5', label: 'dyt-tree-select',
+          type: 'treeSelect', model: 'superAdmin5000', label: 'dyt-tree-select',
           style: { width: '300px' },
           componentProps: {
             data: options,

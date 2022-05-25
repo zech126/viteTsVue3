@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-bind="selectConfig"
-    :title="title"
+    :title="props.title"
     :custom-class="customClassName"
     :top="marginTop"
   >
@@ -11,71 +11,67 @@
     </template>
   </el-dialog>
 </template>
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
-  name: 'DytDialog',
-  components: {},
-  props: {
-    // 标题
-    title: { type: String, default: ''},
-    // 离顶部距离
-    top: { type: [String, Number], default: '' },
-    // 自定义样式
-    customClass: { type: String, default: '' },
-    // 可选值 full medium small mini
-    size: { type: String, default: 'small' },
-    // 是否设置固定内容高度
-    fixedHeight: { type: Boolean, default: false }
-  },
-  data () {
-    return {
-      // pageId: Math.random().toString(36).substr(2),
-      sizeClass: {
-        full: 'dialog-custom-class-full',
-        medium: 'dialog-custom-class-medium',
-        small: 'dialog-custom-class-small',
-        mini: 'dialog-custom-class-mini'
-      },
-      defaultConfig: {
-        'append-to-body': true,
-        'close-on-click-modal': false,
-        'close-on-press-escape': false
-      }
-    }
-  },
-  computed: {
-    slots () {
-      return {
-        keys: Object.keys(this.$slots),
-        value: Object.values(this.$slots)
-      }
-    },
-    selectConfig () {
-      let config = { ...this.defaultConfig, ...this.$attrs };
-      if (config.disabled || config.readonly) {
-        config.placeholder = '';
-      }
-      return config;
-    },
-    marginTop () {
-      const marginTop = {
-        full: typeof this.top === 'number' ? `${this.top || 0}px` : this.top || '0px',
-        medium: typeof this.top === 'number' ? `${this.top || 50}px` : this.top || '5vh',
-        small: typeof this.top === 'number' ? `${this.top || 50}px` : this.top || '15vh',
-        mini: typeof this.top === 'number' ? `${this.top || 50}px` : this.top || '20vh'
-      }
-      return marginTop[this.size];
-    },
-    customClassName () {
-      return `dialog-custom-class${this.fixedHeight ? ' custom-fixed-height' : ''} ${this.sizeClass[this.size]}${this.customClass ? ` ${this.customClass}` : ''}`;
-    }
-  },
-  watch: {},
-  created () {},
-  mounted () {},
-  methods: {}
+<script lang="ts" setup>
+import { reactive, computed, useSlots, useAttrs } from 'vue';
+
+// const global:any = getGlobal();
+// const proxy:any = getProxy();
+const $slots = useSlots();
+const $attrs = useAttrs();
+const props = defineProps({
+  // 标题
+  title: { type: String, default: ''},
+  // 离顶部距离
+  top: { type: [String, Number], default: '' },
+  // 自定义样式
+  customClass: { type: String, default: '' },
+  // 可选值 full medium small mini
+  size: { type: String, default: 'small' },
+  // 是否设置固定内容高度
+  fixedHeight: { type: Boolean, default: false }
 });
+
+const data = reactive({
+  // pageId: Math.random().toString(36).substr(2),
+  sizeClass: {
+    full: 'dialog-custom-class-full',
+    medium: 'dialog-custom-class-medium',
+    small: 'dialog-custom-class-small',
+    mini: 'dialog-custom-class-mini'
+  },
+  defaultConfig: {
+    'append-to-body': true,
+    'close-on-click-modal': false,
+    'close-on-press-escape': false
+  }
+})
+
+const slots = computed(() => {
+  return {
+    keys: Object.keys($slots),
+    value: Object.values($slots)
+  }
+})
+
+const selectConfig = computed(() => {
+  let config = { ...data.defaultConfig, ...$attrs };
+    return config;
+})
+
+const marginTop = computed(() => {
+  const topJson = {
+      full: typeof props.top === 'number' ? `${props.top || 0}px` : props.top || '0px',
+      medium: typeof props.top === 'number' ? `${props.top || 50}px` : props.top || '5vh',
+      small: typeof props.top === 'number' ? `${props.top || 50}px` : props.top || '15vh',
+      mini: typeof props.top === 'number' ? `${props.top || 50}px` : props.top || '20vh'
+    }
+    return topJson[props.size];
+})
+
+const customClassName = computed(() => {
+  return `dialog-custom-class${props.fixedHeight ? ' custom-fixed-height' : ''} ${data.sizeClass[props.size]}${props.customClass ? ` ${props.customClass}` : ''}`;
+})
+
 </script>
 <style lang="less">
 @headDefaultH: 40px;

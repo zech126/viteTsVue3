@@ -49,6 +49,8 @@ import {computed, useSlots, useAttrs, reactive} from 'vue';
 import getProxy from "@/utils/proxy";
 import getGlobal from '@/utils/global';
 const global = getGlobal();
+const attrs = useAttrs();
+
 const props = defineProps({
   // 默认下拉数据
   options: { type: Array, default: () => {return []} },
@@ -100,20 +102,23 @@ const options:any = computed(() => {
   return props.options
 });
 const selectConfig = computed(() => {
-  let config = { 
-    ...{
-      placeholder: '请选择',
-      size: 'default',
-      clearable: true,
-      filterable: true,
-      disabled: false,
-      readonly: false,
-    },
-    ...useAttrs()
+  let config = {
+    placeholder: '请选择',
+    size: 'default',
+    clearable: true,
+    filterable: true,
+    disabled: false,
+    readonly: false,
+    'collapse-tags-tooltip': false,
+    'collapse-tags': false,
+    ...attrs
   };
   config['popper-class'] = (`${config['popper-class'] || ''} select-demo-popper`).trim();
   if (config.disabled || config.readonly) {
     config.placeholder = '';
+  }
+  if (config['collapse-tags'] && typeof attrs['collapse-tags-tooltip'] !== 'boolean') {
+    config['collapse-tags-tooltip'] = true;
   }
   return config;
 });

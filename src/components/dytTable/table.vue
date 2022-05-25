@@ -1,5 +1,5 @@
 <template>
-  <div :id="`table_${pageId}`" class="dyt-table-container" :class="{'dyt-table-empty': tableData.length === 0}">
+  <div :id="`table_${props.pageId}`" class="dyt-table-container">
     <!-- 表格头部 -->
     <div v-if="slots.includes('tableTop')" class="table-top-container">
       <slot name="tableTop" />
@@ -11,38 +11,38 @@
         <slot name="tableLeft" />
       </div>
       <!-- 表格 -->
-      <div v-if="tableConfog.showTable" class="mian-container-table">
+      <div v-if="props.tableConfig.showTable" class="mian-container-table">
         <el-table
-          :ref="`table_${pageId}`"
-          v-bind="tableAttr"
+          :ref="`table_${props.pageId}`"
+          v-bind="data.tableAttr"
           v-on="tableListeners"
-          :data="tableData"
-          :height="$common.isEmpty(tableHeight) ? null : tableHeight"
-          :max-height="(tableAttr['max-height'] || tableAttr['maxHeight'] || null)"
+          :data="props.tableData"
+          :height="$common.isEmpty(props.tableHeight) ? null : props.tableHeight"
+          :max-height="(data.tableAttr['max-height'] || data.tableAttr['maxHeight'] || null)"
           style="width: 100%;"
         >
           <el-table-column
-            v-if="typeof tableConfog.multiple === 'boolean' && tableConfog.multiple"
+            v-if="typeof props.tableConfig.multiple === 'boolean' && props.tableConfig.multiple"
             align="center"
             type="selection"
             width="50"
             :selectable="selectable"
           />
           <el-table-column
-            v-if="typeof tableConfog.indexMethod === 'function'"
+            v-if="typeof props.tableConfig.indexMethod === 'function'"
             align="center"
             type="index"
             width="50"
-            :index="tableConfog.indexMethod"
+            :index="props.tableConfig.indexMethod"
           />
           <el-table-column
-            v-if="typeof tableConfog.indexMethod === 'boolean' && tableConfog.indexMethod"
+            v-if="typeof props.tableConfig.indexMethod === 'boolean' && props.tableConfig.indexMethod"
             align="center"
             type="index"
             width="50"
           />
           <slot name="tableColumn">
-            <template v-for="(item, index) in columnConfig">
+            <template v-for="(item, index) in data.columnConfig">
               <!-- 自定义插槽列 -->
               <slot v-if="item.slot" :name="item.slot" :column-config="item" />
               <el-table-column v-else :key="`col-${index}`"
@@ -50,15 +50,19 @@
                   'show-overflow-tooltip': true,
                   ...item,
                   'min-width': item['min-width'] || item.minWidth,
-                  align: (columnAlign.includes(item.align) ? item.align : 'center')
+                  align: (data.columnAlign.includes(item.align) ? item.align : 'center')
                 }"
               >
                 <template v-slot="scope">
-                  <dyt-node v-if="typeof cloumnsRender[`render-${index}`] === 'function'" :node="cloumnsRender[`render-${index}`]" :node-parameter="scope"/>
+                  <dyt-node
+                    v-if="typeof data.cloumnsRender[`render-${index}`] === 'function'"
+                    :node="data.cloumnsRender[`render-${index}`]"
+                    :node-parameter="scope"
+                  />
                   <div v-else class="table-ellipsis-tips"
-                    v-on="cloumnsEvents[`events-${index}`] ? {
+                    v-on="data.cloumnsEvents[`events-${index}`] ? {
                       click: (e:any) => {
-                        cloumnsEvents[`events-${index}`].click && cloumnsEvents[`events-${index}`].click(scope, e);
+                        data.cloumnsEvents[`events-${index}`].click && data.cloumnsEvents[`events-${index}`].click(scope, e);
                       }
                     }: {}"
                   >
@@ -91,8 +95,10 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
+import getGlobal from '@/utils/global';
+import getProxy from '@/utils/proxy';
+import { reactive, computed, useSlots, useAttrs, watch } from 'vue';
 
 interface dataType{
   columnAlign: Array<any>;
@@ -100,7 +106,7 @@ interface dataType{
   cloumnsRender: any;
   cloumnsEvents: any;
   tableAttr: {
-    height: any;
+    height?: any;
     'highlight-current-row': boolean;
     // 'row-key': (row) => {
     //   return row.userId
@@ -111,134 +117,134 @@ interface dataType{
   }
 }
 
-export default defineComponent({
-  name: 'TableView',
-  props: {
-    // 表格其他设置
-    tableConfog: { type: Object, default: () => {return {}} },
-    tableData: { type: Array, default: () => {return []} },
-    tableHeight: {type: [String, Number], default: null},
-    pageId: {type: String, default: ''},
-    // 表格配置 对应 elementUI 的 table Attributes
-    tableProps: { type: Object, default: () => {return {}} },
-    tableColumns:  { type: Array, default: () => [] },
-    // 请求中
-    tableLoading: { type: Boolean, default: false },
-  },
-  setup () {},
-  data ():dataType {
-    return {
-      columnAlign: ['left', 'center', 'right'],
-      columnConfig: [],
-      cloumnsRender: {},
-      cloumnsEvents: {},
-      tableAttr: {
-        height: '',
-        'highlight-current-row': true,
-        // 'row-key': (row) => {
-        //   return row.userId
-        // },
-        stripe: true,
-        size: 'small',
-        border: true
-      }
-    }
-  },
-  computed: {
-    slots () {
-      return Object.keys(this.$slots)
-    },
-    // 绑定到列表的事件
-    tableListeners () {
-      const attrs = Object.keys(this.$attrs);
-      let tableFun = {};
-      attrs.forEach(funKeys => {
-        if (!this.$common.isEmpty(funKeys) && funKeys.substring(0,2) === 'on') {
-          const newKey = `${funKeys.substring(2, 1).toLocaleLowerCase()}${funKeys.substring(3, funKeys.length)}`;
-          tableFun[newKey] = this.$attrs[funKeys];
-        }
-      })
-      return tableFun;
-    },
-  },
-  watch: {
-    tableProps: {
-      immediate: true,
-      deep: true,
-      handler (val) {
-        this.tableAttr = {...this.tableAttr, ...val}
-        delete this.tableAttr.height;
-      }
-    },
-    tableColumns: {
-      immediate: true,
-      deep: true,
-      handler (val) {
-        this.initColumns(this.$common.copy(val));
-      }
-    }
-  },
-  created () {},
-  mounted () {},
-  methods: {
-    initColumns (arr:Array<any>) {
-      let columns:Array<any> = [];
-      this.cloumnsRender = {};
-      this.cloumnsEvents = {};
-      arr.forEach((item, index) => {
-        if (typeof item.render === 'function') {
-          this.cloumnsRender[`render-${index}`] = item.render;
-          delete item.render;
-        }
-        if (!this.$common.isEmpty(item.events)) {
-          this.cloumnsEvents[`events-${index}`] = item.events;
-          delete item.events;
-        }
-        columns.push(item);
-      })
-      this.columnConfig = columns;
-    },
-    // 用于多选表格，清空用户的选择
-    clearSelection () {
-      this.$refs[`table_${this.pageId}`].clearSelection();
-    },
-    // 用于多选表格，切换某一行的选中状态，如果使用了第二个参数，则是设置这一行选中与否（selected 为 true 则选中）
-    toggleRowSelection (row:any, selected:any) {
-      this.$refs[`table_${this.pageId}`].toggleRowSelection(row, selected);
-    },
-    // 用于多选表格，切换所有行的选中状态
-    toggleAllSelection () {
-      this.$refs[`table_${this.pageId}`].toggleAllSelection();
-    },
-    // 用于可展开表格与树形表格，切换某一行的展开状态，如果使用了第二个参数，则是设置这一行展开与否（expanded 为 true 则展开）
-    toggleRowExpansion (row:any, expanded:any) {
-      this.$refs[`table_${this.pageId}`].toggleRowExpansion(row, expanded);
-    },
-    // 用于单选表格，设定某一行为选中行，如果调用时不加参数，则会取消目前高亮行的选中状态。
-    setCurrentRow (row:any) {
-      this.$refs[`table_${this.pageId}`].setCurrentRow(row);
-    },
-    // 用于清空排序条件，数据会恢复成未排序的状态
-    clearSort () {
-      this.$refs[`table_${this.pageId}`].clearSort();
-    },
-    // 不传入参数时用于清空所有过滤条件，数据会恢复成未过滤的状态，也可传入由columnKey组成的数组以清除指定列的过滤条件
-    clearFilter (columnKey:any) {
-      this.$refs[`table_${this.pageId}`].clearFilter(columnKey);
-    },
-    // 对 Table 进行重新布局。当 Table 或其祖先元素由隐藏切换为显示时，可能需要调用此方法
-    doLayout () {
-      this.$refs[`table_${this.pageId}`].doLayout();
-    },
-    // 手动对 Table 进行排序。参数prop属性指定排序列，order指定排序顺序。
-    sort (prop:any, order:any) {
-      this.$refs[`table_${this.pageId}`].sort(prop, order);
-    },
-    selectable(row:any, index:any) {
-      return this.tableConfog.selectable ? this.tableConfog.selectable(row, index) : true;
-    }
+const $slots = useSlots();
+const $attrs = useAttrs();
+const global = getGlobal();
+const proxy:any = getProxy();
+const props = defineProps({
+  // 表格其他设置
+  tableConfig: { type: Object, default: () => {return {}} },
+  tableData: { type: Array, default: () => {return []} },
+  tableHeight: {type: [String, Number], default: null},
+  pageId: {type: String, default: ''},
+  // 表格配置 对应 elementUI 的 table Attributes
+  tableProps: { type: Object, default: () => {return {}} },
+  tableColumns:  { type: Array, default: () => [] },
+  // 请求中
+  tableLoading: { type: Boolean, default: false },
+});
+
+const data:dataType = reactive({
+  columnAlign: ['left', 'center', 'right'],
+  columnConfig: [],
+  cloumnsRender: {},
+  cloumnsEvents: {},
+  tableAttr: {
+    height: '',
+    'highlight-current-row': true,
+    // 'row-key': (row) => {
+    //   return row.userId
+    // },
+    stripe: true,
+    size: 'small',
+    border: true
   }
 });
+// 插槽
+const slots = computed(() => {
+  return Object.keys($slots)
+});
+// 绑定到列表的事件
+const tableListeners = computed(() => {
+  const attrs = Object.keys($attrs);
+  let tableFun = {};
+  attrs.forEach(funKeys => {
+    if (!global.$common.isEmpty(funKeys) && funKeys.substring(0,2) === 'on') {
+      const newKey = `${funKeys.substring(2, 1).toLocaleLowerCase()}${funKeys.substring(3, funKeys.length)}`;
+      tableFun[newKey] = $attrs[funKeys];
+    }
+  })
+  return tableFun;
+});
+
+const initColumns = (arr:Array<any>) => {
+  let columns:Array<any> = [];
+  data.cloumnsRender = {};
+  data.cloumnsEvents = {};
+  arr.forEach((item, index) => {
+    if (typeof item.render === 'function') {
+      data.cloumnsRender[`render-${index}`] = item.render;
+      delete item.render;
+    }
+    if (!global.$common.isEmpty(item.events)) {
+      data.cloumnsEvents[`events-${index}`] = item.events;
+      delete item.events;
+    }
+    columns.push(item);
+  })
+  data.columnConfig = columns;
+}
+// 用于多选表格，清空用户的选择
+const clearSelection = () => {
+  proxy.$refs[`table_${props.pageId}`]?.clearSelection();
+}
+// 用于多选表格，切换某一行的选中状态，如果使用了第二个参数，则是设置这一行选中与否（selected 为 true 则选中）
+const toggleRowSelection = (row:any, selected:any) => {
+  proxy.$refs[`table_${props.pageId}`]?.toggleRowSelection(row, selected);
+}
+// 用于多选表格，切换所有行的选中状态
+const toggleAllSelection = () =>{
+  proxy.$refs[`table_${props.pageId}`]?.toggleAllSelection();
+}
+// 用于可展开表格与树形表格，切换某一行的展开状态，如果使用了第二个参数，则是设置这一行展开与否（expanded 为 true 则展开）
+const toggleRowExpansion = (row:any, expanded:any) => {
+  proxy.$refs[`table_${props.pageId}`]?.toggleRowExpansion(row, expanded);
+}
+// 用于单选表格，设定某一行为选中行，如果调用时不加参数，则会取消目前高亮行的选中状态。
+const setCurrentRow = (row:any) => {
+  proxy.$refs[`table_${props.pageId}`]?.setCurrentRow(row);
+}
+// 用于清空排序条件，数据会恢复成未排序的状态
+const clearSort = () => {
+  proxy.$refs[`table_${props.pageId}`]?.clearSort();
+}
+// 不传入参数时用于清空所有过滤条件，数据会恢复成未过滤的状态，也可传入由columnKey组成的数组以清除指定列的过滤条件
+const clearFilter = (columnKey:any) => {
+  proxy.$refs[`table_${props.pageId}`]?.clearFilter(columnKey);
+}
+// 对 Table 进行重新布局。当 Table 或其祖先元素由隐藏切换为显示时，可能需要调用此方法
+const doLayout = () => {
+  proxy.$refs[`table_${props.pageId}`]?.doLayout();
+}
+// 手动对 Table 进行排序。参数prop属性指定排序列，order指定排序顺序。
+const sort = (prop:any, order:any) => {
+  proxy.$refs[`table_${props.pageId}`]?.sort(prop, order);
+}
+const selectable = (row:any, index:any) => {
+  return props.tableConfig.selectable ? props.tableConfig.selectable(row, index) : true;
+}
+
+watch(() => props.tableProps, (val:any) => {
+  data.tableAttr = {...data.tableAttr, ...val}
+  delete data.tableAttr.height;
+}, {deep: true, immediate: true});
+
+watch(() => props.tableColumns, (val:any) => {
+  initColumns(global.$common.copy(val));
+}, {deep: true, immediate: true});
+
+defineExpose({
+  clearSelection,
+  toggleRowSelection,
+  toggleAllSelection,
+  toggleRowExpansion,
+  setCurrentRow,
+  clearSort,
+  clearFilter,
+  doLayout,
+  sort
+});
+
 </script>
 <style lang="less">
 .dyt-table-container{
