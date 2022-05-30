@@ -62,20 +62,95 @@
       <dyt-input-tag style="margin: 10px 0; width: 500px;" type="textarea" v-model="data.inputTagTxt" :string="true" />
     </div>
     <div style="margin-top:10px;">
+      虚拟滚动-分组
       <dyt-select
-        v-model="data.dytSelect"
+        v-model="data.dytSelectx"
         :virtual="true"
         :defaultProp="data.defaultProp"
         :options="data.selectOptions2"
-      ></dyt-select>
+      />
     </div>
     <div style="margin-top:10px;">
+      虚拟滚动-点击次数排序
+      <dyt-select
+        v-model="data.dytSelect"
+        :virtual="true"
+        :options="data.selectOptions"
+        sort-key="virtual"
+        :is-sort="true"
+        :sort-limit="5"
+      />
+    </div>
+    <div style="margin-top:10px;">
+      虚拟滚动多选-点击次数排序
+      <dyt-select
+        v-model="data.dytSelectm"
+        :options="data.selectOptions"
+        sort-key="virtualm"
+        :virtual="true"
+        :is-sort="true"
+        :sort-limit="5"
+        :multiple="true"
+      />
+    </div>
+    <div style="margin-top:10px;">
+      虚拟滚动-插槽(支持排序)
+      <dyt-select v-model="data.dytSelect" :virtual="true" :options="data.selectOptions" sort-key="selectOptionmcg" :is-sort="true">
+        <template v-slot:default="{ item }">
+          {{(typeof item.label !== 'undefined' ? item.label : item.value)}}
+        </template>
+      </dyt-select>
+    </div>
+    <div style="margin-top:10px;">
+      常规
       <dyt-select
         v-model="data.dytSelect"
         :options="data.selectOptions"
-      ></dyt-select>
+      />
     </div>
     <div style="margin-top:10px;">
+      常规-点击次数排序
+      <dyt-select
+        v-model="data.dytSelect"
+        :options="data.selectOptions"
+        sort-key="selectOptions"
+        :is-sort="true"
+        :sort-limit="4"
+      />
+    </div>
+    <div style="margin-top:10px;">
+      常规多选-点击次数排序
+      <dyt-select
+        v-model="data.dytSelectm"
+        :options="data.selectOptions"
+        sort-key="selectOptionm"
+        :is-sort="true"
+        :sort-limit="4"
+        :multiple="true"
+      />
+    </div>
+    <div style="margin-top:10px;">
+      常规-插槽-1(不支持排序)
+      <dyt-select v-model="data.dytSelect">
+        <el-option
+          v-for="(item, index) in data.selectOptions"
+          :key="`option-${index}`"
+          :label="(typeof item.label !== 'undefined' ? item.label : '')"
+          :value="item.value"
+          :disabled="(typeof item.disabled === 'boolean' ? item.disabled : false)"
+        />
+      </dyt-select>
+    </div>
+    <div style="margin-top:10px;">
+      常规-插槽-2(支持排序)
+      <dyt-select v-model="data.dytSelect" :options="data.selectOptions" sort-key="selectOptionmc" :is-sort="true">
+        <template v-slot:option="{item}">
+          {{item.label}}
+        </template>
+      </dyt-select>
+    </div>
+    <div style="margin-top:10px;">
+      常规-分组
       <dyt-select
         v-model="data.dytSelect1"
         :options="data.selectOptions1"
@@ -235,14 +310,16 @@ const data = reactive({
   inputTag: '',
   inputTagP: '',
   inputTagTxt: '',
-  dytSelect: '',
+  dytSelect: 'value-3',
+  dytSelectm: [],
   dytSelect1: '',
+  dytSelectx: '',
   selectOptions: [
     {label: 'label-1', value: 'value-1'},
     {label: 'label-2', value: 'value-2'},
     {label: 'label-3', value: 'value-3'},
     {label: 'label-4', value: 'value-4'},
-    {label: 'label-5', value: 'value-5'},
+    {label: 'label-5', value: 'value-5', disabled: true},
     {label: 'label-6', value: 'value-6'},
     {label: 'label-7', value: 'value-7'},
     {label: 'label-8', value: 'value-8'},
@@ -250,7 +327,7 @@ const data = reactive({
     {label: 'label-10', value: 'value-10'}
   ],
   selectOptions2: [
-    {label1: 'label-1', value1: 'value-1'},
+    {label1: 'label-1', value1: 'value-1', disabled1: true},
     {label1: 'label-2', value1: 'value-2'},
     {label1: 'label-3', value1: 'value-3'},
     {label1: 'label-4', value1: 'value-4'},
@@ -260,6 +337,7 @@ const data = reactive({
     {label1: 'label-8', value1: 'value-8'},
     {
       label1: 'label-9',
+      disabled1: true,
       options1: [
         {label1: 'label-1', value1: 'value-1'},
         {label1: 'label-2', value1: 'value-2'},
@@ -289,6 +367,7 @@ const data = reactive({
   selectOptions1: [
     {
       label: 'label-1',
+      disabled: true,
       options: [
         {label: 'label-1-1', value: 'label-1-1'},
         {label: 'label-1-2', value: 'label-1-2'},
@@ -299,7 +378,7 @@ const data = reactive({
       label: 'label-2',
       options: [
         {label: 'label-2-1', value: 'label-2-1'},
-        {label: 'label-2-2', value: 'label-2-2'},
+        {label: 'label-2-2', value: 'label-2-2', disabled: true},
         {label: 'label-2-3', value: 'label-2-3'}
       ]
     },

@@ -22,6 +22,13 @@ const navList = [
         icon: '',
         url: '/test2'
       },
+      {
+        id: '1-4',
+        name: '百度编辑器',
+        icon: '',
+        url: '/testUEditor'
+      },
+      
       // {
       //   id: '1-4',
       //   name: '测试页面',

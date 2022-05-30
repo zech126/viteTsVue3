@@ -16,6 +16,12 @@ const routes = [
     path: '/tableTest',
     component: () => import("./page/tableTest.vue"),
     meta: { requireAuth: true, keepAlive: true }
+  },
+  {
+    name: '百度编辑器',
+    path: '/testUEditor',
+    component: () => import("./page/testUEditor.vue"),
+    meta: { requireAuth: false, keepAlive: false }
   }
 ];
 export default routes;

@@ -6,11 +6,11 @@
   </el-input>
 </template>
 <script lang="ts" setup>
-import {computed, ComputedRef, useSlots, useAttrs} from 'vue';
+import {computed, useSlots, useAttrs} from 'vue';
 import getProxy from "@/utils/proxy";
 const proxy:any = getProxy();
-const slots:ComputedRef<unknown> = computed(() => Object.keys(useSlots()));
-const selectConfig:ComputedRef<unknown> = computed(() => {
+const slots = computed(() => Object.keys(useSlots()));
+const selectConfig = computed(() => {
   let config = { ...{ disabled: false, readonly: false, clearable: true, placeholder: '请输入' }, ...useAttrs() };
   if (config.disabled || config.readonly) {
     config.placeholder = '';

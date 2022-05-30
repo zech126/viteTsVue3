@@ -18,6 +18,7 @@ declare module '@vue/runtime-core' {
     $attrs: any;
     $emit: any;
     $parent: any;
+    localforage: LocalForage
   }
 }
 // 新增 axios 配置

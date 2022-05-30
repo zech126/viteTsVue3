@@ -44,12 +44,12 @@
                 <div v-if="!$common.isEmpty(data.formData[item.model])" class="filter-item-label">
                   {{ item.label || '' }}
                 </div>
-                <dyt-node v-if="(typeof item.render === 'function')" :node="item.render" />
+                <dyt-node v-if="(typeof item.render === 'function' && !item.slot)" :node="item.render" />
                 <!-- 注册组件 -->
-                <template v-if="(!item.slot && typeof item.render !== 'function')">
+                <template v-else-if="(typeof item.render !== 'function' && !item.slot)">
                   <!-- 输入框 -->
                   <dyt-input
-                    v-if="$common.isEmpty(item.type) || ['input', 'text', 'el-input', 'elinput', 'dyt-input', 'dytinput'].includes(item.type.toLowerCase())"
+                    v-if="$common.isEmpty(item.type) || ['input', 'text', 'elinput', 'dytinput'].includes(item.type.toLowerCase().replace(/-/g, ''))"
                     v-model="data.formData[item.model]"
                     v-bind="{
                       ...(item.componentProps||{}),
@@ -60,7 +60,7 @@
                   />
                   <!-- 下拉选择 -->
                   <dyt-select
-                    v-else-if="['select', 'el-select', 'elselect', 'dyt-select', 'dytselect'].includes(item.type.toLowerCase())"
+                    v-else-if="['select', 'elselect', 'dytselect'].includes(item.type.toLowerCase().replace(/-/g, ''))"
                     v-model="data.formData[item.model]"
                     v-bind="{
                       'collapse-tags': true,
@@ -74,7 +74,7 @@
                   />
                   <!-- 日期组件 -->
                   <dyt-date-picker
-                    v-else-if="['date', 'el-date-picker', 'eldatepicker', 'dyt-date-picker', 'dytdatepicker'].includes(item.type.toLowerCase())"
+                    v-else-if="['date', 'eldatepicker', 'dytdatepicker'].includes(item.type.toLowerCase().replace(/-/g, ''))"
                     v-model="data.formData[item.model]"
                     v-bind="{
                       ...(item.componentProps||{}),
@@ -85,7 +85,7 @@
                   />
                   <!-- 标签输入 -->
                   <dyt-input-tag
-                    v-else-if="['tag', 'textarea', 'input-tag', 'inputtag', 'dyt-input-tag', 'dytinputtag'].includes(item.type.toLowerCase())"
+                    v-else-if="['tag', 'textarea', 'inputtag', 'dytinputtag'].includes(item.type.toLowerCase().replace(/-/g, ''))"
                     v-model="data.formData[item.model]"
                     v-bind="{
                       string: true,
@@ -99,7 +99,7 @@
                   />
                   <!-- 下拉树 -->
                   <dyt-tree-select
-                    v-else-if="['tree', 'tree-select', 'treeselect', 'dyt-tree-select', 'dyttreeselect'].includes(item.type.toLowerCase())"
+                    v-else-if="['tree', 'treeselect', 'dyttreeselect'].includes(item.type.toLowerCase().replace(/-/g, ''))"
                     v-model="data.formData[item.model]"
                     v-bind="{
                       ...(item.componentProps||{}),
@@ -108,16 +108,8 @@
                     }"
                     v-on="(item.events||{})"
                   />
-                  <!-- <dytTreeSelect style="width: 300px;"
-                    v-model="treeSelectVal"
-                    :data="options"
-                    :defaultProps="defaultProps"
-                    :limit="1"
-                    :multiple="true"
-                    :check-strictly="false"
-                  /> -->
                 </template>
-                <slot v-if="(item.slot && typeof item.render !== 'function')" :name="item.model" />
+                <slot v-else :name="item.model" />
               </el-form-item>
             </template>
           </el-form>
@@ -264,7 +256,7 @@ const expandHand = () => {
   $emit('filterExpand', data.isExpand);
 }
 // 处理参数中的异步
-const filterFunHand = (fun:Function, key:string, type:string) => {
+const filterFunHand = (fun:any, key:string, type:string) => {
   const typeVal = { array: [], string: '', object: {}, number: null };
   data.filterAsync[key] = {value: typeVal[type], loading: true};
   if (typeof fun === 'function') {

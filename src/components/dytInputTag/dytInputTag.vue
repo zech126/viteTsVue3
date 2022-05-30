@@ -101,7 +101,7 @@
               <Icon class="el-tag__close el-icon-close" title="清空" name="circle-close" @click.stop="clearableHand"/>
             </div>
           </template>
-          <dyt-input v-model="base.valueValidation" type="text" style="display:none;" />
+          <dyt-input v-model="base.valueValidation" class="tag-form-item-tool" type="text" />
         </div>
       </template>
       <div v-if="props.limit > 0" :ref="`popover-${base.pageId}`">
@@ -710,6 +710,9 @@ defineExpose({
       box-shadow: none;
       outline: none;
     }
+  }
+  .tag-form-item-tool{
+    display: none;
   }
 }
 .tag-popper-content{
