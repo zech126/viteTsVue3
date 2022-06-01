@@ -1,7 +1,7 @@
 declare interface editorType {
   UEDITOR_HOME_URL: string;
   serverUrl?: string;
-  toolbars?: Array<Array<string>|any>;
+  toolbars?: Array<Array<string> | {[key:string]:any} | string>;
   labelMap?: { [key: string]: any };
   lang?: string;
   langPath?: string;
@@ -96,5 +96,8 @@ declare interface Window {
     listeners: loadSubscribeListeners;
     on:(eventName: string, callback: () => void) => void;
     emit: (eventName: string) => void;
-  }
+  },
+  baidu: { [key: string]: any };
+  // 用于临时存储 ueditor
+  temporaryStorage: { [key: string]: any };
 }

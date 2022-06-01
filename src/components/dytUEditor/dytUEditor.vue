@@ -1,14 +1,20 @@
 <template>
-  <div :id="editorId" :name="props.name" v-loading="!data.editorReady" element-loading-text="资源加载中..." />
-  <el-input v-model="data.hasContent" style="display:none;" />
+  <div :editorid="data.componentId">
+    <div :id="editorId" :name="props.name" v-loading="!data.editorReady" element-loading-text="资源加载中..." />
+    <el-input v-model="data.hasContent" class="el-input-display-none" />
+  </div>
 </template>
 <script lang="ts" setup>
 /*
   官网地址： https://github.com/fex-team/ueditor
 */
-import { reactive, computed, watch, nextTick, PropType } from 'vue';
+import { reactive, computed, watch, nextTick, PropType, onBeforeUnmount } from 'vue';
 import { editorConfig, defaultLoad } from './defaultConfig';
 import getGlobal from '@/utils/global';
+import prototype from './prototype';
+import autoupload from './autoupload';
+import simpleupload from './simpleupload';
+import { LoadEvent } from './loadSubscribe';
 
 const global = getGlobal();
 const emit = defineEmits(['update:modelValue', 'initBefore', 'ready', 'change']);
@@ -23,16 +29,37 @@ const props = defineProps({
   // UEditor 绑定值
   modelValue: { type: String, default: ''},
   // 需要加载的静态资源
-  staticResource: { type: Array  as PropType<{url: string, baseUrl: string}[]>, default: () => {return [{url: '', baseUrl: ''}]} },
+  staticResource: { type: Array as PropType<{url: string, baseUrl: string}[]>, default: () => {return [{url: '', baseUrl: ''}]} },
   // 检查自定义加载的静态资源是否加载完成
-  staticResLoadChecker: { type: Function as PropType<() => boolean> }
+  staticResLoadChecker: { type: Function as PropType<() => boolean> },
+  // 自动上传时可上传文件后缀
+  allowFileSuffix: {
+    type: Array,
+    default: () => {
+      return ['zip', 'rar', 'pds', 'pdf', 'docx', 'doc', 'xlsx', 'xls', 'ppt', 'ppt', 'pptx', 'txt']
+    }
+  },
+  // 文件上传
+  uploadFile: {
+    type: Function,
+    default: () => {
+      return new Promise((resolve:any) => {
+        resolve('dytUEditorVal')
+      })
+    }
+  }
 });
 
 const data:{editor: any, editorReady: boolean, hasContent: string, [key: string]: any} = reactive({
   editor: null,
   editorReady: false,
-  hasContent: ''
+  hasContent: '',
+  componentId: `dyt_editor_${Math.random().toString(36).substring(2)}`
 });
+
+// 当 window 不存在对应全局变量时初始化对应全局变量
+global.$common.isEmpty(window.$loadSubscribe) && (window.$loadSubscribe = new LoadEvent());
+global.$common.isEmpty(window.temporaryStorage) && (window.temporaryStorage = {});
 
 const config = computed(() => {
   return {...editorConfig, ...props.config};
@@ -40,7 +67,12 @@ const config = computed(() => {
 const editorId = computed(() => {
   return props.editorId || 'editor_' + Math.random().toString(36).substring(2);
 });
-
+const allowFiles = computed(() => {
+  return props.allowFileSuffix || [];
+});
+const uploadHand = computed(() => {
+  return props.uploadFile;
+});
 // 动态创建 script 标签来加载 JS 脚本，保证同一个脚本只被加载一次
 const loadScript = (link:string) => {
   return new Promise<void>((resolve, reject) => {
@@ -129,6 +161,18 @@ const checkerDefaultEditor = () => {
 const initEditor = () => {
   // 已实例过不再实例
   if (!data.editorReady) {
+    // 将对应值临时存起来
+    window.temporaryStorage[data.componentId] = {
+      uploadHand: uploadHand.value,
+      allowFiles: allowFiles.value
+    }
+    // 重写对应原型链
+    prototype();
+    // 重写单图上传
+    simpleupload(data.componentId);
+    // 重写自动上传功能(图片(文件)粘贴、拖着图片(文件))
+    autoupload(data.componentId);
+
     emit('initBefore', editorId.value);
     data.editor = window.UE.getEditor(editorId.value, config.value);
   }
@@ -250,6 +294,10 @@ const  cursorSetContent = (content:string) => {
 const execCommand = (type: string, effect?: string) => {
   global.$common.isEmpty(effect) ? data.editor?.execCommand(type) : data.editor?.execCommand(type, effect);
 }
+// 组件销毁前将临时值销毁
+onBeforeUnmount(() => {
+  delete window.temporaryStorage[data.componentId];
+})
 
 defineExpose({
   loadScript,
@@ -272,3 +320,8 @@ defineExpose({
   execCommand
 });
 </script>
+<style lang="less" scoped>
+.el-input-display-none{
+  display: none;
+}
+</style>
