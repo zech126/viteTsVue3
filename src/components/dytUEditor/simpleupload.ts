@@ -11,11 +11,13 @@ export default function simpleupload (key: string) {
     let isLoaded = false;
     let containerBtn:any;
     function initUploadBtn(){
+      // 上传文件方法
+      const uploadFileFun = window.temporaryStorage[parents(me.container, '[editorid]').getAttribute('editorid')].uploadHand;
       const timestrap = (+new Date()).toString(36);
       let w = containerBtn.offsetWidth || 20;
       let h = containerBtn.offsetHeight || 20;
       let btnIframe:any = document.createElement('iframe');
-      btnIframe.id = `edui_iframe_${timestrap}`;
+      // btnIframe.id = `edui_iframe_${timestrap}`;
       let btnStyle = 'display:block;width:' + w + 'px;height:' + h + 'px;overflow:hidden;border:0;margin:0;padding:0;position:absolute;top:0;left:0;filter:alpha(opacity=0);-moz-opacity:0;-khtml-opacity: 0;opacity: 0;cursor:pointer;';
 
       domUtils.on(btnIframe, 'load', function(){
@@ -44,52 +46,49 @@ export default function simpleupload (key: string) {
 
         const form = btnIframeDoc.getElementById('edui_form_' + timestrap);
         const input = btnIframeDoc.getElementById('edui_input_' + timestrap);
-        const iframe = window.document.getElementById(`edui_iframe_${timestrap}`);
-        // 上传文件方法
-        const uploadFileFun = window.temporaryStorage[parents(iframe, '[editorid]').getAttribute('editorid')].uploadHand;
-
+        // const iframe = window.document.getElementById(`edui_iframe_${timestrap}`);
+        
+        // 错误处理
+        const errorHandler = (title:any, loadingId:string) => {
+          loadingId && setTimeout(() => {
+            const loader = me.document.getElementById(loadingId);
+            loader && domUtils.remove(loader);
+            me.execCommand('inserthtml', '');
+          }, 200);
+          me.fireEvent('showmessage', {
+            'id': loadingId,
+            'content': title,
+            'type': 'error',
+            'timeout': 4000
+          });
+        };
         domUtils.on(input, 'change', function(){
           const filename = input.value;
           const files = input.files[0];
+          // 重置表单
+          form.reset();
           if(!filename) return;
           const loadingId = 'loading_' + (+new Date()).toString(36);
           me.focus();
-          me.execCommand('inserthtml', '<img class="loadingclass" id="' + loadingId + '" src="' + me.options.themePath + me.options.theme +'/images/spacer.gif" title="' + (me.getLang('simpleupload.loading') || '') + '" >');
-
-          function showErrorLoader(title:any){
-            if(loadingId) {
-              let loader = me.document.getElementById(loadingId);
-              loader && domUtils.remove(loader);
-              me.fireEvent('showmessage', {
-                'id': loadingId,
-                'content': title,
-                'type': 'error',
-                'timeout': 4000
-              });
-              me.execCommand('inserthtml', '');
-            }
-          }
+          me.execCommand('inserthtml', '<img class="loadingclass" id="' + loadingId + '"'+
+          ' src="' + me.options.themePath + me.options.theme +'/images/spacer.gif"'+
+          ' title="' + (me.getLang('simpleupload.loading') || '') + '" />');
           
+          // 判断是否配置上传功能
+          if (typeof uploadFileFun !== 'function' || !me._serverConfigLoaded) {
+            errorHandler('未配置上传文件功能！', loadingId);
+            return;
+          }
           const fileext = filename ? filename.substr(filename.lastIndexOf('.')):'';
           const filetype = /image\/\w+/i.test(files.type) ? 'image':'file';
           // 判断文件格式是否错误
           if (!fileext || filetype !== 'image') {
-            showErrorLoader(`${me.getLang('simpleupload.exceedTypeError')}, 请选择图片格式的文件`);
+            errorHandler(`${me.getLang('simpleupload.exceedTypeError')}, 请选择图片格式的文件`, loadingId);
             return;
           }
-          // 执行上传
-          let loader = me.document.getElementById(loadingId);
-          // 重置表单
-          form.reset();
           // 执行图片上传操作
           uploadFileFun(files).then((link:string) => {
-            if (link === 'dytUEditorVal' || !link) {
-              setTimeout(() => {
-                showErrorLoader && showErrorLoader('未来配置上传文件功能!');
-                loader && domUtils.remove(loader);
-              }, 200);
-              return;
-            }
+            let loader = me.document.getElementById(loadingId);
             loader.setAttribute('src', link);
             loader.setAttribute('_src', link);
             loader.setAttribute('title', files.name || '');
@@ -98,7 +97,7 @@ export default function simpleupload (key: string) {
             domUtils.removeClasses(loader, 'loadingclass');
             me.execCommand('inserthtml', '');
           }).catch((msg:string) => {
-            showErrorLoader && showErrorLoader(msg || '图片上传失败!');
+            errorHandler(msg || '图片上传失败!', loadingId);
           });
         });
 

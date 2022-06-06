@@ -17,9 +17,11 @@ export default function autoupload (key:string) {
     const removeHand = (item: {[key:string]: any}, me:any) => {
       setTimeout(() => {
         let loader = me.document.getElementById(item.id);
-        if (loader && item.type !== 'image') {
-          loader = loader.parentNode;
-        }
+        if (!loader) return;
+        // if (item.type !== 'image') {
+        //   loader = loader.parentNode;
+        // }
+        loader = loader.parentNode;
         loader && domUtils.remove(loader);
         me.execCommand('inserthtml', '');
       }, 200);
@@ -60,9 +62,10 @@ export default function autoupload (key:string) {
     }
 
     // 文件插入处理
-    function sendAndInsertFile (files:any, me:any, editKey: string) {
-      const allowFiles = window.temporaryStorage[editKey].allowFiles || [];
+    function sendAndInsertFile (files:any, me:any) {
+      const editKey = parents(me.container, '[editorid]').getAttribute('editorid');
       const uploadFileFun = window.temporaryStorage[editKey].uploadHand;
+      const allowFiles = window.temporaryStorage[editKey].allowFiles || [];
       let uploadFileList:any = [];
       let loadingId = '';
       files.forEach((file:any) => {
@@ -71,19 +74,30 @@ export default function autoupload (key:string) {
         const filetype = /image\/\w+/i.test(file.type) ? 'image':'file';
         const maxSize = me.getOpt(filetype + 'MaxSize');
         // const urlPrefix = me.getOpt(filetype + 'UrlPrefix');
-        if (filetype == 'image') {
-          loadingHtml = '<img class="loadingclass" id="' + loadingId + '" src="' +
-          me.options.themePath + me.options.theme +
-          '/images/spacer.gif" title="' + (me.getLang('autoupload.loading') || '') + '" >';
-        } else {
-          loadingHtml = '<p id="agsdrgh55">' +
+        // if (filetype == 'image') {
+        //   loadingHtml = '<img class="loadingclass" id="' + loadingId + '" src="' +
+        //     me.options.themePath + me.options.theme +
+        //     '/images/spacer.gif" title="' + (me.getLang('autoupload.loading') || '') + '" >';
+        // } else {
+        //   loadingHtml = '<p>' +
+        //     '<img class="loadingclass" id="' + loadingId + '" src="' +
+        //     me.options.themePath + me.options.theme +
+        //     '/images/spacer.gif" title="' + (me.getLang('autoupload.loading') || '') + '" >' +
+        //     '</p>';
+        // }
+        loadingHtml = '<p>' +
             '<img class="loadingclass" id="' + loadingId + '" src="' +
             me.options.themePath + me.options.theme +
             '/images/spacer.gif" title="' + (me.getLang('autoupload.loading') || '') + '" >' +
             '</p>';
-        }
         /* 插入loading的占位符 */
         me.execCommand('inserthtml', loadingHtml);
+        // 判断是否配置上传功能
+        if (typeof uploadFileFun !== 'function') {
+          removeHand({id: loadingId, type: filetype }, me);
+          // errorHandler('未配置上传文件功能！', loadingId, filetype, me);
+          return;
+        }
         /* 判断文件大小是否超出限制 */
         if(file.size > maxSize) {
           errorHandler(me.getLang('autoupload.exceedSizeError'), loadingId, filetype, me);
@@ -101,35 +115,21 @@ export default function autoupload (key:string) {
           const uptype = filetype;
           const id = loadingId;
           uploadFileFun(upFile).then((link:string) => {
-            resolve({ success: link === 'dytUEditorVal' ? false : true, link: link, file: upFile, filetype: uptype, loadingId: id });
+            resolve({ success: true, link: link, file: upFile, filetype: uptype, loadingId: id });
           }).catch((msg:string) => {
             resolve({ success: false, file: upFile, msg: msg || '上传失败!', filetype: uptype, loadingId: id });
           })
         }))
       });
       Promise.all(uploadFileList).then((arr:any) => {
-        let isUploadFile:Array<{[key:string]: any}> = [];
         arr.forEach((file:any) => {
           if (file.success && !!file.link) {
             successHandler(file.filetype, file.link, file.file, file.loadingId, me);
-          } else if (file.link === 'dytUEditorVal') {
-            isUploadFile.push({id: file.loadingId, type: file.filetype});
           } else {
             console.error(`${file.file.name} ${file.msg || '上传失败!'}`);
             removeHand({id: file.loadingId, type: file.filetype }, me);
           }
         });
-        if (isUploadFile.length > 0) {
-          me.fireEvent('showmessage', {
-            'id': isUploadFile[0],
-            'content': '未来配置上传文件功能!',
-            'type': 'error',
-            'timeout': 4000
-          });
-          isUploadFile.forEach((item:{[key:string]: any}) => {
-            removeHand(item, me);
-          })
-        }
       }).catch((error) => {
         console.error(error || '文件上传失败!');
       })
@@ -152,7 +152,6 @@ export default function autoupload (key:string) {
       bindEvents: {
         'ready' (e:any) {
           const me:any = this;
-          const editKey = parents(me.container, '[editorid]').getAttribute('editorid');
           if(window.FormData && window.FileReader) {
             domUtils.on(me.body, 'paste drop', (e:any) => {
               let hasImg = false;
@@ -173,7 +172,7 @@ export default function autoupload (key:string) {
                     hasImg = true;
                   }
                 }
-                sendAndInsertFile(needUploadFile, me, editKey);
+                sendAndInsertFile(needUploadFile, me);
                 hasImg && e.preventDefault();
               }
             });

@@ -10,7 +10,7 @@ export const editorConfig:editorType = {
   initialFrameWidth: '100%'
 }
 
-export const defaultLoad = ['ueditor.config.js', 'ueditor.all.js', 'ueditor.parse.min.js'];
+export const defaultLoad = ['ueditor.config.js', 'ueditor.all.min.js', 'ueditor.parse.min.js'];
 
 export default {
   editorConfig: editorConfig

@@ -1,7 +1,8 @@
 <template>
-  <div :editorid="data.componentId">
+  <div :editorid="data.componentId" class="dyt-editor-content" :class="{'hidde-custom-buttom': insertimageIndex === -1}">
     <div :id="editorId" :name="props.name" v-loading="!data.editorReady" element-loading-text="资源加载中..." />
     <el-input v-model="data.hasContent" class="el-input-display-none" />
+    <insertimage v-model:visible="data.visibleDialog" :editor="data.editorEntity" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -15,6 +16,8 @@ import prototype from './prototype';
 import autoupload from './autoupload';
 import simpleupload from './simpleupload';
 import { LoadEvent } from './loadSubscribe';
+import insertimage from './insertimage.vue';
+import { parents } from './tool';
 
 const global = getGlobal();
 const emit = defineEmits(['update:modelValue', 'initBefore', 'ready', 'change']);
@@ -40,20 +43,27 @@ const props = defineProps({
     }
   },
   // 文件上传
-  uploadFile: {
-    type: Function,
-    default: () => {
-      return new Promise((resolve:any) => {
-        resolve('dytUEditorVal')
-      })
-    }
-  }
+  uploadFile: { type: Function },
+  // 获取图片列表
+  getImages: { type: Function },
+  // 上传图片到图片列表
+  uploadImages: { type: Function },
+  // 删除图片列表的图片
+  removeImages: { type: Function }
 });
 
-const data:{editor: any, editorReady: boolean, hasContent: string, [key: string]: any} = reactive({
+const data:{
+  editor: any,
+  editorReady: boolean,
+  hasContent: string,
+  editorEntity: {[key: string]: any};
+  [key: string]: any
+} = reactive({
   editor: null,
   editorReady: false,
   hasContent: '',
+  visibleDialog: false,
+  editorEntity: {},
   componentId: `dyt_editor_${Math.random().toString(36).substring(2)}`
 });
 
@@ -62,7 +72,14 @@ global.$common.isEmpty(window.$loadSubscribe) && (window.$loadSubscribe = new Lo
 global.$common.isEmpty(window.temporaryStorage) && (window.temporaryStorage = {});
 
 const config = computed(() => {
-  return {...editorConfig, ...props.config};
+  let newConfig = {...editorConfig, ...props.config};
+  return newConfig;
+});
+const insertimageIndex = computed(() => {
+  if (config.value.toolbars && config.value.toolbars[0]) {
+    return config.value.toolbars[0].includes('insertimage') ? config.value.toolbars[0].indexOf('insertimage') : -1;
+  }
+  return 57;
 });
 const editorId = computed(() => {
   return props.editorId || 'editor_' + Math.random().toString(36).substring(2);
@@ -73,6 +90,16 @@ const allowFiles = computed(() => {
 const uploadHand = computed(() => {
   return props.uploadFile;
 });
+const getFileList = computed(() => {
+  return props.getImages;
+});
+const uploadFiles = computed(() => {
+  return props.uploadImages;
+});
+const removeFiles = computed(() => {
+  return props.removeImages;
+});
+
 // 动态创建 script 标签来加载 JS 脚本，保证同一个脚本只被加载一次
 const loadScript = (link:string) => {
   return new Promise<void>((resolve, reject) => {
@@ -157,6 +184,52 @@ const checkerDefaultEditor = () => {
   // 仅加载完ueditor.config.js时UE对象和UEDITOR_CONFIG对象存在,仅加载完ueditor.all.js时UEDITOR_CONFIG对象存在,但为空对象
   return (window.UE && window.UE.getEditor && window.UEDITOR_CONFIG && Object.keys(window.UEDITOR_CONFIG).length !== 0);
 };
+// 多图上传
+const addCustomButtom = () => {
+  window.UE.registerUI('multiple-upload', (editor:any, uiName:any) => {
+    // 注册按钮执行时的 command 命令，使用命令默认就会带有回退操作
+    editor.registerCommand(uiName, {
+      execCommand: () => {
+        editor.execCommand('inserthtml', ``);
+      }
+    });
+    // 创建一个 button
+    let btn = new window.UE.ui.Button({
+      // 按钮的名字
+      name: uiName,
+      // 提示
+      title: '插入图片',
+      // 需要添加的额外样式，可指定 icon 图标，图标路径参考常见问题 2
+      cssRules: "background-position: -726px -77px",
+      // 点击时执行的命令
+      onclick: () => {
+        data.editorEntity = editor;
+        const editorid = parents(editor.container, '[editorid]').getAttribute('editorid');
+        // 判断是否配置获取列表文件方法
+        if (typeof window.temporaryStorage[editorid].getFiles !== 'function' && typeof window.temporaryStorage[editorid].uploadFiles !== 'function') {
+          global.$message.warning('该功能后端未配置！')
+          return;
+        }
+        nextTick(() => {
+          data.visibleDialog = true;
+        });
+      }
+    });
+    // 当点到编辑内容上时，按钮要做的状态反射
+    editor.addListener('selectionchange', () => {
+      let state = editor.queryCommandState(uiName);
+      if (state === -1) {
+        btn.setDisabled(true);
+        btn.setChecked(false);
+      } else {
+        btn.setDisabled(false);
+        btn.setChecked(state);
+      }
+    });
+    // 因为是添加 button，所以需要返回这个 button
+    return btn;
+  }, insertimageIndex.value)
+}
 // 实例化编辑器
 const initEditor = () => {
   // 已实例过不再实例
@@ -164,7 +237,10 @@ const initEditor = () => {
     // 将对应值临时存起来
     window.temporaryStorage[data.componentId] = {
       uploadHand: uploadHand.value,
-      allowFiles: allowFiles.value
+      allowFiles: allowFiles.value,
+      getFiles: getFileList.value,
+      uploadFiles: uploadFiles.value,
+      removeFiles: removeFiles.value,
     }
     // 重写对应原型链
     prototype();
@@ -172,7 +248,7 @@ const initEditor = () => {
     simpleupload(data.componentId);
     // 重写自动上传功能(图片(文件)粘贴、拖着图片(文件))
     autoupload(data.componentId);
-
+    insertimageIndex.value > -1 && addCustomButtom();
     emit('initBefore', editorId.value);
     data.editor = window.UE.getEditor(editorId.value, config.value);
   }
@@ -321,7 +397,22 @@ defineExpose({
 });
 </script>
 <style lang="less" scoped>
-.el-input-display-none{
-  display: none;
+.dyt-editor-content{
+  &.hidde-custom-buttom{
+    :deep(.edui-for-multiple-upload){
+      display: none !important;
+    }
+  }
+  .el-input-display-none{
+    display: none;
+  }
+  :deep(.edui-for-insertimage){
+    display: none !important;
+  }
+}
+</style>
+<style lang="less">
+#edui_fixedlayer{
+  z-index: 99999999 !important;
 }
 </style>
