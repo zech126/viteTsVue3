@@ -207,7 +207,10 @@ const addCustomButtom = () => {
         const editorid = parents(editor.container, '[editorid]').getAttribute('editorid');
         // 判断是否配置获取列表文件方法
         if (typeof window.temporaryStorage[editorid].getFiles !== 'function' && typeof window.temporaryStorage[editorid].uploadFiles !== 'function') {
-          global.$message.warning('该功能后端未配置！')
+          global.$message.warning({
+            message: '该功能后端未配置！',
+            'show-close': true
+          });
           return;
         }
         nextTick(() => {

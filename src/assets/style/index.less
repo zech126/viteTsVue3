@@ -122,6 +122,9 @@ body {
   // 信息提示层级提升
   .el-message{
     z-index: 99999999999 !important;
+    .el-message__content{
+      line-height: 1.6em;
+    }
   }
   .el-input--small {
     font-size: var(--dyt-font-size);
@@ -311,22 +314,22 @@ body {
       animation:iconLoading 1.2s linear infinite;
     }
   }
-// tip 提示
-.popper-limit-tips{
-  .popper-tips-content{
-    max-width: 500px;
-    max-height: 50vh;
-    overflow: auto;
-  }
-  .limit-tips-item{
-    display: inline-block;
-    margin: 5px;
-    padding: 0 8px;
-    font-size: var(--dyt-font-size);
-    color: #909399;
-    background: #f4f4f5;
-    border-radius: 5px;
-  }
+  // tip 提示
+  .popper-limit-tips{
+    .popper-tips-content{
+      max-width: 500px;
+      max-height: 50vh;
+      overflow: auto;
+    }
+    .limit-tips-item{
+      display: inline-block;
+      margin: 5px;
+      padding: 0 8px;
+      font-size: var(--dyt-font-size);
+      color: #909399;
+      background: #f4f4f5;
+      border-radius: 5px;
+    }
   }
 }
 

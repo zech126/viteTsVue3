@@ -86,6 +86,7 @@
 import { reactive, watch, computed, nextTick} from 'vue';
 import { parents } from './tool';
 import getGlobal from '@/utils/global';
+import { debounce } from '@/utils/debounce';
 
 const global = getGlobal();
 const emit = defineEmits(['update:visible']);
@@ -101,7 +102,8 @@ const data:{[key:string]:any} = reactive({
   dialogVisible: false,
   pageLoading: false,
   checkList: [],
-  temporaryStorage: {}
+  temporaryStorage: {},
+  unqualifiedFile: []
 });
 const isVisible = computed(() => {
   return props.visible;
@@ -132,12 +134,21 @@ const initData = () => {
 };
 // 上传前
 const beforeUpload = (rawFile:any) => {
+  const filetype = /image\/\w+/i.test(rawFile.type) ? 'image':'file';
+  if (filetype !== 'image') {
+    data.unqualifiedFile.push(rawFile);
+    return false;
+  }
   data.uploadList.push(rawFile);
   data.temporaryStorage.uploadFiles(rawFile).then((res:boolean) => {
     data.fileInfoList.push(res);
     data.uploadList.splice(0, 1);
-  }).catch(() => {
+  }).catch((msg:string) => {
     data.uploadList.splice(0, 1);
+    global.$message.warning({
+      message: msg || '上传失败！',
+      'show-close': true
+    });
   })
   return false;
 }
@@ -152,7 +163,9 @@ const removeFiles = (image:{[key:string]: any}, index:number) => {
   data.temporaryStorage.removeFiles(backVal).then((res:boolean) => {
     image.loading = false;
     if (!res) return;
-    data.fileInfoList.splice(index, 1);
+    data.fileInfoList = data.fileInfoList.filter((item:{[key:string]: any}) => {
+      return JSON.stringify(image) !== JSON.stringify(item);
+    });
   }).catch(() => {
     image.loading = false;
   })
@@ -201,12 +214,24 @@ const imageError = (e: Error, image:any) => {
 watch(() => isVisible.value, (val) => {
   data.dialogVisible = val;
 }, {immediate: true, deep: true});
+
 watch(() => data.dialogVisible, (val) => {
   isVisible.value !== val && emit('update:visible', val);
   nextTick(() => {
     val && initData()
   })
 }, {deep: true});
+
+watch(() => data.unqualifiedFile, debounce((val) => {
+  if (global.$common.isEmpty(val)) return;
+  const fileName:Array<string> = val.map((file:any) => file.name);
+  global.$message.warning({
+    message: `${fileName.join(', ')} 为非图片文件格式, 不允许上传`,
+    'show-close': true
+  });
+  
+  data.unqualifiedFile = [];
+}, 100), {deep: true});
 
 </script>
 <style lang="less" scoped>
