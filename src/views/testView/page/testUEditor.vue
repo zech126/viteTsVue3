@@ -49,28 +49,43 @@ const data = reactive({
   }
 })
 const uploadFile = (file:any) => {
-  return new Promise((resolve) => {
+  console.log(file)
+  return new Promise((resolve, reject) => {
     // 模拟接口返回数据
     setTimeout(() => {
       resolve('../../../src/assets/images/123.png');
-    }, 3000)
+      if (Math.random() * 10 > 5) {
+        resolve('../../../src/assets/images/123.png')
+      } else {
+        reject()
+      }
+    }, Math.random() * Math.random() * 5000)
   })
 }
 const uploadImages = (file:any) => {
-  return new Promise((resolve) => {
+  console.log(file)
+  return new Promise((resolve, reject) => {
     // 模拟接口返回数据
     setTimeout(() => {
-      resolve({url: '../../../src/assets/images/123.png', id: (new Date().getTime()).toString(36)});
-    }, 3000)
+      if (Math.random() * 10 > 5) {
+        resolve({url: '../../../src/assets/images/123.png', id: Math.random().toString(36).substring(2)})
+      } else {
+        reject()
+      }
+    }, Math.random() * Math.random() * 5000)
   })
 }
 const removeImages = (image:{[key:string]: any}) => {
   console.log(image)
-  return new Promise((resolve:(value:boolean) => void) => {
+  return new Promise((resolve:(value:boolean) => void, reject) => {
     // 模拟接口返回数据
     setTimeout(() => {
-      resolve(true);
-    }, 3000)
+      if (Math.random() * 10 > 5) {
+        resolve(true)
+      } else {
+        reject()
+      }
+    }, Math.random() * Math.random() * 5000)
   })
 }
 
@@ -86,7 +101,7 @@ const getImageList = () => {
         {url: '../../../src/assets/images/nullength.png', id: '5'}
       ]
       resolve(list);
-    }, 3000)
+    }, Math.random() * Math.random() * 5000)
   })
 }
 

@@ -40,7 +40,7 @@
           <slot name="filter" />
         </template>
         <!-- 自定义插槽位置 -->
-        <template v-for="(fItem) in filterFieldConfig.filter((item:any) => item.slot)" v-slot:[fItem.model]>
+        <template v-for="(fItem, index) in filterFieldConfig.filter((item:any) => item.slot)" v-slot:[fItem.model] :key="index">
           <slot :name="`filter-${fItem.model}`" />
         </template>
         <!-- 搜索按钮 -->
