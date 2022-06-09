@@ -98,7 +98,7 @@
 <script lang="ts" setup>
 import getGlobal from '@/utils/global';
 import getProxy from '@/utils/proxy';
-import { reactive, computed, useSlots, useAttrs, watch } from 'vue';
+import { reactive, computed, useSlots, useAttrs, watch, PropType } from 'vue';
 
 interface dataType{
   columnAlign: Array<any>;
@@ -123,13 +123,18 @@ const global = getGlobal();
 const proxy:any = getProxy();
 const props = defineProps({
   // 表格其他设置
-  tableConfig: { type: Object, default: () => {return {}} },
-  tableData: { type: Array, default: () => {return []} },
+  tableConfig: { type: Object as PropType<{
+    autoload?: boolean,
+    multiple?: boolean,
+    showTable?: boolean,
+    [key:string]: any
+  }>,  default: () => {return {}} },
+  tableData: { type: Array as PropType<{[key:string]: any}[]>, default: () => {return []} },
   tableHeight: {type: [String, Number], default: null},
   pageId: {type: String, default: ''},
   // 表格配置 对应 elementUI 的 table Attributes
-  tableProps: { type: Object, default: () => {return {}} },
-  tableColumns:  { type: Array, default: () => [] },
+  tableProps: { type: Object as PropType<{[key:string]: any}>, default: () => {return {}} },
+  tableColumns:  { type: Array as PropType<{[key:string]: any}[]>, default: () => [] },
   // 请求中
   tableLoading: { type: Boolean, default: false },
 });

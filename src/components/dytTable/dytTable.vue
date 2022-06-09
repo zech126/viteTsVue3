@@ -140,7 +140,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, useAttrs, useSlots, watch, computed, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { reactive, useAttrs, useSlots, watch, computed, nextTick, onMounted, onBeforeUnmount, PropType } from 'vue';
 import getGlobal from "@/utils/global";
 import getProxy from "@/utils/proxy";
 import filterBar from './filter.vue';
@@ -155,30 +155,57 @@ const $attrs = useAttrs();
 const $emit = defineEmits(['requested', 'expandFilter', 'filterReset', 'filterValidate']);
 const props = defineProps({
   // 搜索栏
-  filterFields: { type: Array, default: () => [] },
+  filterFields: { type: Array as PropType<Array<{[key:string]:any}>>, default: () => [] },
   // 搜索栏默认初始值
-  filterModel: { type: Object, default: () => {return {}} },
+  filterModel: { type: Object as PropType<{[key:string]:any}>, default: () => {return {}} },
   // 搜索栏设置
-  filterConfig: { type: Object,  default: () => {return {}} },
+  filterConfig: {
+    type: Object as PropType<{
+      showFilter?: boolean,
+      showSearch?: boolean,
+      showReset?: boolean,
+      validRules?: {[key:string]:Array<{[key:string]:any}>}
+    }>,
+    default: () => {return {}}
+  },
   // 表格请求方法
   requestHandler: { type: Function, default: () => {} },
   // 发起请求之前
   requestBefore: { type: Function, default: (filterVal:any) => filterVal },
   // 表格列设置
-  tableColumns:  { type: Array, default: () => [] },
+  tableColumns:  { type: Array as PropType<Array<{[key:string]:any}>>, default: () => [] },
   // 表格其他设置
-  tableConfog: { type: Object,  default: () => {return {}} },
-  tableConfig: { type: Object,  default: () => {return {}} },
+  tableConfog: { type: Object as PropType<{
+    autoload?: boolean,
+    multiple?: boolean,
+    showTable?: boolean
+  }>,  default: () => {return {}} },
+  tableConfig: { type: Object as PropType<{
+    autoload?: boolean,
+    multiple?: boolean,
+    showTable?: boolean
+  }>,  default: () => {return {}} },
   // 表格配置 对应 elementUI 的 table Attributes
-  tableProps: { type: Object, default: () => {return {}} },
+  tableProps: { type: Object as PropType<{[key:string]:any}>, default: () => {return {}} },
   // 列表数据接口返回字段映射
-  contentDataMap: { type: Object, default: () => {return {}} },
+  contentDataMap: { type: Object as PropType<{
+    rows?: string,
+    total?: string,
+    errorInfos?: string
+  }>, default: () => {return {}} },
   // 设置为 false 之后，表格高度变为自动适应
   handleTable: { type: Boolean, default: true },
   isInited: { type: Boolean, default: true },
   // 分页设置
   paginationConfig: {
-    type: Object,
+    type: Object as PropType<{
+      background?: boolean,
+      showPagination?: boolean,
+      layout?: string,
+      'pager-count'?: number,
+      'page-sizes'?: Array<number>,
+      'page-size'?: number
+    }>,
     default: () => {return { showPagination: true }}
   },
   // 请求报错时，是否情况列表数据

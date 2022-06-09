@@ -58,7 +58,7 @@
   </el-select>
 </template>
 <script lang="ts" setup>
-import {computed, useSlots, useAttrs, reactive, watch} from 'vue';
+import {computed, useSlots, useAttrs, reactive, watch, PropType, ComputedRef} from 'vue';
 import getProxy from "@/utils/proxy";
 import getGlobal from '@/utils/global';
 const global = getGlobal();
@@ -67,9 +67,9 @@ const attrs = useAttrs();
 
 const props = defineProps({
   // 默认下拉数据
-  options: { type: Array, default: () => {return []} },
+  options: { type: Array as PropType<{[key:string]:string|number}[]>, default: () => {return []} },
   // 选项中和展示值道具
-  defaultProp: { type: Object,  default: () =>{return {}} },
+  defaultProp: { type: Object as PropType<{[key:string]:string}>,  default: () =>{return {}} },
   // 是否使用虚拟滚动
   virtual: { type: Boolean,  default: false },
   // 是否开启点击次数排序(需配合 sortKey 使用, 分组不支持排序)
@@ -79,7 +79,12 @@ const props = defineProps({
   // 击次数排序最大个数 KEY (isSort 必须为 true 才生效, 分组不支持排序)
   sortLimit: { type: Number, default: 5 }
 });
-const data:{pageId: string, options: Array<any>, unIncludes:Array<string>, isGroup: boolean} = reactive({
+const data:{
+  pageId: string,
+  options: Array<{[key:string]:string|number}>,
+  unIncludes:Array<string>,
+  isGroup: boolean
+} = reactive({
   pageId: Math.random().toString(36).substring(2),
   options: [],
   unIncludes: ['default', 'option'],
@@ -99,11 +104,11 @@ const defaultProp = computed(() => {
   }
 });
 
-const selectOptionList:any = computed(() => {
+const selectOptionList:ComputedRef<Array<{[key:string]:string|number}>> = computed(() => {
   return optionsHand(props.options);
 });
 
-const selectConfig:any = computed(() => {
+const selectConfig:{[key:string]:any} = computed(() => {
   let config = {
     placeholder: '请选择',
     size: 'default',

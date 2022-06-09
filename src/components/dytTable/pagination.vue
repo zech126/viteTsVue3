@@ -21,7 +21,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, useSlots, computed, watch, nextTick } from 'vue';
+import { reactive, useSlots, computed, watch, nextTick, PropType } from 'vue';
 import getGlobal from "@/utils/global";
 
 interface dataType {
@@ -41,13 +41,16 @@ const $slots = useSlots();
 const global = getGlobal();
 
 const props = defineProps({
-  pageConfig: { type: Object, default: () => {return {}} },
+  pageConfig: { type: Object as PropType<{
+    pageSize?: number,
+    pageNum?: number
+  }>, default: () => {return {}} },
   total: {type: Number, default: 0},
   pageId: {type: String, default: ''},
   tableLoading: { type: Boolean, default: false },
   showPagination: { type: Boolean, default: true },
   paginationAlign: { type: String, default: 'right' },
-  paginationInfo: { type: Object, default: () => {return {}} }
+  paginationInfo: { type: Object as PropType<{[key:string]:any}>, default: () => {return {}} }
 });
 
 const data:dataType = reactive({

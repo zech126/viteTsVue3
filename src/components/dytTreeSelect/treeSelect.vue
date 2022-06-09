@@ -148,7 +148,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, useSlots, useAttrs, computed, onMounted, nextTick, watch } from 'vue';
+import { reactive, useSlots, useAttrs, computed, onMounted, nextTick, watch, PropType } from 'vue';
 import getGlobal from "@/utils/global";
 import getProxy from "@/utils/proxy";
 
@@ -223,11 +223,19 @@ const props = defineProps({
   // 检索
   filterNodeMethod: { type: Function, default: () => {} },
   // 展示数据,支持异步
-  data: { type: Array, default: () => {return []} },
-  options: { type: Array, default: () => {return []} },
+  data: { type: Array as PropType<Array<{[key:string]: any}>>, default: () => {return []} },
+  options: { type: Array as PropType<Array<{[key:string]: any}>>, default: () => {return []} },
   // popoverTreeWidth: { type: [String, Number], default: null },
   // Props 设置
-  defaultProps: { type: Object, default: () => {return {}} },
+  defaultProps: { type: Object as PropType<{
+    label?: string,
+    value?: string,
+    children?: string,
+    disabled?: string,
+    isLeaf?: string,
+    class?: string,
+    [key:string]: any
+  }>, default: () => {return {}} },
   // 是否使用虚拟滚动
   virtual: { type: Boolean,  default: false },
   // 是否禁用 tip

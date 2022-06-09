@@ -17,22 +17,22 @@
   </el-image>
 </template>
 <script lang="ts" setup>
-import {computed, ComputedRef, useSlots, useAttrs} from 'vue';
+import {computed, useSlots, useAttrs, PropType} from 'vue';
 // import getProxy from "@/utils/proxy";
 // const proxy:any = getProxy();
 const unSlots = ['error'];
-const slots:ComputedRef<any> = computed(() => Object.keys(useSlots()));
+const slots = computed(() => Object.keys(useSlots()));
 // 开启图片预览功能
 const props = defineProps({
   // 默认下拉数据
-  previewSrcList: { type: Array, default: () => {return []} },
+  previewSrcList: { type: Array as PropType<string[]>, default: () => {return []} },
   // 当 previewSrcList 为空是否关闭预览
   closePreview: { type: Boolean, default: false },
   // 图片路径
   src: { type: String, default: '' },
   url: { type: String, default: '' }
 });
-const selectConfig:ComputedRef<any> = computed(() => {
+const selectConfig = computed(() => {
   let config = {
     ...{
       'preview-teleported': true,

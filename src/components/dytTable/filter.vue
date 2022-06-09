@@ -125,7 +125,7 @@
 <script lang="ts" setup>
 import getGlobal from '@/utils/global';
 import getProxy from '@/utils/proxy';
-import {reactive, computed, useSlots, watch, nextTick, onMounted, onBeforeUnmount, onBeforeMount} from 'vue';
+import {reactive, computed, useSlots, watch, nextTick, onMounted, onBeforeUnmount, onBeforeMount, PropType} from 'vue';
 
 interface dataType{
   showMore: Boolean;
@@ -152,11 +152,19 @@ const proxy:any = getProxy();
 const $slots = useSlots();
 const props = defineProps({
   //搜索栏
-  filterFields: { type: Array, default: () => [] },
+  filterFields: { type: Array as PropType<Array<{[key:string]:any}>>, default: () => [] },
   pageId: { type: String, default: Math.random().toString(36).substring(2) },
   tableLoading: { type: Boolean, default: false },
-  filterConfig: { type: Object, default: () => {return {}} },
-  filterModel: { type: Object, default: () => {return {}} },
+  filterConfig: {
+    type: Object as PropType<{
+      showFilter?: boolean,
+      showSearch?: boolean,
+      showReset?: boolean,
+      validRules?: {[key:string]:Array<{[key:string]:any}>}
+    }>,
+    default: () => {return {}}
+  },
+  filterModel: { type: Object as PropType<{[key:string]:any}>, default: () => {return {}} },
   filterMessage: { type: String, default: '请在检索栏必填项输入检索条件！' }
 });
 

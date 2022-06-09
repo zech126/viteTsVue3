@@ -331,7 +331,7 @@ export default defineComponent({
       ],
       tableConfog: {
         // 打开页面立即加载数据
-        autoload: true,
+        // autoload: true,
         // 表格是否多选
         multiple: true,
         // 开启表格多选时有效

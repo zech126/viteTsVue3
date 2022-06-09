@@ -141,7 +141,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, useAttrs, computed, watch, onMounted, nextTick } from 'vue';
+import { reactive, useAttrs, computed, watch, onMounted, nextTick, PropType } from 'vue';
 import getGlobal from "@/utils/global";
 import getProxy from "@/utils/proxy";
 
@@ -157,7 +157,7 @@ import getProxy from "@/utils/proxy";
  */
 interface dataType {
   valueValidation: string;
-  vModel: Array<any>;
+  vModel: Array<string>;
   pageId: string;
   inputValue: string;
   inputWidth: string;
@@ -178,7 +178,7 @@ const proxy:any = getProxy();
 const $attrs = useAttrs();
 const props = defineProps({
   // 绑定值， 使用 v-model 或 modelValue 绑定
-  modelValue: { type: [Array, String], default: () => {return []}},
+  modelValue: { type: [Array, String] as PropType<string | string[] | {[key:string]:string}[]>, default: () => {return []}},
   // 占位符提示
   placeholder: { type: String, default: '请输入后按回车或使用逗号分隔'},
   // 最多显示格式， 0 为不限制
@@ -190,13 +190,13 @@ const props = defineProps({
   // 是否可以添加 tag
   addTag: { type: Boolean, default: true },
   // 对输入值进行分割字符集合
-  split: { type: [Array, String], default: () => {return [',', '，', '\n']} },
+  split: { type: [Array, String] as PropType<string | string[]>, default: () => {return [',', '，', '\n']} },
   // change 事件是否返回字符串
   string: { type: Boolean, default: false },
   // 返回字符串时的分隔符号（string 为 true 时生效）
   separStr: { type: String, default: ',' },
   // 值为对象时，string 必须为 false，键值替换
-  defaultProp: { type: Object, default: () => {return {}} },
+  defaultProp: { type: Object as PropType<{value:string|number, label: string|number}>, default: () => {return {}} },
   // 输入框的类型, 可选值：textarea、text
   type: { type: String, default: 'text'},
   // 当 type 为 textarea 并且 limit 大于 0 生效， 下拉是否展示 tag 默认 false
@@ -297,21 +297,13 @@ const tagkeyup = (e:Object) => {
   $emit('keyup', e);
 }
 // 字符串分割
-const strSplit = (str:string, splitStr:any) => {
-  if (global.$common.isEmpty(splitStr)) return [str];
+const strSplitHand = (str:string, splitStr:Array<string> | string) => {
   if (global.$common.isEmpty(str)) return [];
   if (typeof str !== 'string') return str;
   if (typeof splitStr === 'string') return str.split(splitStr);
   if (global.$common.isArray(splitStr)) {
     if (splitStr.length === 0) return [str];
-    let newStr = str;
-    const newSplit = splitStr[0];
-    splitStr.slice(1).forEach((sp:string) => {
-      if(str.includes(sp)){
-        newStr = newStr.replace(new RegExp(sp,'g'), newSplit);
-      }
-    });
-    return newStr.split(newSplit).filter(item => !global.$common.isEmpty(item, true));
+    return str.split(new RegExp(`${splitStr.join('|')}+`)).filter(item => !global.$common.isEmpty(item, true));
   }
   return [str];
 }
@@ -322,7 +314,8 @@ const changeInputVal = (matchingSplit:Array<any>) => {
   let getValList:any = [];
   const textValue = base.inputValue;
   const listL = tagList.length - 1;
-  if (listL < 1) return global.$common.isEmpty(tagList[0]) ?  '' : `${tagList[0]}\n`;
+  const separated = typeof props.split === 'string' ? props.split : props.split.includes('\n') ? '\n' : props.split[0];
+  if (listL < 1) return global.$common.isEmpty(tagList[0]) ?  '' : `${tagList[0]}${separated}`;
   tagList.forEach((item:string, index:number) => {
     if (typeof props.split === 'string') {
       if (!getValList.includes(item)) {
@@ -335,14 +328,14 @@ const changeInputVal = (matchingSplit:Array<any>) => {
         }
       }
     } else if (global.$common.isArray(props.split)) {
-      const split:Array<any> = props.split;
+      const split:Array<string> = props.split;
       if (split.length === 0) return textValue;
       split.forEach((sp1:string) => {
         split.forEach((sp2:string) => {
           if (!getValList.includes(item)) {
             if (index === listL) {
               getValList.push(item);
-              newVal = `${newVal}${item}\n`;
+              newVal = `${newVal}${item}${separated}`;
             } else if (textValue.includes(`${sp1}${item}${sp2}`) || (index === 0 && textValue.includes(`${item}${sp2}`))) {
               getValList.push(item);
               newVal = `${newVal}${item}${sp2}`;
@@ -366,7 +359,7 @@ const addTagHand = (e:any = {}) => {
     }
     return;
   }
-  const newAddItems:any = strSplit(base.inputValue, props.split).filter(item => !global.$common.isEmpty(item, true));
+  const newAddItems:any = strSplitHand(base.inputValue, props.split).filter(item => !global.$common.isEmpty(item, true));
   let addItems:Array<any> = [];
   let matchingSplit:Array<any> = [];
   newAddItems.forEach((item:any) => {
@@ -407,8 +400,10 @@ const addTagHand = (e:any = {}) => {
 // 失去焦点
 const blur = () => {
   proxy.$refs[`saveTagInput-${base.pageId}`] && proxy.$refs[`saveTagInput-${base.pageId}`].blur();
-  addTagHand();
   base.isFocus = false;
+  setTimeout(() => {
+    addTagHand();
+  }, 200);
 }
 // 获取焦点
 const focus = () => {
@@ -465,32 +460,30 @@ watch(() => props.modelValue, (val:any) => {
   } else {
     if (JSON.stringify(val) === JSON.stringify(base.vModel)) return;
     let textVal = '';
+    const separated = typeof props.split === 'string' ? props.split : props.split.includes('\n') ? '\n' : props.split[0];
+    const propSplit = typeof props.split === 'string' ? [props.split] : props.split;
+
     val.forEach((item:any, index:number) => {
       if (typeof item === 'string') {
-        // @ts-ignore
-        props.split.forEach((str:string) => {
+        propSplit.forEach((str:string) => {
           item.includes(str) && (item = item.replace(new RegExp(`${str}`,'g'), ''));
         })
-        textVal = index > 0 ? `${textVal}${item}\n` : `${item}\n`;
-        base.inputValue = textVal;
+        textVal = index > 0 ? `${textVal}${item}${separated}` : `${item}${separated}`;
       } else if (props.defaultProp.label && !global.$common.isEmpty(item[props.defaultProp.label])) {
         let newI = item[props.defaultProp.label];
-        // @ts-ignore
-        props.split.forEach((str:string) => {
+        propSplit.forEach((str:string) => {
           newI.includes(str) && (newI = newI.replace(new RegExp(`${str}`,'g'), ''));
         });
-        textVal = index > 0 ? `${textVal}${newI}\n` : `${newI}\n`;
-        base.inputValue = textVal;
+        textVal = index > 0 ? `${textVal}${newI}${separated}` : `${newI}${separated}`;
       } else if (global.$common.isEmpty(props.defaultProp.label) && props.defaultProp.value && !global.$common.isEmpty(item[props.defaultProp.value])) {
         let newI = item[props.defaultProp.value];
-        // @ts-ignore
-        props.split.forEach((str:string) => {
+        propSplit.forEach((str:string) => {
           newI.includes(str) && (newI = newI.replace(new RegExp(`${str}`,'g'), ''));
         });
-        textVal = index > 0 ? `${textVal}${newI}\n` : `${newI}\n`;
-        base.inputValue = textVal;
+        textVal = index > 0 ? `${textVal}${newI}${separated}` : `${newI}${separated}`;
       }
     });
+    base.inputValue = textVal;
   }
   nextTick(() => {
     if (!selectConfig.value.addTag) {

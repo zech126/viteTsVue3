@@ -19,8 +19,7 @@ const $slots = useSlots();
 const $attrs = useAttrs();
 
 const props = defineProps({
-  icon: { type: String, default: '' },
-  moduleData: { type: Object, default: () => {return {}} }
+  icon: { type: String, default: '' }
 })
 
 const data = reactive({

@@ -26,7 +26,7 @@ const props = defineProps({
   // 手动设置 UEditor ID
   editorId: {type: String, default: ''},
   // UEditor 配置
-  config: { type: Object, default: () => {return {}} },
+  config: { type: Object as PropType<editorType>, default: () => {return {}} },
   // 常用于表单中 http://fex.baidu.com/ueditor/#start-submit
   name: {type: String, default: ''},
   // UEditor 绑定值
@@ -37,7 +37,7 @@ const props = defineProps({
   staticResLoadChecker: { type: Function as PropType<() => boolean> },
   // 自动上传时可上传文件后缀
   allowFileSuffix: {
-    type: Array,
+    type: Array as PropType<Array<string>>,
     default: () => {
       return ['zip', 'rar', 'pds', 'pdf', 'docx', 'doc', 'xlsx', 'xls', 'ppt', 'ppt', 'pptx', 'txt']
     }
