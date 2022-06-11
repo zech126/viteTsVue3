@@ -17,12 +17,12 @@ export default {
   },
   // 处理方法, 执行后不会继续执行后面代码
   hand: {
-    200: (response:any, responseData:any, record:any) => {
+    200: (response:any, responseData:any) => {
       return responseData
     },
     // token 无效 或 过去
-    451: (response:any, responseData:any, record:any) => {
-      record.againLogin();
+    451: (response:any, responseData:any) => {
+      console.error('登录过期')
       return responseData;
     }
   },

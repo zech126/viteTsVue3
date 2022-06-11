@@ -111,13 +111,12 @@ export default function autoupload (key:string) {
           return;
         }
         uploadFileList.push(new Promise((resolve) => {
-          const upFile = file;
           const uptype = filetype;
           const id = loadingId;
-          uploadFileFun(upFile).then((link:string) => {
-            resolve({ success: true, link: link, file: upFile, filetype: uptype, loadingId: id });
+          uploadFileFun(file).then((link:string) => {
+            resolve({ success: true, link: link, file: file, filetype: uptype, loadingId: id });
           }).catch((msg:string) => {
-            resolve({ success: false, file: upFile, msg: msg || '上传失败!', filetype: uptype, loadingId: id });
+            resolve({ success: false, file: file, msg: msg || '上传失败!', filetype: uptype, loadingId: id });
           })
         }))
       });
@@ -126,8 +125,9 @@ export default function autoupload (key:string) {
           if (file.success && !!file.link) {
             successHandler(file.filetype, file.link, file.file, file.loadingId, me);
           } else {
-            console.error(`${file.file.name} ${file.msg || '上传失败!'}`);
-            removeHand({id: file.loadingId, type: file.filetype }, me);
+            console.error(`文件 ${file.file.name} 上传失败: ${file.msg}`);
+            // removeHand({id: file.loadingId, type: file.filetype }, me);
+            errorHandler(`"${file.file.name}"上传失败: ${file.msg}`, file.loadingId, file.filetype, me)
           }
         });
       }).catch((error) => {
@@ -168,7 +168,9 @@ export default function autoupload (key:string) {
                   if(file.getAsFile) file = file.getAsFile();
                   // 此处可写上传方法
                   if(file && file.size > 0) {
-                    needUploadFile.push(file);
+                    // 文件对象中名称不能修改，，只能创建新文件对象时传入文件名称
+                    const upFile = e.type === 'paste' ? new File([file], `${(+new Date()).toString(36)}_${file.name}`, {type: file.type}) : file;
+                    needUploadFile.push(upFile);
                     hasImg = true;
                   }
                 }

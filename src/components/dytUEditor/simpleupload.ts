@@ -97,7 +97,7 @@ export default function simpleupload (key: string) {
             domUtils.removeClasses(loader, 'loadingclass');
             me.execCommand('inserthtml', '');
           }).catch((msg:string) => {
-            errorHandler(msg || '图片上传失败!', loadingId);
+            errorHandler(`图片上传失败: ${msg}`, loadingId);
           });
         });
 

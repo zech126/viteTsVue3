@@ -18,6 +18,7 @@ import simpleupload from './simpleupload';
 import { LoadEvent } from './loadSubscribe';
 import insertimage from './insertimage.vue';
 import { parents } from './tool';
+import { debounce } from '@/utils/debounce';
 
 const global = getGlobal();
 const emit = defineEmits(['update:modelValue', 'initBefore', 'ready', 'change']);
@@ -263,13 +264,13 @@ const initEditor = () => {
     oldContent !== props.modelValue && data.editor.setContent(props.modelValue);
     // 第二次不再添加监听
     if (data.editorReady) return;
-    data.editor.addListener('contentChange', () => {
+    data.editor.addListener('contentChange', debounce(() => {
       const nowContent = data.editor.getContent();
       emit('update:modelValue', nowContent);
       emit('change', nowContent);
       const hasContents = data.editor?.hasContents();
       data.hasContent = hasContents ? 'hasContents' : '';
-    });
+    }, 100));
     
     if (!data.editorReady) {
       nextTick(() => {

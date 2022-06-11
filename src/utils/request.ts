@@ -5,7 +5,6 @@ import requestHand from './requestHand'
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import cookieConfig from '@/utils/cookieConfig';
-import record from '@/utils/certificationCenter';
 
 // axios 默认配置
 const instance = axios.create({
@@ -40,24 +39,8 @@ instance.interceptors.request.use((config:any) => {
     return config;
   }
   return new Promise((resolve, reject) => {
-    record.recordCertification({type: 'getToken'}).then((info:any) => {
-      // 当认证中心不存在token时，跳转登录
-      if (!info.login || !info.token) {
-        record.goToLogin();
-        return;
-      }
-      const token = common.getCookie(cookieConfig.tokenName);
-      // 当 token 不一致时， 更新 token 后再请求接口
-      if (!token || token !== `${info.token.token_type} ${info.token.access_token}`) {
-        record.authTokenHand(info.token, info.login.loginName).then(() => {
-          resolve(requestConfig());
-        }).catch(() => {
-          resolve(requestConfig());
-        })
-      } else {
-        resolve(requestConfig());
-      }
-    })
+    // 可在此次验证登录 token
+    resolve(requestConfig());
   })
 });
 
@@ -69,7 +52,7 @@ instance.interceptors.response.use((response: any) => {
   let newMsg = responseData.msg;
   // 状态码处理
   if (requestHand.hand[code]) {
-    return requestHand.hand[code](response, response.data, record);
+    return requestHand.hand[code](response, response.data);
   }
   // 错误处理
   if(common.isEmpty(newMsg)) {
@@ -95,7 +78,7 @@ instance.interceptors.response.use((response: any) => {
     let newMsg = responseData.msg;
     // 状态码处理
     if (requestHand.hand[code]) {
-      return requestHand.hand[code](error.response, responseData, record);
+      return requestHand.hand[code](error.response, responseData);
     }
     // 错误处理
     if(common.isEmpty(newMsg)) {

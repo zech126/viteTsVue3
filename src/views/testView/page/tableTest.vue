@@ -6,6 +6,7 @@
       :filter-config="filterConfig"
       :table-columns="tableColumns"
       :table-confog="tableConfog"
+      :content-data-map="contentDataMap"
       :request-before="transformRequestData"
       :pagination-config="paginationConfig"
       :request-handler="requestHandler"
@@ -405,7 +406,10 @@ export default defineComponent({
           'page-size': 'pageSize',
           'page-num': 'pageNum'
         }
-      }
+      },
+      // 数据设置
+      contentDataMap: { rows: 'reslove.list', total: 'reslove.total', errorInfos: 'msg' },
+      tableTotal: Number((Math.random() * Math.random()).toString().substring(2, 7))
     };
   },
   watch: {
@@ -428,20 +432,32 @@ export default defineComponent({
   },
   methods: {
     // 发送请求前处理，可用于验证以及参数修改, 如果返回 false， 则不会执行 requestHandler 方法发起请求
-    transformRequestData (requestData:any) {
+    transformRequestData (requestData:{[key:string]: any}) {
       let request = this.$common.copy(requestData);
       return request
     },
     // 获取列表数据
-    requestHandler (requestData:any) {
-      return this.$http.get(this.api.testApi.selectUserInfo, {
-        params: {
-          ...requestData,
-          // enable: 1,
-          sortField: 'a.gmt_create',
-          sortType: 'DESC'
-        }
-      })
+    requestHandler (requestData:{[key:string]: any}) {
+      let tableList:Array<any> = [];
+      const remaining = this.tableTotal - ((requestData.pageNum - 1) * requestData.pageSize);
+      const pageSize = remaining > requestData.pageSize ? requestData.pageSize : remaining;
+      for (let i = 0; i < pageSize; i ++) {
+        tableList.push({
+          username: `username-${i + 1}`,
+          name: `name-${i + 1}`
+        })
+      }
+      return new Promise((reslove, reject) => {
+        setTimeout(() => {
+          reslove({
+            reslove: {
+              list: tableList,
+              total: this.tableTotal,
+            },
+            msg: ''
+          })
+        }, Math.random() * Math.random() * 5000)
+      });
     },
     filterReset () {
       this.filterModel.commonStr6 = 'commonStr6';

@@ -2,15 +2,9 @@
   <div v-loading="data.headLoading" class="head-container">
     <img class="logo" src="@images/logo.png">
     <div class="operation-container">
-      <span class="operation-item" @click="goToLapa">
-        <span class="backUsercenter">
-          <i class="lapa icon-fanhui" />
-          <span>返回认证中心</span>
-        </span>
-      </span>
       <span class="operation-item">
         <i class="lapa icon-user" />
-        {{ (getUserInfo && getUserInfo.securityUser && getUserInfo.securityUser.name) ? getUserInfo.securityUser.name : '' }}
+        {{ (getUserInfo && getUserInfo.userName ? getUserInfo.userName : '') }}
       </span>
       <span class="operation-item" @click="loginOut">
         <i class="lapa icon-exit" />
@@ -21,19 +15,13 @@
 </template>
 <script lang="ts" setup>
 import { computed, reactive } from 'vue';
-import record from '@/utils/certificationCenter';
 import store from '@/store';
 
 let data = reactive({
   headLoading: false
 })
 const loginOut = () => {
-  record.outSystemLogin().then((res:any) => {
-    res.defaultHand();
-  });
-}
-const goToLapa = () => {
-  record.backOauth();
+  console.log('退出登录')
 }
 const getUserInfo = computed(() => {
   return store.getters['layout/userInfo'];

@@ -28,19 +28,18 @@ const navList = [
         icon: '',
         url: '/testUEditor'
       },
-      
-      // {
-      //   id: '1-4',
-      //   name: '测试页面',
-      //   childList: [
-      //     {
-      //       id: '1-2',
-      //       name: '测试页面-test1',
-      //       icon: '',
-      //       url: '/test1'
-      //     }
-      //   ]
-      // },
+      {
+        id: '1-5',
+        name: '404测试',
+        childList: [
+          {
+            id: '5-1',
+            name: '404页面',
+            icon: '',
+            url: '/test/test'
+          }
+        ]
+      },
     ]
   }
 ]

@@ -12,6 +12,7 @@ import dytSubmenu from './elSubmenu.vue'
 import routerPage from '@/router/pageRouter';
 import store from '@/store';
 import common from '@/utils/common';
+import { debounce } from '@/utils/debounce';
 
 // 定义类型
 interface dataType {
@@ -55,10 +56,6 @@ const navActive = computed(() => {
 const gettersNavList = computed(() => {
   return store.getters['layout/menuTree']
 })
-// 监听变化
-watch([gettersNavList], ([val], [oldVal]) => {
-  getNavList(val || []);
-})
 
 const getNavList = (val:any = []) => {
   data.navLoadinged = true;
@@ -100,6 +97,12 @@ const menuTreeHand = (tree:any) => {
   }
   return hand(common.copy(tree), true);
 }
+
+// 监听变化
+watch(gettersNavList, debounce((val, oldVal) => {
+  getNavList(val || []);
+}, 200), {deep: true, immediate: true})
+
 </script>
 <style lang="less" scoped>
 .side-nav-container{

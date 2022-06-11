@@ -435,6 +435,7 @@ watch(() => data.unqualifiedFile, debounce((val) => {
     display: inline-block;
     vertical-align: top;
     :deep(.el-upload-dragger){
+      padding: 0;
       width: auto;
       height: auto;
       border: none;

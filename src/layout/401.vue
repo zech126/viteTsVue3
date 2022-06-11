@@ -37,13 +37,10 @@
 
 <script lang="ts" setup>
 import errGif from '@images/401.gif';
-import record from '@/utils/certificationCenter';
 
 const errGifGif = errGif + '?' + +new Date();
 const loginOut = () => {
-  record.outSystemLogin().then((res:any) => {
-    res.defaultHand();
-  });
+  console.log('退出登录')
 }
 const goToPageHome = () => {
   const location = window.location;

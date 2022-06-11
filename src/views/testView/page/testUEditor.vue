@@ -20,7 +20,9 @@
 <script lang="ts" setup>
 import {reactive, watch} from 'vue';
 import getProxy from '@/utils/proxy';
+import getGlobal from '@/utils/global';
 const proxy:any = getProxy();
+const global = getGlobal();
 
 const data = reactive({
   content: 'sdregyte',
@@ -46,29 +48,40 @@ const data = reactive({
         'print', 'preview', 'searchreplace', 'drafts', 'help'
       ]
     ]
+  },
+  uploadData: {
+    pathType: 1
   }
-})
+});
+console.log(global.api)
 const uploadFile = (file:any) => {
   console.log(file)
-  return new Promise((resolve, reject) => {
-    // 模拟接口返回数据
-    setTimeout(() => {
-      resolve('../../../src/assets/images/123.png');
-      if (Math.random() * 10 > 5) {
-        resolve('../../../src/assets/images/123.png')
-      } else {
-        reject()
+  return new Promise((reslove, reject) => {
+    let uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+    Object.keys(data.uploadData).forEach(key => {
+      uploadFormData.append(key, data.uploadData[key]);
+    });
+    // reject('插入图片失败，请尝试重新插入！');
+    global.$http.post(global.api.uploadFile.upload, uploadFormData, {
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded'
       }
-    }, Math.random() * Math.random() * 5000)
-  })
+    }).then((res:{[key:string]:any}) => {
+      res.data ? reslove(res.data) : reject(res && res.msg ? res.msg : '插入图片失败，请尝试重新插入！');
+    }).catch((err:{[key:string]:any}) => {
+      console.log(err)
+      reject(err.msg || '插入图片失败，请尝试重新插入！');
+    })
+  });
 }
 const uploadImages = (file:any) => {
   console.log(file)
-  return new Promise((resolve, reject) => {
+  return new Promise((reslove, reject) => {
     // 模拟接口返回数据
     setTimeout(() => {
       if (Math.random() * 10 > 5) {
-        resolve({url: '../../../src/assets/images/123.png', id: Math.random().toString(36).substring(2)})
+        reslove({url: '../../../src/assets/images/123.png', id: Math.random().toString(36).substring(2)})
       } else {
         reject()
       }
@@ -77,11 +90,11 @@ const uploadImages = (file:any) => {
 }
 const removeImages = (image:{[key:string]: any}) => {
   console.log(image)
-  return new Promise((resolve:(value:boolean) => void, reject) => {
+  return new Promise((reslove:(value:boolean) => void, reject) => {
     // 模拟接口返回数据
     setTimeout(() => {
       if (Math.random() * 10 > 5) {
-        resolve(true)
+        reslove(true)
       } else {
         reject()
       }
@@ -90,7 +103,7 @@ const removeImages = (image:{[key:string]: any}) => {
 }
 
 const getImageList = () => {
-   return new Promise((resolve) => {
+   return new Promise((reslove) => {
     // 模拟接口返回数据
     setTimeout(() => {
       const list = [
@@ -100,7 +113,7 @@ const getImageList = () => {
         {url: '../../../src/assets/images/search.png', id: '4'},
         {url: '../../../src/assets/images/nullength.png', id: '5'}
       ]
-      resolve(list);
+      reslove(list);
     }, Math.random() * Math.random() * 5000)
   })
 }
