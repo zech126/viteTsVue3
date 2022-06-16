@@ -87,12 +87,17 @@ export default function simpleupload (key: string) {
             return;
           }
           // 执行图片上传操作
-          uploadFileFun(files).then((link:string) => {
+          uploadFileFun(files).then((res:{url: string, name?: string, [key:string]:any} | string) => {
             let loader = me.document.getElementById(loadingId);
-            loader.setAttribute('src', link);
-            loader.setAttribute('_src', link);
-            loader.setAttribute('title', files.name || '');
-            // loader.setAttribute('alt', json.original || '');
+            if (typeof res !== 'string') {
+              loader.setAttribute('src', res.url);
+              loader.setAttribute('_src', res.url);
+              loader.setAttribute('title', res.name || files.name || '');
+            } else {
+              loader.setAttribute('src', res);
+              loader.setAttribute('_src', res);
+              loader.setAttribute('title', files.name || '');
+            }
             loader.removeAttribute('id');
             domUtils.removeClasses(loader, 'loadingclass');
             me.execCommand('inserthtml', '');

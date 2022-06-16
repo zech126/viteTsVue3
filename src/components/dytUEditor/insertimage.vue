@@ -108,7 +108,8 @@ const data:{[key:string]:any} = reactive({
   unqualifiedFile: [],
   uploadFailJson: {},
   imagePreview: [],
-  imageIndex: 0
+  imageIndex: 0,
+  romveError: {}
 });
 const isVisible = computed(() => {
   return props.visible;
@@ -128,7 +129,7 @@ const initData = () => {
   data.temporaryStorage = window.temporaryStorage[editorid];
   data.pageLoading = true;
   // 获取文件列表
-  data.temporaryStorage.getFiles().then((res:Array<{[key:string]: any}>) => {
+  data.temporaryStorage.getFiles().then((res:Array<string | {[key:string]: any}>) => {
     data.pageLoading = false;
     data.fileInfoList = res.map((item) => {
       return {
@@ -137,7 +138,7 @@ const initData = () => {
         checked: false,
         upload: false,
         insertImageTemporaryId: `${random}_${Math.random().toString(36).substring(2)}`,
-        ...item
+        ...(typeof item === 'string' ? { url: item } : item)
       }
     })
   }).catch(() => {
@@ -174,10 +175,10 @@ const beforeUpload = (rawFile:{[key:string]: any} | string) => {
   });
 
   // 执行上传方法
-  data.temporaryStorage.uploadFiles(newFile).then((res:{[key:string]:any}) => {
+  data.temporaryStorage.uploadFiles(newFile).then((res:{url: string, [key:string]:any} | string) => {
     data.fileInfoList.forEach((item:{[key:string]: any}, index:number) => {
       if (item.insertImageTemporaryId === imageId) {
-        data.fileInfoList[index] = { ...item, error: false, loading: false, upload: false, ...res};
+        data.fileInfoList[index] = { ...item, error: false, loading: false, upload: false, ...(typeof res !== 'string' ? res : {url: res})};
       }
     });
     if (data.uploadFailJson[imageId]) {
@@ -216,6 +217,10 @@ const removeFiles = (image:{[key:string]: any}, index:number) => {
   removeKey.forEach(key => {
     delete backVal[key];
   });
+  if (data.romveError[image.insertImageTemporaryId]) {
+    delete image.removeFail;
+    clearTimeout(data.romveError[image.insertImageTemporaryId]);
+  }
   data.temporaryStorage.removeFiles(backVal).then((res:boolean) => {
     image.loading = false;
     if (!res) return;
@@ -231,7 +236,7 @@ const removeFiles = (image:{[key:string]: any}, index:number) => {
         item.removeFail = msg || '删除失败';
       }
     });
-    setTimeout(() => {
+    data.romveError[image.insertImageTemporaryId] = setTimeout(() => {
       data.fileInfoList.forEach((item:{[key:string]: any}, index:number) => {
         if (item.insertImageTemporaryId === image.insertImageTemporaryId) {
           delete item.removeFail;

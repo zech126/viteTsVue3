@@ -1,6 +1,6 @@
 <template>
   <div :editorid="data.componentId" class="dyt-editor-content" :class="{'hidde-custom-buttom': insertimageIndex === -1}">
-    <div :id="editorId" :name="props.name" v-loading="!data.editorReady" element-loading-text="资源加载中..." />
+    <div :editortag="data.componentId" :id="editorId" :name="props.name" v-loading="!data.editorReady" element-loading-text="资源加载中..." />
     <el-input v-model="data.hasContent" class="el-input-display-none" />
     <insertimage v-model:visible="data.visibleDialog" :editor="data.editorEntity" />
   </div>
@@ -162,6 +162,7 @@ const loadEditor = (files:Array<string| {url: string, baseUrl: string}>, baseUrl
       }
       return res;
     },{ jsLinks: [], cssLinks: []});
+    // 此次不可用 Promise.allSettled
     Promise.all([
       Promise.all(cssLinks.map((link) => loadCss(link))),
       // 动态创建 script 是先加载完的先执行，所以不可以一次性创建所有资源的引入脚本

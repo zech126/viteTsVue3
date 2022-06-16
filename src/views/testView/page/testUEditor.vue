@@ -68,10 +68,15 @@ const uploadFile = (file:any) => {
         'content-type': 'application/x-www-form-urlencoded'
       }
     }).then((res:{[key:string]:any}) => {
-      res.data ? reslove(res.data) : reject(res && res.msg ? res.msg : '插入图片失败，请尝试重新插入！');
+      if (res.data) {
+        reslove(res.data);
+        // 或
+        // reslove({url: res.data, id: Math.random().toString(36).substring(2)});
+      } else {
+        reject(res && res.msg ? res.msg : '上传图片失败，请尝试重新插入！');
+      }
     }).catch((err:{[key:string]:any}) => {
-      console.log(err)
-      reject(err.msg || '插入图片失败，请尝试重新插入！');
+      reject(err.msg || '上传图片失败，请尝试重新插入！');
     })
   });
 }
@@ -81,9 +86,11 @@ const uploadImages = (file:any) => {
     // 模拟接口返回数据
     setTimeout(() => {
       if (Math.random() * 10 > 5) {
-        reslove({url: '../../../src/assets/images/123.png', id: Math.random().toString(36).substring(2)})
+        reslove('../../../src/assets/images/123.png');
+        // 或
+        // reslove({url: '../../../src/assets/images/123.png', id: Math.random().toString(36).substring(2)});
       } else {
-        reject()
+        reject('上传失败')
       }
     }, Math.random() * Math.random() * 5000)
   })
@@ -107,12 +114,20 @@ const getImageList = () => {
     // 模拟接口返回数据
     setTimeout(() => {
       const list = [
-        {url: '../../../src/assets/images/nullength11.png', id: '1'},
-        {url: '../../../src/assets/images/123.png', id: '2'},
-        {url: '../../../src/assets/images/404.png', id: '3'},
-        {url: '../../../src/assets/images/search.png', id: '4'},
-        {url: '../../../src/assets/images/nullength.png', id: '5'}
-      ]
+        '../../../src/assets/images/nullength11.png',
+        '../../../src/assets/images/123.png',
+        '../../../src/assets/images/404.png',
+        '../../../src/assets/images/search.png',
+        '../../../src/assets/images/nullength.png'
+      ];
+      // 或（需要删除图片库的图片时，请使用对象）
+      // const list = [
+      //   {url: '../../../src/assets/images/nullength11.png', id: '1'},
+      //   {url: '../../../src/assets/images/123.png', id: '2'},
+      //   {url: '../../../src/assets/images/404.png', id: '3'},
+      //   {url: '../../../src/assets/images/search.png', id: '4'},
+      //   {url: '../../../src/assets/images/nullength.png', id: '5'}
+      // ];
       reslove(list);
     }, Math.random() * Math.random() * 5000)
   })

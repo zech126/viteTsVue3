@@ -39,14 +39,13 @@ export default function autoupload (key:string) {
       }, 200);
     }
     // 成功处理
-    const successHandler = (filetype:string, link:string, file:any, loadingId: string, me:any) => {
+    const successHandler = (filetype:string, link:string, info:any, file:any, loadingId: string, me:any) => {
       if (filetype == 'image') {
         let loader = me.document.getElementById(loadingId);
         if (loader) {
           loader.setAttribute('src', link);
           loader.setAttribute('_src', link);
-          loader.setAttribute('title', file.name || '');
-          // loader.setAttribute('alt', data.original || '');
+          loader.setAttribute('title', info.name || file.name || '');
           loader.removeAttribute('id');
           domUtils.removeClasses(loader, 'loadingclass');
         }
@@ -73,18 +72,6 @@ export default function autoupload (key:string) {
         loadingId = 'loading_' + (+new Date()).toString(36);
         const filetype = /image\/\w+/i.test(file.type) ? 'image':'file';
         const maxSize = me.getOpt(filetype + 'MaxSize');
-        // const urlPrefix = me.getOpt(filetype + 'UrlPrefix');
-        // if (filetype == 'image') {
-        //   loadingHtml = '<img class="loadingclass" id="' + loadingId + '" src="' +
-        //     me.options.themePath + me.options.theme +
-        //     '/images/spacer.gif" title="' + (me.getLang('autoupload.loading') || '') + '" >';
-        // } else {
-        //   loadingHtml = '<p>' +
-        //     '<img class="loadingclass" id="' + loadingId + '" src="' +
-        //     me.options.themePath + me.options.theme +
-        //     '/images/spacer.gif" title="' + (me.getLang('autoupload.loading') || '') + '" >' +
-        //     '</p>';
-        // }
         loadingHtml = '<p>' +
             '<img class="loadingclass" id="' + loadingId + '" src="' +
             me.options.themePath + me.options.theme +
@@ -113,23 +100,29 @@ export default function autoupload (key:string) {
         uploadFileList.push(new Promise((resolve) => {
           const uptype = filetype;
           const id = loadingId;
-          uploadFileFun(file).then((link:string) => {
-            resolve({ success: true, link: link, file: file, filetype: uptype, loadingId: id });
+          uploadFileFun(file).then((res:{url: string, name?: string, [key:string]:any} | string) => {
+            if (typeof res !== 'string') {
+              resolve({ success: true, link: res.url, info: res, file: file, filetype: uptype, loadingId: id });
+            } else {
+              resolve({ success: true, link: res, info: {}, file: file, filetype: uptype, loadingId: id });
+            }
           }).catch((msg:string) => {
             resolve({ success: false, file: file, msg: msg || '上传失败!', filetype: uptype, loadingId: id });
           })
         }))
       });
-      Promise.all(uploadFileList).then((arr:any) => {
-        arr.forEach((file:any) => {
-          if (file.success && !!file.link) {
-            successHandler(file.filetype, file.link, file.file, file.loadingId, me);
-          } else {
-            console.error(`文件 ${file.file.name} 上传失败: ${file.msg}`);
-            // removeHand({id: file.loadingId, type: file.filetype }, me);
-            errorHandler(`"${file.file.name}"上传失败: ${file.msg}`, file.loadingId, file.filetype, me)
+      Promise.allSettled(uploadFileList).then((arr) => {
+        arr.forEach(res => {
+          if (res.status === 'fulfilled') {
+            if (res.value.success && !!res.value.link) {
+              successHandler(res.value.filetype, res.value.link, res.value.info, res.value.file, res.value.loadingId, me);
+            } else {
+              console.error(`文件 ${res.value.file.name} 上传失败: ${res.value.msg}`);
+              // removeHand({id: res.value.loadingId, type: res.value.filetype }, me);
+              errorHandler(`"${res.value.file.name}"上传失败: ${res.value.msg}`, res.value.loadingId, res.value.filetype, me)
+            }
           }
-        });
+        })
       }).catch((error) => {
         console.error(error || '文件上传失败!');
       })

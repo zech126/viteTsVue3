@@ -625,47 +625,53 @@ function addMaskLayer(html) {
     maskLayer.className = "maskLayer";
     maskLayer.innerHTML = html;
 }
+function base64ToFile (base64Data, fileName) {
+    const arr = base64Data.split(',');
+    const fileType = arr[0].match(/:(.*?);/)[1];
+    let bstr = atob(arr[1]);
+    let leng = bstr.length;
+    let UintArr = new Uint8Array(leng);
+    while (leng--) {
+      UintArr[leng] = bstr.charCodeAt(leng);
+    }
+    const newFile = new File([UintArr], fileName || '', {
+      type: fileType
+    })
+    return newFile;
+  }
 //执行确认按钮方法
 function exec(scrawlObj) {
-    if (scrawlObj.isScrawl) {
-        addMaskLayer(lang.scrawlUpLoading);
-        var base64 = scrawlObj.getCanvasData();
-        if (!!base64) {
-            var options = {
-                timeout:100000,
-                onsuccess:function (xhr) {
-                    if (!scrawlObj.isCancelScrawl) {
-                        var responseObj;
-                        responseObj = eval("(" + xhr.responseText + ")");
-                        if (responseObj.state == "SUCCESS") {
-                            var imgObj = {},
-                                url = editor.options.scrawlUrlPrefix + responseObj.url;
-                            imgObj.src = url;
-                            imgObj._src = url;
-                            imgObj.alt = responseObj.original || '';
-                            imgObj.title = responseObj.title || '';
-                            editor.execCommand("insertImage", imgObj);
-                            dialog.close();
-                        } else {
-                            alert(responseObj.state);
-                        }
-
-                    }
-                },
-                onerror:function () {
-                    alert(lang.imageError);
-                    dialog.close();
-                }
-            };
-            options[editor.getOpt('scrawlFieldName')] = base64;
-
-            var actionUrl = editor.getActionUrl(editor.getOpt('scrawlActionName')),
-                params = utils.serializeParam(editor.queryCommandValue('serverparam')) || '',
-                url = utils.formatUrl(actionUrl + (actionUrl.indexOf('?') == -1 ? '?':'&') + params);
-            ajax.request(url, options);
-        }
-    } else {
+    if (!scrawlObj.isScrawl) {
         addMaskLayer(lang.noScarwl + "&nbsp;&nbsp;&nbsp;<input type='button' value='" + lang.continueBtn + "'  onclick='removeMaskLayer()'/>");
+        return;
     }
+    addMaskLayer(lang.scrawlUpLoading);
+    let base64File = `data:image/png;base64,${scrawlObj.getCanvasData()}`;
+    if (!base64File) {
+        alert('无法获取到涂鸦信息');
+        dialog.close();
+        return;
+    }
+    const wTop = window.top;
+    const editorCont = wTop.document.querySelector(`#${editor.key}`);
+    if (!editorCont) {
+        alert('无法获取到当前编辑器');
+        dialog.close();
+        return;
+    }
+    const uploadFileFun = wTop.temporaryStorage[editorCont.getAttribute('editortag')].uploadHand;
+    if (!uploadFileFun) {
+        alert('未配置上传文件功能！');
+        dialog.close();
+        return;
+    }
+    const file = base64ToFile(base64File, `scrawl_${(+new Date()).toString(36)}.png`);
+    uploadFileFun(file).then(url => {
+        editor.execCommand("insertImage", { src: url, _src: url, alt: '', title: ''});
+        dialog.close();
+    }).catch(msg => {
+        alert(typeof msg == 'string' ? msg : lang.imageError);
+        removeMaskLayer();
+    });
 }
 
