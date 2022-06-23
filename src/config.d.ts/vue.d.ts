@@ -18,7 +18,8 @@ declare module '@vue/runtime-core' {
     $attrs: any;
     $emit: any;
     $parent: any;
-    localforage: LocalForage
+    localforage: LocalForage;
+    [key:string]: any;
   }
 }
 // 新增 axios 配置
@@ -26,19 +27,22 @@ declare module 'axios' {
   interface AxiosRequestConfig {
     removeEmpty?: boolean;
     hiddenError?: boolean;
+    [key:string]: any;
   }
 }
 // 环境变量
-interface ImportMetaEnv {
+declare interface ImportMetaEnv {
   VITE_CONFIG: string;
   VITE_SYSTEMCODE: string;
   VITE_AUTH: string;
   VITE_BASEURL: string;
+  [key:string]: string;
 }
 
-interface MinifyOptions {
+declare interface MinifyOptions {
   dropConsole: boolean;
   dropDebugger: boolean;
+  [key:string]: any;
 }
 
 declare module '*.svg';

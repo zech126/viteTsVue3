@@ -31,7 +31,14 @@ module.exports = {
     'no-template-curly-in-string': 'off', // 禁止在常规字符串中出现模板字面量占位符语法
     'no-mixed-spaces-and-tabs': 'off', // 禁止空格和 tab 的混合缩进
     'no-inner-declarations': 'off', // // 禁止 RegExp 构造函数中无效的正则表达式字符串
-    'vue/no-parsing-error': [2, { 'x-invalid-end-tag': false }], // 有些便签自闭合
+    // 有些便签自闭合
+    'vue/no-parsing-error': [
+      'error',
+      {
+        'x-invalid-end-tag': false,
+        'invalid-first-character-of-tag-name': false,
+      }
+    ],
     // 忽略方法参数未使用
     'no-unused-vars': [
       // 'error', { 'vars': 'all', 'args': 'after-used', 'ignoreRestSiblings': false }

@@ -66,8 +66,12 @@ const common = {
     return Object.prototype.toString.call(val).slice(8, -1) === 'Set'
   },
   // 数组去重
-  arrRemoveRepeat: (arr:any) => {
+  arrRemoveRepeat: (arr:Array<any>) => {
     return Array.from(new Set(arr));
+  },
+  // 多维数组扁平化
+  flat: (arr:Array<any>) => {
+    return arr.flat(Infinity);
   },
   // 移除对象中所有为字符串的值 2 端空格
   // exceptionKey 不处理的键名
@@ -202,7 +206,7 @@ const common = {
   delCookie (keys:any) {
     if (typeof keys === 'string' && !common.isEmpty(keys)) {
       Cookies.remove(keys);
-    } if (common.isArray(keys)) {
+    } else if (common.isArray(keys)) {
       keys.forEach((item:any) => {
         common.delCookie(item);
       })

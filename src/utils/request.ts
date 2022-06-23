@@ -15,25 +15,27 @@ const instance = axios.create({
 });
 
 // axios 其他自定义配置
-instance.interceptors.request.use((config:any) => {
+instance.interceptors.request.use((config) => {
   //配置发送请求的信息
   NProgress.start();
   const requestConfig = () => {
-    let headersConfig:any = {};
+    let headersConfig:{[key:string]:any} = {};
     const token = common.getCookie(cookieConfig.tokenName);
     if (!common.isEmpty(token)) {
       headersConfig.Authorization = token;
     }
     config.headers = {...headersConfig, ...config.headers};
-    config.baseURL = requestHand.baseHand(config.url);
+    config.baseURL = requestHand.baseHand(config.url || '');
     config.timeout = typeof config.timeout === 'number' && config.timeout > 1000 ? config.timeout : 1000 * 120;
     // 当是 payload 或 默认提交时对参数处理
-    const contentType = config.headers['Content-Type'] || config.headers['content-type'] || config.headers['contentType'];
-    if (common.isEmpty(contentType) || ['application/json'].includes(contentType)) {
-      // 移除参数中的空值
-      if(common.isEmpty(config.removeEmpty) || (common.isBoolean(config.removeEmpty) && config.removeEmpty)) {
-        config.data = !common.isEmpty(config.data) ? common.removeEmpty(config.data) : undefined;
-        config.params = !common.isEmpty(config.params) ? common.removeEmpty(config.params) : undefined;
+    if (config.headers) {
+      const contentType:any = config.headers['Content-Type'] || config.headers['content-type'] || config.headers['contentType'];
+      if (common.isEmpty(contentType) || ['application/json'].includes(contentType)) {
+        // 移除参数中的空值
+        if(common.isEmpty(config.removeEmpty) || (common.isBoolean(config.removeEmpty) && config.removeEmpty)) {
+          config.data = !common.isEmpty(config.data) ? common.removeEmpty(config.data) : undefined;
+          config.params = !common.isEmpty(config.params) ? common.removeEmpty(config.params) : undefined;
+        }
       }
     }
     return config;
@@ -45,7 +47,7 @@ instance.interceptors.request.use((config:any) => {
 });
 
 // 添加响应拦截器
-instance.interceptors.response.use((response: any) => {
+instance.interceptors.response.use((response) => {
   NProgress.done();
   const responseData = response.data || {};
   const code = responseData.status || responseData.code || response.status;
@@ -70,7 +72,7 @@ instance.interceptors.response.use((response: any) => {
   });
   console.error(response);
   return Promise.reject(responseData);
-}, (error:any) => {
+}, (error) => {
   NProgress.done();
   if (error.response) {
     const responseData = error.response.data || {};

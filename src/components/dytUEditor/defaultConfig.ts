@@ -6,6 +6,8 @@ export const editorConfig:editorType = {
   serverUrl: '',
   // 初始容器高度
   initialFrameHeight: 400,
+  // 工具栏是否浮动
+  // autoFloatEnabled: false,
   // 初始容器宽度
   initialFrameWidth: '100%'
 }

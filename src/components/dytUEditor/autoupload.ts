@@ -91,7 +91,7 @@ export default function autoupload (key:string) {
           return;
         }
         const fileext = file.name ? file.name.substr(file.name.lastIndexOf('.')):'';
-        const allowFileSuffix = allowFiles.map((suffix:string) => `.${suffix}`);
+        const allowFileSuffix = allowFiles.map((suffix:string) => `.${suffix.toLowerCase()}`);
         /* 判断文件格式是否超出允许 */
         if ((fileext && filetype != 'image') && (!allowFileSuffix.includes(fileext.toLowerCase()))) {
           errorHandler(`${me.getLang('autoupload.exceedTypeError')}`, loadingId, filetype, me);

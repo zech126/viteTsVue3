@@ -1,8 +1,15 @@
 <template>
-  <div :editorid="data.componentId" class="dyt-editor-content" :class="{'hidde-custom-buttom': insertimageIndex === -1}">
+  <div
+    :editorid="data.componentId"
+    class="dyt-editor-content"
+    :class="{
+      'hidde-multiple-upload': insertimageIndex === -1,
+      'hidde-attachment': attachmentIndex === -1
+    }"
+  >
     <div :editortag="data.componentId" :id="editorId" :name="props.name" v-loading="!data.editorReady" element-loading-text="资源加载中..." />
     <el-input v-model="data.hasContent" class="el-input-display-none" />
-    <insertimage v-model:visible="data.visibleDialog" :editor="data.editorEntity" />
+    <insertimage v-model:visible="data.visibleInsertimage" :editor="data.editorEntity" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -14,10 +21,12 @@ import { editorConfig, defaultLoad } from './defaultConfig';
 import getGlobal from '@/utils/global';
 import prototype from './prototype';
 import autoupload from './autoupload';
+import addInsertimageBtn from './addInsertimageBtn';
+import addAttachmentBtn from './addAttachmentBtn';
 import simpleupload from './simpleupload';
 import { LoadEvent } from './loadSubscribe';
 import insertimage from './insertimage.vue';
-import { parents } from './tool';
+// import { parents } from './tool';
 import { debounce } from '@/utils/debounce';
 
 const global = getGlobal();
@@ -63,7 +72,7 @@ const data:{
   editor: null,
   editorReady: false,
   hasContent: '',
-  visibleDialog: false,
+  visibleInsertimage: false,
   editorEntity: {},
   componentId: `dyt_editor_${Math.random().toString(36).substring(2)}`
 });
@@ -77,10 +86,10 @@ const config = computed(() => {
   return newConfig;
 });
 const insertimageIndex = computed(() => {
-  if (config.value.toolbars && config.value.toolbars[0]) {
-    return config.value.toolbars[0].includes('insertimage') ? config.value.toolbars[0].indexOf('insertimage') : -1;
-  }
-  return 57;
+  return config.value.toolbars && config.value.toolbars[0] ? config.value.toolbars[0].indexOf('insertimage') : 57;
+});
+const attachmentIndex = computed(() => {
+  return config.value.toolbars && config.value.toolbars[0] ? config.value.toolbars[0].indexOf('attachment') : 63;
 });
 const editorId = computed(() => {
   return props.editorId || 'editor_' + Math.random().toString(36).substring(2);
@@ -186,54 +195,30 @@ const checkerDefaultEditor = () => {
   // 仅加载完ueditor.config.js时UE对象和UEDITOR_CONFIG对象存在,仅加载完ueditor.all.js时UEDITOR_CONFIG对象存在,但为空对象
   return (window.UE && window.UE.getEditor && window.UEDITOR_CONFIG && Object.keys(window.UEDITOR_CONFIG).length !== 0);
 };
-// 多图上传
+// 按钮
 const addCustomButtom = () => {
-  window.UE.registerUI('multiple-upload', (editor:any, uiName:any) => {
-    // 注册按钮执行时的 command 命令，使用命令默认就会带有回退操作
-    editor.registerCommand(uiName, {
-      execCommand: () => {
-        editor.execCommand('inserthtml', ``);
-      }
-    });
-    // 创建一个 button
-    let btn = new window.UE.ui.Button({
-      // 按钮的名字
-      name: uiName,
-      // 提示
-      title: '插入图片',
-      // 需要添加的额外样式，可指定 icon 图标，图标路径参考常见问题 2
-      cssRules: "background-position: -726px -77px",
-      // 点击时执行的命令
-      onclick: () => {
-        data.editorEntity = editor;
-        const editorid = parents(editor.container, '[editorid]').getAttribute('editorid');
-        // 判断是否配置获取列表文件方法
-        if (typeof window.temporaryStorage[editorid].getFiles !== 'function' && typeof window.temporaryStorage[editorid].uploadFiles !== 'function') {
-          global.$message.warning({
-            message: '该功能后端未配置！',
-            'show-close': true
-          });
-          return;
-        }
-        nextTick(() => {
-          data.visibleDialog = true;
-        });
-      }
-    });
-    // 当点到编辑内容上时，按钮要做的状态反射
-    editor.addListener('selectionchange', () => {
-      let state = editor.queryCommandState(uiName);
-      if (state === -1) {
-        btn.setDisabled(true);
-        btn.setChecked(false);
-      } else {
-        btn.setDisabled(false);
-        btn.setChecked(state);
-      }
-    });
-    // 因为是添加 button，所以需要返回这个 button
-    return btn;
-  }, insertimageIndex.value)
+  // 多图列表
+  insertimageIndex.value > -1 && addInsertimageBtn({
+    onclick: (editor) => {
+      data.editorEntity = editor;
+      nextTick(() => {
+        data.visibleInsertimage = true;
+      });
+    },
+    id: data.componentId,
+    global: global,
+    index: insertimageIndex.value
+  });
+  // 附件上传
+  attachmentIndex.value > -1 && addAttachmentBtn({
+    // onclick: (editor) => {
+    //   data.editorEntity = editor;
+    //   console.log('执行上传附件')
+    // },
+    id: data.componentId,
+    global: global,
+    index: attachmentIndex.value
+  });
 }
 // 实例化编辑器
 const initEditor = () => {
@@ -253,7 +238,7 @@ const initEditor = () => {
     simpleupload(data.componentId);
     // 重写自动上传功能(图片(文件)粘贴、拖着图片(文件))
     autoupload(data.componentId);
-    insertimageIndex.value > -1 && addCustomButtom();
+    addCustomButtom();
     emit('initBefore', editorId.value);
     data.editor = window.UE.getEditor(editorId.value, config.value);
   }
@@ -403,8 +388,13 @@ defineExpose({
 </script>
 <style lang="less" scoped>
 .dyt-editor-content{
-  &.hidde-custom-buttom{
+  &.hidde-multiple-upload{
     :deep(.edui-for-multiple-upload){
+      display: none !important;
+    }
+  }
+  &.hidde-attachment{
+    :deep(.edui-for-custom-attachment){
       display: none !important;
     }
   }
@@ -412,6 +402,9 @@ defineExpose({
     display: none;
   }
   :deep(.edui-for-insertimage){
+    display: none !important;
+  }
+  :deep(.edui-for-attachment){
     display: none !important;
   }
 }

@@ -2,7 +2,7 @@
 const process = import.meta.env;
 export default {
   // 匹配不同模块服务地址
-  baseHand: (url:any) => {
+  baseHand: (url:string) => {
     // if (url.includes('/dyt-cloud-upms-admin/')) {
     //   return process.VITE_BASEURL ?  `${window.location.protocol}//${process.VITE_BASEURL}` : '/';
     // }

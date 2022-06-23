@@ -26,6 +26,13 @@ const blur = () => {
 const select = () => {
   proxy.$refs.dytInputRef?.select();
 }
+const clear = () => {
+  proxy.$refs.dytInputRef?.clear();
+}
+const resizeTextarea = () => {
+  proxy.$refs.dytInputRef?.resizeTextarea();
+}
+
 // 暴露给父级使用 ref 时使用
-defineExpose({ focus, blur, select });
+defineExpose({ focus, blur, select, clear, resizeTextarea });
 </script>

@@ -126,7 +126,8 @@ const customClassName = computed(() => {
     }
     .elDialogHeaderbtn(@headDefaultH, @headDefaultH);
     &.dialog-custom-class-small{
-      width: 80%;
+      --el-dialog-width: 80%;
+      width: var(--el-dialog-width);
       margin-top: 15vh;
       .el-dialog__header{
         height: @headDefaultH;
@@ -145,7 +146,8 @@ const customClassName = computed(() => {
       .customfixedheight(calc(70vh - 90px));
     }
     &.dialog-custom-class-full{
-      width: 100%;
+      --el-dialog-width: 100%;
+      width: var(--el-dialog-width);
       margin-top: 0vh;
       .el-dialog__header{
         height: @headFullH;
@@ -164,7 +166,8 @@ const customClassName = computed(() => {
       .customfixedheight(calc(100vh - 110px));
     }
     &.dialog-custom-class-medium{
-      width: 90%;
+      --el-dialog-width: 90%;
+      width: var(--el-dialog-width);
       margin-top: 5vh;
       .el-dialog__header{
         height: @headDefaultH;
@@ -183,7 +186,8 @@ const customClassName = computed(() => {
       .customfixedheight(calc(90vh - 90px));
     }
     &.dialog-custom-class-mini{
-      width: 65%;
+      --el-dialog-width: 65%;
+      width: var(--el-dialog-width);
       margin-top: 22vh;
       .el-dialog__header{
         height: @headDefaultH;

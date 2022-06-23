@@ -5,6 +5,9 @@
   "license": "ISC",
   "scripts": {
     "dev": "vite --mode dev",
+    "test": "vite --mode test",
+    "pre": "vite --mode pre",
+    "prod": "vite --mode prod",
     "preview": "vite preview --port 8483",
     "build:dev": "vite build --mode dev",
     "build:test": "vite build --mode test",
