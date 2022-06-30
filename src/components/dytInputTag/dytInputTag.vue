@@ -433,7 +433,12 @@ const showBefore = () => {
 const popoverShow = () => {
   base.isFocus = !selectConfig.value.disabled;
   base.isShow = true;
-  $emit('show');
+  const inputValue = base.inputValue;
+  base.inputValue = '';
+  nextTick(() => {
+    base.inputValue = inputValue;
+    $emit('show');
+  })
 }
 // 显示动画播放完毕后触发
 const afterEnter = () => {
@@ -634,6 +639,7 @@ defineExpose({
     position: relative;
     max-width: 100%;
     font-size: var(--dyt-font-size);
+    line-height: 1.1em;
     cursor: pointer;
     overflow: hidden;
     .el-tag-text{

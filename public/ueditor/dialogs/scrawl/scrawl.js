@@ -625,19 +625,19 @@ function addMaskLayer(html) {
     maskLayer.className = "maskLayer";
     maskLayer.innerHTML = html;
 }
-function base64ToFile (base64Data, fileName) {
+function base64ToFile (base64Data, fileName, fileType) {
     const arr = base64Data.split(',');
-    const fileType = arr[0].match(/:(.*?);/)[1];
-    let bstr = atob(arr[1]);
+    const match = arr[0].match(/:(.*?);/);
+    const newFileType = arr[0] && match && match.length > 1 ? match[1] : fileType;
+    let bstr = atob(arr.length > 1 ? arr[1] : base64Data);
     let leng = bstr.length;
     let UintArr = new Uint8Array(leng);
     while (leng--) {
       UintArr[leng] = bstr.charCodeAt(leng);
     }
-    const newFile = new File([UintArr], fileName || '', {
-      type: fileType
-    })
-    return newFile;
+    return !!newFileType ? new File([UintArr], fileName, {
+      type: newFileType
+    }) : new File([UintArr], fileName);
   }
 //执行确认按钮方法
 function exec(scrawlObj) {
@@ -646,7 +646,7 @@ function exec(scrawlObj) {
         return;
     }
     addMaskLayer(lang.scrawlUpLoading);
-    let base64File = `data:image/png;base64,${scrawlObj.getCanvasData()}`;
+    let base64File = scrawlObj.getCanvasData();
     if (!base64File) {
         alert('无法获取到涂鸦信息');
         dialog.close();
@@ -665,7 +665,7 @@ function exec(scrawlObj) {
         dialog.close();
         return;
     }
-    const file = base64ToFile(base64File, `scrawl_${(+new Date()).toString(36)}.png`);
+    const file = base64ToFile(base64File, `scrawl_${(+new Date()).toString(36)}.png`, 'image/png');
     uploadFileFun(file).then(url => {
         editor.execCommand("insertImage", { src: url, _src: url, alt: '', title: ''});
         dialog.close();

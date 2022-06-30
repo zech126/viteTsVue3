@@ -202,10 +202,12 @@
 <script lang="ts" setup>
 import { reactive, onMounted } from 'vue';
 import getProxy from "@/utils/proxy";
+import getGlobal from "@/utils/global";
 import * as component from './test';
 import {component1, component2} from './test';
 
 const proxy:any = getProxy();
+const global = getGlobal();
 const data = reactive({
   canshu: 'component1',
   canshu1: 'component2',
@@ -308,7 +310,7 @@ const data = reactive({
   picker: '',
   daterange: [],
   inputTag: '',
-  inputTagP: ['开始', '划划水', '摸摸鱼', '吹吹牛', '等下班 '],
+  inputTagP: ['ready', '嘭...', '开始', '划划水', '摸摸 鱼', '吹 吹牛', '等下班', '叮..', '打卡完成', '坐电梯', '坐地铁'],
   inputTagTxt: [ 'ready', '嘭...', '开始', '划划水', '摸摸 鱼', '吹 吹牛', '等下班'],
   dytSelect: 'value-3',
   dytSelectm: [],
@@ -441,6 +443,25 @@ setTimeout(() => {
 //     zip.addLocalFolder(sourceFolder);
 //     zip.writeZip(destZip);
 // }
+const dd = {
+  d: [],
+  h: [[[], ['3', '', ['1']]], {}, '', {d: 'sdh', sddf: {lgd:'', dshdsh: {hhg: [{dfsgdg:[{gggggg: []}]}, '', {web:''}]}}}, [[[]]]],
+  f: { g: { b:{ c: {} } } },
+  jg: { dg: { fd: { gss:'', ddgf: { dfthj: '0' } } }, h: {} },
+  hg: [[], []],
+  hh: '123'
+};
+
+const trm = {
+  a: '  srgsh  sdgfsh  ',
+  b: { c: { sdf: null, fhdfg: 123, gghgf: true, jkhjl: false, tyty: () => {}, d: { fadsg: '  ds  asg ', sd: '  ', e: 'hji;l  ' } } },
+  c: [[]],
+  ddd: {d: '   ', f: ' d dsgh  ', gsg: ['  ', 'dg ', '  dsgf  '] },
+  d: [{d: ['asg  ', '  dasgf111  ', '   ', '   zasfg'], ddd: {gds: '  sdh', dfgh: '   ',  agas: '  sdfgh   ', hhjh: '   dsfh111'}}]
+};
+console.log('移除空值, hg 和 h[3].sddf.dshdsh.hhg[2] 除外', global.$common.removeEmpty(dd, ['hg', 'h[*].sddf.dshdsh.hhg[*]'], true));
+console.log('移除字符串2端的空格, ddd 和 b.c.d.e 除外', global.$common.trim(trm, ['ddd', 'b.c.d.e']));
+
 </script>
 <style lang="less" scoped>
 .dytImage{

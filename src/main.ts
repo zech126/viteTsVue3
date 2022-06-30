@@ -32,6 +32,7 @@ app.config.globalProperties.$dayjs = dayjs;
 // 注册全局对象
 app.config.globalProperties.$common = $common;
 app.config.globalProperties.api = $api;
+app.config.globalProperties.$api = $api;
 app.config.globalProperties.$http = $http;
 app.config.globalProperties.localforage = localforage;
 

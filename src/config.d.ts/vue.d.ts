@@ -9,11 +9,11 @@ declare module '*.vue' {
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $http: AxiosInstance;
-    $dayjs: Function;
-    $common: any;
+    $dayjs: any;
+    $common: {[key:string]: any};
     $message: any;
-    api: any;
-    $api: any;
+    api: {[key:string]: any};
+    $api: myObject;
     $refs: any;
     $attrs: any;
     $emit: any;
@@ -29,20 +29,6 @@ declare module 'axios' {
     hiddenError?: boolean;
     [key:string]: any;
   }
-}
-// 环境变量
-declare interface ImportMetaEnv {
-  VITE_CONFIG: string;
-  VITE_SYSTEMCODE: string;
-  VITE_AUTH: string;
-  VITE_BASEURL: string;
-  [key:string]: string;
-}
-
-declare interface MinifyOptions {
-  dropConsole: boolean;
-  dropDebugger: boolean;
-  [key:string]: any;
 }
 
 declare module '*.svg';
