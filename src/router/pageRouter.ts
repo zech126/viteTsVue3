@@ -1,12 +1,22 @@
 import { RouteRecord } from 'vue-router'
 // 路由入口设置
 let routerMaps:Array<RouteRecord> = [];
+let routerPath:{[key:string]: string} = {};
 // 获取所有 views 目录下一级 routerConfig.js 文件
-const files = import.meta.globEager("../views/*/routerConfig.ts");
+const tsFiles = import.meta.globEager("../views/*/routerConfig.ts");
+const jsFiles = import.meta.globEager("../views/*/routerConfig.js");
+const files = {...tsFiles, ...jsFiles};
 // 相同路由不做提示
 Object.keys(files).forEach((key) => {
   if (files[key].default) {
-    routerMaps = [...routerMaps, ...files[key].default];
+    files[key].default.forEach((rou:RouteRecord) => {
+      if (!!routerPath[rou.path]) {
+        console.error(`${key} 和 ${routerPath[rou.path]} 存在相同路由：${rou.path}`);
+      }
+      routerPath[rou.path] = key;
+      routerMaps.push(rou);
+    })
+    // routerMaps = [...routerMaps, ...files[key].default];
   }
 });
 export default routerMaps;

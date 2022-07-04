@@ -1,7 +1,3 @@
-declare type myObject  = {
-  [key: string]: any;
-}
-
 // 环境变量
 declare interface ImportMetaEnv {
   VITE_CONFIG: string;

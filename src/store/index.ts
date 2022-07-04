@@ -63,8 +63,9 @@ let storeMaps = {
 // this.$store.getters['modulesName/stateName']      // 区分模块
 
 // 获取所有 views 目录下一级的 storeConfig.js 文件
-const files = import.meta.globEager("../views/*/storeConfig.ts");
-
+const tsFiles = import.meta.globEager("../views/*/storeConfig.ts");
+const jsFiles = import.meta.globEager("../views/*/storeConfig.js");
+const files = {...tsFiles, ...jsFiles};
 const hand = (obj:any) => {
   const moduleName = obj.moduleName;
   delete obj.moduleName;

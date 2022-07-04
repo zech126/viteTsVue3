@@ -13,7 +13,7 @@ declare module '@vue/runtime-core' {
     $common: {[key:string]: any};
     $message: any;
     api: {[key:string]: any};
-    $api: myObject;
+    $api: {[key:string]: any};
     $refs: any;
     $attrs: any;
     $emit: any;

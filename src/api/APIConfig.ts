@@ -1,26 +1,31 @@
 import globalApi from "../api/globalApi"; //全局API
+const globalPath = '../api/globalApi/globalApi.ts';
 //API 入口设置
 const apiMaps:object = {};
 // 获取所有 views 目录下一级 apiConfig.js 文件
-const files = import.meta.globEager("../views/*/apiConfig.ts");
+const tsFiles = import.meta.globEager("../views/*/apiConfig.ts");
+const jsFiles = import.meta.globEager("../views/*/apiConfig.js");
+const files = {...tsFiles, ...jsFiles};
+let apiKeySpin:{[key:string]: string} = {};
 // API 对象
 Object.keys(files).forEach((key) => {
   if (files[key].default) {
     Object.keys(files[key].default).forEach(apiKey => {
+      if (!!apiKeySpin[apiKey]) {
+        console.error(`${apiKeySpin[apiKey]} 和 ${key} 存在相同 API 标识：${apiKey}, 相同标识将被覆盖`);
+      }
+      apiKeySpin[apiKey] = key;
       apiMaps[apiKey] = files[key].default[apiKey];
       if (!!globalApi[apiKey]) {
         if (typeof apiMaps[apiKey] === 'string' || typeof globalApi[apiKey] === 'string') {
-          console.error(`api.${apiKey} 被 globalApi.ts 文件中的 ${apiKey} 覆盖`);
-          // 相同 key 赋值
+          console.error(`${key} 和 ${globalPath} 存在相同 API 标识：${apiKey}, 相同标识将被覆盖`);
           apiMaps[apiKey] = globalApi[apiKey];
         } else {
           if (!!apiMaps[apiKey]) {
-            // 相同 key 覆盖提示
             Object.keys(apiMaps[apiKey]).forEach(lower => {
-              !!globalApi[apiKey][lower] && console.error(`api.${apiKey}.${lower} 被 globalApi.ts 文件中的 ${apiKey}.${lower} 覆盖`);
+              !!globalApi[apiKey][lower] && console.error(`${key} 和 ${globalPath} 存在相同 API 标识：${apiKey}.${lower}, 相同标识将被覆盖`);
             })
           }
-          // 相同 key 合并
           apiMaps[apiKey] = {...apiMaps[apiKey], ...globalApi[apiKey]};
         }
         delete globalApi[apiKey];
@@ -28,4 +33,4 @@ Object.keys(files).forEach((key) => {
     })
   }
 });
-export default { ...apiMaps, ...globalApi };
+export default {...apiMaps, ...globalApi};

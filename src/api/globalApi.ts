@@ -1,17 +1,18 @@
 const globalApi = {
-  module1: '/globalApi/1111',
-  module2: {
-    api1: '/globalApi/yyyy/dsgh',
-    api2: '/globalApi/hhh'
+  module10: '/globalApi/1111',
+  module20: {
+    api10: '/globalApi/yyyy/dsgh',
+    api20: '/globalApi/hhh'
   },
   module3: {
-    api1: '/globa/api1',
-    api2: '/globa/api2',
-    api3: {
+    api10: '/globa/api1',
+    api20: '/globa/api2',
+    api30: {
       ff: '/globa/ff'
     },
-    api5: '/globa/api5'
+    api50: '/globa/api5'
   },
+  ertesg0: '/sdtyhdtfyju'
 };
 
 export default globalApi;

@@ -31,7 +31,7 @@ instance.interceptors.request.use((config) => {
     if (Object.prototype.toString.call(config.data) != '[object FormData]' && Object.prototype.toString.call(config.params) != '[object FormData]') {
       // 移除参数中的空值
       if(common.isEmpty(config.removeEmpty) || (common.isBoolean(config.removeEmpty) && config.removeEmpty)) {
-        config.data = !common.isEmpty(config.data) ? common.removeEmpty(config.params) : undefined;
+        config.data = !common.isEmpty(config.data) ? common.removeEmpty(config.data) : undefined;
         config.params = !common.isEmpty(config.params) ? common.removeEmpty(config.params) : undefined;
       }
     }
