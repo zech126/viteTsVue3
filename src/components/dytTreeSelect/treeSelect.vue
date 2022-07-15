@@ -172,8 +172,8 @@ interface dataType {
   popoverTreeWidth: string | number | null;
 }
 
-const global:any = getGlobal();
-const proxy:any = getProxy();
+const global = getGlobal();
+const proxy = getProxy();
 const $slots = useSlots();
 const $attrs = useAttrs();
 const emit = defineEmits(['show', 'showBefore', 'showAfter', 'hide', 'hideAfter', 'update:modelValue', 'input']);
@@ -305,6 +305,7 @@ const initTreeData  = (arr:Array<any> = [], disabled: boolean = false) => {
 }
 // 弹窗位置调整
 const popoverAdjust = () => {
+  if (!proxy) return;
   nextTick(() => {
     const ele = proxy.$refs[`tag-${data.pageId}`];
     const content:any = proxy.$refs[`popover-${data.pageId}`].parentNode;
@@ -340,9 +341,10 @@ const popoverShow = () => {
 // 设置宽度
 const setTreeWidth = () => {
   let itemList:Array<any> = [];
-  const content:any = proxy.$refs[`popover-${data.pageId}`];
-  const itemDemo:any = content.querySelectorAll('.el-tree-node__content .el-tree-node__label');
-  itemDemo.forEach((item:any) => {
+  if (!proxy) return;
+  const content = proxy.$refs[`popover-${data.pageId}`];
+  const itemDemo:Array<HTMLElement> = content.querySelectorAll('.el-tree-node__content .el-tree-node__label');
+  itemDemo.forEach(item => {
     itemList.push(item.offsetWidth + 110);
   })
   itemList.push(global.$common.getElementStyle(content.querySelector('.el-scrollbar__wrap'), 'width', true));
@@ -497,75 +499,75 @@ const clickPopoverOutside = (e:any) => {
 // el-tree 的方法
 // 过滤所有树节点，过滤后的节点将被隐藏
 const filter = (val:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].filter(val);
+  proxy?.$refs[`tree-${data.pageId}`]?.filter(val);
 }
 // 为节点设置新数据，只有当设置 node-key 属性的时候才可用
 const updateKeyChildren = (key:any = null, resources:any = null)  => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].updateKeyChildren(key, resources);
+  proxy?.$refs[`tree-${data.pageId}`]?.updateKeyChildren(key, resources);
 }
 // 如果节点可以被选中，(show-checkbox 为 true), 本方法将返回当前选中节点的数组
 const getCheckedNodes = (leafOnly:any = null, includeHalfChecked:any = null) => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getCheckedNodes(leafOnly, includeHalfChecked);
+  return proxy?.$refs[`tree-${data.pageId}`]?.getCheckedNodes(leafOnly, includeHalfChecked);
 }
 // 设置目前勾选的节点，使用此方法必须提前设置 node-key 属性, 要选中的节点构成的数组
 const setCheckedNodes = (val:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].setCheckedNodes(val);
+  proxy?.$refs[`tree-${data.pageId}`]?.setCheckedNodes(val);
 }
 // 若节点可用被选中 (show-checkbox 为 true), 它将返回当前选中节点 key 的数组
 const getCheckedKeys = (leafOnly:any = null) => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getCheckedKeys(leafOnly);
+  return proxy?.$refs[`tree-${data.pageId}`]?.getCheckedKeys(leafOnly);
 }
 // 设置目前选中的节点，使用此方法必须设置 node-key 属性
 const setCheckedKeys = (keys:any = null, leafOnly:any = null) => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].setCheckedKeys(keys, leafOnly);
+  return proxy?.$refs[`tree-${data.pageId}`]?.setCheckedKeys(keys, leafOnly);
 }
 // 设置节点是否被选中, 使用此方法必须设置 node-key 属性
 const setChecked = (resources:any = null, checked:any = null, deep:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].setChecked(resources, checked, deep);
+  proxy?.$refs[`tree-${data.pageId}`]?.setChecked(resources, checked, deep);
 }
 // 如果节点可用被选中 (show-checkbox 为 true), 它将返回当前半选中的节点组成的数组
 const getHalfCheckedNodes = () => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getHalfCheckedNodes();
+  return proxy?.$refs[`tree-${data.pageId}`]?.getHalfCheckedNodes();
 }
 // 若节点可被选中(show-checkbox 为 true)，则返回目前半选中的节点的 key 所组成的数组
 const getHalfCheckedKeys = (val:any = null) => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getHalfCheckedKeys(val);
+  return proxy?.$refs[`tree-${data.pageId}`]?.getHalfCheckedKeys(val);
 }
 // 返回当前被选中节点的数据 (如果没有则返回 null)
 const getCurrentKey = () => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getCurrentKey();
+  return proxy?.$refs[`tree-${data.pageId}`]?.getCurrentKey();
 }
 // 返回当前被选中节点的数据 (如果没有则返回 null)
 const getCurrentNode = () => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getCurrentNode();
+  return proxy?.$refs[`tree-${data.pageId}`]?.getCurrentNode();
 }
 // 通过 key 设置某个节点的当前选中状态，使用此方法必须设置 node-key  属性
 const setCurrentKey = (key:any = null, shouldAutoExpandParent = true) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].setCurrentKey(key, shouldAutoExpandParent);
+  proxy?.$refs[`tree-${data.pageId}`]?.setCurrentKey(key, shouldAutoExpandParent);
 }
 // 设置节点为选中状态，使用此方法必须设置 node-key 属性
 const setCurrentNode = (node:any = null, shouldAutoExpandParent = true) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].setCurrentNode(node, shouldAutoExpandParent);
+  proxy?.$refs[`tree-${data.pageId}`]?.setCurrentNode(node, shouldAutoExpandParent);
 }
 // 根据 data 或者 key 拿到 Tree 组件中的 node
 const getNode = (resources:any = null) => {
-  return proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].getNode(resources);
+  return proxy?.$refs[`tree-${data.pageId}`]?.getNode(resources);
 }
 // 删除 Tree 中的一个节点，使用此方法必须设置 node-key 属性
 const remove = (resources:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].remove(resources);
+  proxy?.$refs[`tree-${data.pageId}`]?.remove(resources);
 }
 // 为 Tree 中的一个节点追加一个子节点
 const append = (resources:any = null, parentNode:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].append(resources, parentNode);
+  proxy?.$refs[`tree-${data.pageId}`]?.append(resources, parentNode);
 }
 // 在 Tree 中给定节点前插入一个节点
 const insertBefore = (resources:any = null, refNode:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].insertBefore(resources, refNode);
+  proxy?.$refs[`tree-${data.pageId}`]?.insertBefore(resources, refNode);
 }
 // 在 Tree 中给定节点后插入一个节点
 const insertAfter = (resources:any = null, refNode:any = null) => {
-  proxy.$refs[`tree-${data.pageId}`] && proxy.$refs[`tree-${data.pageId}`].insertAfter(resources, refNode);
+  proxy?.$refs[`tree-${data.pageId}`]?.insertAfter(resources, refNode);
 }
 // 返回选中所有值
 const getAllChecked = () => {

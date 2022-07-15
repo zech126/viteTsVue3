@@ -148,8 +148,8 @@ import pagination from './pagination.vue';
 import tableView from './table.vue';
 
 const includeFun = ['filterReset', 'expandFilter', 'requested'];
-const global:any = getGlobal();
-const proxy:any = getProxy();
+const global = getGlobal();
+const proxy = getProxy();
 const $slots = useSlots();
 const $attrs = useAttrs();
 const $emit = defineEmits(['requested', 'expandFilter', 'filterReset', 'filterValidate']);
@@ -369,7 +369,7 @@ const changeTableHeight = () => {
     if (base.notCalculate || !dome) return;
     const filterBar = dome.querySelector(`.filterBar-${base.pageId}`);
     if (!base.isExpand && !base.filterHeight) {
-      base.filterHeight = global.$common.getElementStyle(filterBar, 'height', true);
+      base.filterHeight = Number(global.$common.getElementStyle(filterBar, 'height', true));
     }
     if (global.$common.isEmpty(props.tableProps.height)) {
       const tableDome = dome.querySelector(`#table_${base.pageId}`);
@@ -393,7 +393,7 @@ const changeTableHeight = () => {
       // base.notCalculate = base.tableHeight === null;
     } else if (base.isExpand) {
       let newHeight:any = 0;
-      const difference = global.$common.getElementStyle(filterBar, 'height', true) - base.filterHeight;
+      const difference = Number(global.$common.getElementStyle(filterBar, 'height', true)) - base.filterHeight;
       if (typeof props.tableProps.height === 'string' && !/^\d+$/.test(props.tableProps.height)) {
         newHeight = `calc(${props.tableProps.height} - ${difference}px)`;
       } else {

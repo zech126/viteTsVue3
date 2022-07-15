@@ -173,8 +173,8 @@ interface dataType {
   }
 }
 
-const global:any = getGlobal();
-const proxy:any = getProxy();
+const global = getGlobal();
+const proxy = getProxy();
 const $attrs = useAttrs();
 const props = defineProps({
   // 绑定值， 使用 v-model 或 modelValue 绑定
@@ -414,6 +414,7 @@ const focus = () => {
 }
 // 弹窗位置调整
 const popoverAdjust = () => {
+  if (!proxy) return;
   nextTick(() => {
     const content:any = proxy.$refs[`popover-${base.pageId}`];
     if (!content) return;

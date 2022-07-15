@@ -148,7 +148,7 @@ interface dataType{
 }
 
 const global = getGlobal();
-const proxy:any = getProxy();
+const proxy = getProxy();
 const $slots = useSlots();
 const props = defineProps({
   //搜索栏
@@ -202,7 +202,7 @@ const fConfig = computed(() => {
 const filterLayout = () => {
   const filterForm = document.querySelector(`#filterForm-${props.pageId}`);
   if (!filterForm) return;
-  data.showMore = global.$common.getElementStyle(filterForm, 'height', true) > 90;
+  data.showMore = Number(global.$common.getElementStyle(filterForm, 'height', true)) > 90;
   // 处理按钮位置
   const handWidth = () => {
     nextTick(() => {
@@ -211,10 +211,10 @@ const filterLayout = () => {
       const allItem = Array.prototype.slice.call(filterForm.querySelectorAll('.dyt-filter-item'), 0);
       const lastItem = allItem.filter(item => item.offsetTop === 0).slice(-1)[0]
       if (lastItem) {
-        const contWidth = global.$common.getElementStyle(filterForm, 'width', true);
+        const contWidth = Number(global.$common.getElementStyle(filterForm, 'width', true));
         const btnWidth = cont.querySelector('.dyt-form-search');
         const itemLeft = lastItem.offsetLeft + global.$common.getElementStyle(lastItem, 'width', true) + 10;
-        data.btnOffsetRight = contWidth - itemLeft - global.$common.getElementStyle(btnWidth, 'width', true);
+        data.btnOffsetRight = contWidth - itemLeft - Number(global.$common.getElementStyle(btnWidth, 'width', true));
       }
     })
   }

@@ -22,8 +22,8 @@ interface dataType{
   defaultConfig: any
 }
 
-const proxy:any = getProxy();
-const global: any = getGlobal();
+const proxy = getProxy();
+const global = getGlobal();
 const props = defineProps({
   modelValue: {type: [String, Number, Date, Array], defalt: ''}
 })
@@ -107,10 +107,10 @@ watch(() => props.modelValue, (newVal:any) => {
 }, {deep: true, immediate: true});
 
 const focus = () => {
-  proxy.$refs.dytDatePicker?.focus();
+  proxy?.$refs.dytDatePicker?.focus();
 };
 const blur = () => {
-  proxy.$refs.dytDatePicker?.blur();
+  proxy?.$refs.dytDatePicker?.blur();
 };
 // 暴露给父级使用 ref 时使用
 defineExpose({ focus, blur });

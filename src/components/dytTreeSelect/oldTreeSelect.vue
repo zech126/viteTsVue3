@@ -354,6 +354,7 @@ export default defineComponent({
       })
       itemList.push(this.$common.getElementStyle(content.querySelector('.el-scrollbar__wrap'), 'width', true));
       this.popoverTreeWidth = Math.max.apply('', this.$common.arrRemoveRepeat(itemList));
+      // this.api
       const treeView = content.querySelector('.el-scrollbar__view');
       treeView.style.width = `${this.popoverTreeWidth}px`;
       // console.log(Math.max.apply('', this.$common.arrRemoveRepeat(itemList)))

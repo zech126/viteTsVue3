@@ -34,7 +34,7 @@
 import {reactive, watch, onMounted} from 'vue';
 import getProxy from '@/utils/proxy';
 import getGlobal from '@/utils/global';
-const proxy:any = getProxy();
+const proxy = getProxy();
 const global = getGlobal();
 const images = {
   '00': '../../../src/assets/images/table_loding.gif',
@@ -151,6 +151,7 @@ const getImageList = () => {
 }
 
 const getContet = (ref:string) => {
+  if (!proxy) return;
   const content = proxy.$refs[ref]?.getContent();
   console.log(content)
 }

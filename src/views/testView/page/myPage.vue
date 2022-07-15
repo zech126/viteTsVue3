@@ -206,7 +206,7 @@ import getGlobal from "@/utils/global";
 import * as component from './test';
 import {component1, component2} from './test';
 
-const proxy:any = getProxy();
+const proxy = getProxy();
 const global = getGlobal();
 const data = reactive({
   canshu: 'component1',
@@ -431,7 +431,7 @@ const cascaderChange = (val:any) => {
 }
 
 onMounted(() => {
-  proxy.$refs.inputRef?.focus(); // 焦点放到输入框里面
+  proxy?.$refs.inputRef?.focus(); // 焦点放到输入框里面
 })
 setTimeout(() => {
   data.canshu = '我改变了';
@@ -461,6 +461,7 @@ const trm = {
 };
 console.log('移除空值, hg 和 h[3].sddf.dshdsh.hhg[2] 除外', global.$common.removeEmpty(dd, ['hg', 'h[*].sddf.dshdsh.hhg[*]'], true));
 console.log('移除字符串2端的空格, ddd 和 b.c.d.e 除外', global.$common.trim(trm, ['ddd', 'b.c.d.e']));
+// global.api.
 
 </script>
 <style lang="less" scoped>

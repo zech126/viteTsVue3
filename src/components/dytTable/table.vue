@@ -120,7 +120,7 @@ interface dataType{
 const $slots = useSlots();
 const $attrs = useAttrs();
 const global = getGlobal();
-const proxy:any = getProxy();
+const proxy = getProxy();
 const props = defineProps({
   // 表格其他设置
   tableConfig: { type: Object as PropType<{
@@ -191,39 +191,39 @@ const initColumns = (arr:Array<any>) => {
 }
 // 用于多选表格，清空用户的选择
 const clearSelection = () => {
-  proxy.$refs[`table_${props.pageId}`]?.clearSelection();
+  proxy?.$refs[`table_${props.pageId}`]?.clearSelection();
 }
 // 用于多选表格，切换某一行的选中状态，如果使用了第二个参数，则是设置这一行选中与否（selected 为 true 则选中）
 const toggleRowSelection = (row:any, selected:any) => {
-  proxy.$refs[`table_${props.pageId}`]?.toggleRowSelection(row, selected);
+  proxy?.$refs[`table_${props.pageId}`]?.toggleRowSelection(row, selected);
 }
 // 用于多选表格，切换所有行的选中状态
 const toggleAllSelection = () =>{
-  proxy.$refs[`table_${props.pageId}`]?.toggleAllSelection();
+  proxy?.$refs[`table_${props.pageId}`]?.toggleAllSelection();
 }
 // 用于可展开表格与树形表格，切换某一行的展开状态，如果使用了第二个参数，则是设置这一行展开与否（expanded 为 true 则展开）
 const toggleRowExpansion = (row:any, expanded:any) => {
-  proxy.$refs[`table_${props.pageId}`]?.toggleRowExpansion(row, expanded);
+  proxy?.$refs[`table_${props.pageId}`]?.toggleRowExpansion(row, expanded);
 }
 // 用于单选表格，设定某一行为选中行，如果调用时不加参数，则会取消目前高亮行的选中状态。
 const setCurrentRow = (row:any) => {
-  proxy.$refs[`table_${props.pageId}`]?.setCurrentRow(row);
+  proxy?.$refs[`table_${props.pageId}`]?.setCurrentRow(row);
 }
 // 用于清空排序条件，数据会恢复成未排序的状态
 const clearSort = () => {
-  proxy.$refs[`table_${props.pageId}`]?.clearSort();
+  proxy?.$refs[`table_${props.pageId}`]?.clearSort();
 }
 // 不传入参数时用于清空所有过滤条件，数据会恢复成未过滤的状态，也可传入由columnKey组成的数组以清除指定列的过滤条件
 const clearFilter = (columnKey:any) => {
-  proxy.$refs[`table_${props.pageId}`]?.clearFilter(columnKey);
+  proxy?.$refs[`table_${props.pageId}`]?.clearFilter(columnKey);
 }
 // 对 Table 进行重新布局。当 Table 或其祖先元素由隐藏切换为显示时，可能需要调用此方法
 const doLayout = () => {
-  proxy.$refs[`table_${props.pageId}`]?.doLayout();
+  proxy?.$refs[`table_${props.pageId}`]?.doLayout();
 }
 // 手动对 Table 进行排序。参数prop属性指定排序列，order指定排序顺序。
 const sort = (prop:any, order:any) => {
-  proxy.$refs[`table_${props.pageId}`]?.sort(prop, order);
+  proxy?.$refs[`table_${props.pageId}`]?.sort(prop, order);
 }
 const selectable = (row:any, index:any) => {
   return props.tableConfig.selectable ? props.tableConfig.selectable(row, index) : true;

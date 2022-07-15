@@ -14,8 +14,8 @@
 <script lang="ts" setup>
 import { reactive, computed, useSlots, useAttrs } from 'vue';
 
-// const global:any = getGlobal();
-// const proxy:any = getProxy();
+// const global = getGlobal();
+// const proxy = getProxy();
 const $slots = useSlots();
 const $attrs = useAttrs();
 const props = defineProps({

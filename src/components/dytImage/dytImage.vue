@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import {computed, useSlots, useAttrs, PropType} from 'vue';
 // import getProxy from "@/utils/proxy";
-// const proxy:any = getProxy();
+// const proxy = getProxy();
 const unSlots = ['error'];
 const slots = computed(() => Object.keys(useSlots()));
 // 开启图片预览功能

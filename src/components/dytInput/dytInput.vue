@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import {computed, useSlots, useAttrs} from 'vue';
 import getProxy from "@/utils/proxy";
-const proxy:any = getProxy();
+const proxy = getProxy();
 const slots = computed(() => Object.keys(useSlots()));
 const selectConfig = computed(() => {
   let config = { ...{ disabled: false, readonly: false, clearable: true, placeholder: '请输入' }, ...useAttrs() };
@@ -18,19 +18,19 @@ const selectConfig = computed(() => {
   return config;
 });
 const focus = () => {
-  proxy.$refs.dytInputRef?.focus();
+  proxy?.$refs.dytInputRef?.focus();
 }
 const blur = () => {
-  proxy.$refs.dytInputRef?.blur();
+  proxy?.$refs.dytInputRef?.blur();
 }
 const select = () => {
-  proxy.$refs.dytInputRef?.select();
+  proxy?.$refs.dytInputRef?.select();
 }
 const clear = () => {
-  proxy.$refs.dytInputRef?.clear();
+  proxy?.$refs.dytInputRef?.clear();
 }
 const resizeTextarea = () => {
-  proxy.$refs.dytInputRef?.resizeTextarea();
+  proxy?.$refs.dytInputRef?.resizeTextarea();
 }
 
 // 暴露给父级使用 ref 时使用

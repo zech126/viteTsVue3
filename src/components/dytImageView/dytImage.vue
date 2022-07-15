@@ -15,7 +15,7 @@
 <script lang="ts" setup>
 import { reactive, computed, nextTick, onBeforeUnmount, onMounted, PropType} from 'vue';
 import getProxy from "@/utils/proxy";
-const proxy:any = getProxy();
+const proxy = getProxy();
 // 开启图片预览功能
 const props = defineProps({
   // 目标容器

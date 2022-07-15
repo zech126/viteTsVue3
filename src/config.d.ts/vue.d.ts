@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import { AxiosInstance } from "axios";
+import type { commonClass } from "../utils/common";
 //全局配置（typescript使用）
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
@@ -9,16 +10,16 @@ declare module '*.vue' {
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $http: AxiosInstance;
-    $dayjs: any;
-    $common: {[key:string]: any};
-    $message: any;
+    $common: commonClass,
+    localforage: LocalForage;
     api: {[key:string]: any};
     $api: {[key:string]: any};
-    $refs: any;
+    $refs: Array<any> | {[key: string]: any};
+    $message: any;
+    $dayjs: any;
     $attrs: any;
     $emit: any;
     $parent: any;
-    localforage: LocalForage;
     [key:string]: any;
   }
 }

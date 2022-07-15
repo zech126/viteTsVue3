@@ -15,7 +15,7 @@ import {computed, useSlots, useAttrs, reactive} from 'vue';
 import getProxy from "@/utils/proxy";
 
 const unSlots:Array<any> = ['default'];
-const proxy:any = getProxy();
+const proxy = getProxy();
 const attrs:any = useAttrs();
 const slots:any = computed(() => Object.keys(useSlots()));
 const data = reactive({
@@ -34,7 +34,7 @@ const selectConfig = computed(() => {
 });
 
 const getCheckedNodes = (leafOnly:boolean = false) => {
-  proxy.$refs.dytCascader?.getCheckedNodes(leafOnly);
+  proxy?.$refs.dytCascader?.getCheckedNodes(leafOnly);
 }
 // 暴露给父级使用 ref 时使用
 defineExpose({ getCheckedNodes });

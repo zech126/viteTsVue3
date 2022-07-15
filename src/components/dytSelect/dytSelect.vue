@@ -62,7 +62,7 @@ import {computed, useSlots, useAttrs, reactive, watch, PropType, ComputedRef} fr
 import getProxy from "@/utils/proxy";
 import getGlobal from '@/utils/global';
 const global = getGlobal();
-const proxy:any = getProxy();
+const proxy = getProxy();
 const attrs = useAttrs();
 
 const props = defineProps({
@@ -133,11 +133,11 @@ const selectConfig:{[key:string]:any} = computed(() => {
 
 
 const focus = () => {
-  proxy.$refs[`${data.pageId}`]?.focus();
+  proxy?.$refs[`${data.pageId}`]?.focus();
 }
 
 const blur = () => {
-  proxy.$refs[`${data.pageId}`]?.blur();
+  proxy?.$refs[`${data.pageId}`]?.blur();
 }
 
 const optionsHand = (val:Array<any>) => {
