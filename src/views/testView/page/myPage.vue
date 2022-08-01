@@ -431,7 +431,7 @@ const cascaderChange = (val:any) => {
 }
 
 onMounted(() => {
-  proxy?.$refs.inputRef?.focus(); // 焦点放到输入框里面
+  proxy?.$refs?.inputRef?.focus(); // 焦点放到输入框里面
 })
 setTimeout(() => {
   data.canshu = '我改变了';
@@ -461,7 +461,10 @@ const trm = {
 };
 console.log('移除空值, hg 和 h[3].sddf.dshdsh.hhg[2] 除外', global.$common.removeEmpty(dd, ['hg', 'h[*].sddf.dshdsh.hhg[*]'], true));
 console.log('移除字符串2端的空格, ddd 和 b.c.d.e 除外', global.$common.trim(trm, ['ddd', 'b.c.d.e']));
-// global.api.
+// const myTime = global.$dayjs().add(1, 'day').format('YYYY-MM-DD');
+// console.log(myTime, global.$route)
+
+console.log(global.api)
 
 </script>
 <style lang="less" scoped>

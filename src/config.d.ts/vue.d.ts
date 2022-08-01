@@ -1,6 +1,15 @@
 /// <reference types="vite/client" />
 import { AxiosInstance } from "axios";
+import { Router, RouteLocationNormalizedLoaded } from "vue-router";
+import { Store } from "vuex";
+import dayjs from 'dayjs';
 import type { commonClass } from "../utils/common";
+import type { Message, Notify, LoadingOptions } from 'element-plus';
+
+type PluginFunc<T = unknown> = (option: T, c: typeof dayjs.Dayjs, d: typeof dayjs) => void;
+interface RouteOptions extends RouteLocationNormalizedLoaded {
+  herf: string;
+}
 //全局配置（typescript使用）
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
@@ -9,17 +18,30 @@ declare module '*.vue' {
 }
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $http: AxiosInstance;
-    $common: commonClass,
+    $http: Readonly<AxiosInstance>;
+    $common: Readonly<commonClass>;
     localforage: LocalForage;
-    api: {[key:string]: any};
-    $api: {[key:string]: any};
+    $dayjs: {
+      extend:<T = unknown>(plugin: PluginFunc<T>, option?: T) => dayjs.Dayjs;
+      locale:(preset?: string | ILocale, object?: Partial<ILocale>, isLocal?: boolean) => string;
+      isDayjs: (d: any) => d is dayjs.Dayjs;
+      unix: (t: number) => dayjs.Dayjs;
+      (date?: dayjs.ConfigType, format?: dayjs.OptionType, locale?: string, strict?: boolean): dayjs.Dayjs;
+    };
+    $message: Message;
+    $messageBox: (options: {[key:string]:any}) => void;
+    $msgbox: (options: {[key:string]:any}) => void;
+    $alert: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any}) => void;
+    $confirm: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any})=> void;
+    $prompt: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any}) => void;
+    $notify: Notify;
+    $loading: (options:LoadingOptions) => void;
+    $route: RouteOptions;
+    $router: Router;
+    $store: Store<any>;
+    api: Readonly<{[key:string]: any}>;
+    $api: Readonly<{[key:string]: any}>;
     $refs: Array<any> | {[key: string]: any};
-    $message: any;
-    $dayjs: any;
-    $attrs: any;
-    $emit: any;
-    $parent: any;
     [key:string]: any;
   }
 }

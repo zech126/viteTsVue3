@@ -52,7 +52,7 @@ export class commonClass {
     return Object.prototype.toString.call(val).slice(8, -1) === 'Boolean';
   }
   // 是否函数
-  isFunction (fun:any):fun is void {
+  isFunction (fun:any):fun is Function {
     return Object.prototype.toString.call(fun).slice(8, -1) === 'Function'
   }
   // 是否时间

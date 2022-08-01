@@ -1,16 +1,43 @@
 import type { commonClass } from "./common";
 import { AxiosInstance } from "axios";
-import { ComponentInternalInstance, getCurrentInstance } from 'vue'
+import { ComponentInternalInstance, getCurrentInstance } from 'vue';
+import dayjs from 'dayjs';
+import { Router, RouteLocationNormalizedLoaded } from "vue-router";
+import { Store } from "vuex";
+import type { Message, Notify, LoadingOptions } from 'element-plus';
+
+type PluginFunc<T = unknown> = (option: T, c: typeof dayjs.Dayjs, d: typeof dayjs) => void;
+interface RouteOptions extends RouteLocationNormalizedLoaded {
+  herf: string;
+}
+
 const getGlobal = () => {
-    const { appContext } = getCurrentInstance() as ComponentInternalInstance
-    return appContext.config.globalProperties as  {
-        $http: AxiosInstance;
-        localforage: LocalForage;
-        $common: commonClass;
-        api: {[key:string]: any};
-        $api: {[key:string]: any};
-        $dayjs: any;
-        [key:string]:any;
-    }
+  const { appContext } = getCurrentInstance() as ComponentInternalInstance;
+  return appContext.config.globalProperties as  {
+    $http: Readonly<AxiosInstance>;
+    $common: Readonly<commonClass>;
+    localforage: LocalForage;
+    $dayjs: {
+      extend:<T = unknown>(plugin: PluginFunc<T>, option?: T) => dayjs.Dayjs;
+      locale:(preset?: string | ILocale, object?: Partial<ILocale>, isLocal?: boolean) => string;
+      isDayjs: (d: any) => d is dayjs.Dayjs;
+      unix: (t: number) => dayjs.Dayjs;
+      (date?: dayjs.ConfigType, format?: dayjs.OptionType, locale?: string, strict?: boolean): dayjs.Dayjs;
+    };
+    $message: Message;
+    $messageBox: (options: {[key:string]:any}) => void;
+    $msgbox: (options: {[key:string]:any}) => void;
+    $alert: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any}) => void;
+    $confirm: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any})=> void;
+    $prompt: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any}) => void;
+    $notify: Notify;
+    $loading: (options:LoadingOptions) => void;
+    $route: RouteOptions;
+    $router: Router;
+    $store: Store<any>;
+    api: Readonly<{[key:string]: any}>;
+    $api: Readonly<{[key:string]: any}>;
+    // [key:string]:any;
+  }
 }
 export default getGlobal;

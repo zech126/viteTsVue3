@@ -1,5 +1,6 @@
 // 引入 element-plus icons 所有组件，并且全部注册进去
-import * as icons from '@element-plus/icons-vue'
+import * as icons from '@element-plus/icons-vue';
+import { App } from 'vue';
 // 获取所有组件文件
 const tsFiles = import.meta.globEager('../components/*/index.ts');
 const jsFiles = import.meta.globEager('../components/*/index.js');
@@ -12,9 +13,9 @@ const end = '/index.';
 let fileCont:{ name?:string; '__name'?:string } = {};
 let comKey:{[key:string]:string} = {};
 let componentName:{[key:string]:boolean} = {};
-const install = (app:any) => {
+const install = (app:App) => {
   // 注册 elementUi 字体图标组件
-  Object.keys(icons).forEach((key:any) => {
+  Object.keys(icons).forEach((key:string) => {
     app.component(key, icons[key]);
   });
 
@@ -23,7 +24,7 @@ const install = (app:any) => {
     if (!fileCont) return;
     comKey[key] = fileCont.name ? fileCont.name : key.substring(key.lastIndexOf(start) + start.length, key.lastIndexOf(end));
     if (componentName[comKey[key]]) {
-      console.error(`${key} 导入名为 ${comKey[key]} 组件名但 ${comKey[key]} 已被注册，请将重新命名`);
+      console.error(`${key} 导入名为 ${comKey[key]} 组件名, 但 ${comKey[key]} 已被注册，请将重新命名`);
       return;
     }
     componentName[comKey[key]] = true;
