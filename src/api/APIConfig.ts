@@ -33,4 +33,14 @@ Object.keys(files).forEach((key) => {
     })
   }
 });
+class apiClass {
+  [key: string]: string | number | {[key: string]: any};
+}
+const apiCl = new apiClass();
+apiClass.prototype.ad = {
+  keydd: {
+    j: 'dg'
+  }
+}
+console.log(apiCl)
 export default {...apiMaps, ...globalApi};

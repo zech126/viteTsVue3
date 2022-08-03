@@ -4,7 +4,7 @@ import { Router, RouteLocationNormalizedLoaded } from "vue-router";
 import { Store } from "vuex";
 import dayjs from 'dayjs';
 import type { commonClass } from "../utils/common";
-import type { Message, Notify, LoadingOptions } from 'element-plus';
+import type { Message, Notify, LoadingOptions, IElMessageBox } from 'element-plus';
 
 type PluginFunc<T = unknown> = (option: T, c: typeof dayjs.Dayjs, d: typeof dayjs) => void;
 interface RouteOptions extends RouteLocationNormalizedLoaded {
@@ -29,11 +29,11 @@ declare module '@vue/runtime-core' {
       (date?: dayjs.ConfigType, format?: dayjs.OptionType, locale?: string, strict?: boolean): dayjs.Dayjs;
     };
     $message: Message;
-    $messageBox: (options: {[key:string]:any}) => void;
-    $msgbox: (options: {[key:string]:any}) => void;
-    $alert: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any}) => void;
-    $confirm: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any})=> void;
-    $prompt: (message: string, title?:string | {[key:string]:any}, options?: {[key:string]:any}) => void;
+    $msgbox: IElMessageBox;
+    $messageBox: IElMessageBox;
+    $alert: IElMessageBox['alert'];
+    $confirm: IElMessageBox['confirm'];
+    $prompt: IElMessageBox['prompt'];
     $notify: Notify;
     $loading: (options:LoadingOptions) => void;
     $route: RouteOptions;
@@ -42,7 +42,7 @@ declare module '@vue/runtime-core' {
     api: Readonly<{[key:string]: any}>;
     $api: Readonly<{[key:string]: any}>;
     $refs: Array<any> | {[key: string]: any};
-    [key:string]: any;
+    // [key:string]: any;
   }
 }
 // 新增 axios 配置

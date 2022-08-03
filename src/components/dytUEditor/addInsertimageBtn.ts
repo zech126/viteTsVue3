@@ -24,7 +24,7 @@ export default function addInsertimageBtn (options: {onclick?:(editor:{[key:stri
         if (typeof window.temporaryStorage[editorid].getFiles !== 'function' && typeof window.temporaryStorage[editorid].uploadFiles !== 'function') {
           current.global.$message.warning({
             message: '该功能后端未配置！',
-            'show-close': true
+            'showClose': true
           });
           return;
         }

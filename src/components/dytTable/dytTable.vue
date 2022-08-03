@@ -224,7 +224,7 @@ const base = reactive({
   tableDataMap: { rows: 'data.list', total: 'data.total', errorInfos: 'msg' },
   tableOtherConfog: {
     // 打开页面立即加载数据
-    autoload: true,
+    autoload: false,
     // 表格是否多选
     multiple: false,
     // 显示列表

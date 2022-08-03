@@ -158,7 +158,7 @@ export default function addAttachmentBtn (options: {onclick?:(editor:{[key:strin
         if (typeof window.temporaryStorage[editorid].uploadHand !== 'function') {
           current.global.$message.warning({
             message: '该功能后端未配置！',
-            'show-close': true
+            'showClose': true
           });
           return;
         }

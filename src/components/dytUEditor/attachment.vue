@@ -314,7 +314,7 @@ watch(() => data.unqualifiedFile, debounce((val) => {
   const fileName:Array<string> = val.map((file:any) => file.name);
   global.$message.warning({
     message: `${fileName.join('、 ')} 为非图片文件格式, 不允许上传`,
-    'show-close': true
+    'showClose': true
   });
   data.unqualifiedFile = [];
 }, 100), {deep: true});
