@@ -17,7 +17,7 @@
         顶部插槽：权限（{{power}}），，，，，
         <dyt-date-picker v-model="datePicker">
           <template #default="cell">
-            <div class="cell" :class="{ current: cell.isCurrent }">
+            <div class="dateCell" :class="{ current: cell.isCurrent }">
               <span class="text">{{ cell.text }}</span>
               <span v-if="isHoliday(cell)" class="holiday"></span>
             </div>
@@ -174,7 +174,7 @@ export default defineComponent({
     return {
       dialogVisible: false,
       inputTag: '2,854,84',
-      holidays: ['2022-02-01', '2022-02-02', '2022-02-03', '2022-02-04', '2022-02-05'],
+      holidays: ['2022-02-01', '2022-02-02', '2022-02-03', '2022-02-04', '2022-08-09'],
       datePicker: '',
       filterConfig: {
         validRules: {
@@ -359,8 +359,8 @@ export default defineComponent({
             }
           }
         },
-        {slot: 'myName', label: '自定义列1', align: 'center', 'min-width': '200'},
-        {slot: 'myName1', label: '自定义列2', align: 'center', 'min-width': '200'},
+        {slot: 'myName', label: '自定义列1', align: 'center', 'min-width': '230'},
+        {slot: 'myName1', label: '自定义列2', align: 'center', 'min-width': '230'},
         {label: '电话', prop: 'phone', align: 'center', 'min-width': '120'},
         {label: '邮箱', prop: 'email', align: 'center', 'width': '200'},
         {label: '部门', prop: 'deptName', align: 'center', 'min-width': '200'},
@@ -478,35 +478,35 @@ export default defineComponent({
   }
 });
 </script>
-<style>
-.cell {
-  height: 30px;
-  padding: 3px 0;
-  box-sizing: border-box;
-}
-.cell .text {
-  width: 24px;
-  height: 24px;
-  display: block;
-  margin: 0 auto;
-  line-height: 24px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 50%;
-}
-.cell.current .text {
-  background: purple;
-  color: #fff;
-}
-.cell .holiday {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: red;
-  border-radius: 50%;
-  bottom: 0px;
-  left: 50%;
-  transform: translateX(-50%);
+<style lang="less">
+.dateCell {
+  height: 100%;
+  .text {
+    width: 24px;
+    height: 24px;
+    display: block;
+    margin: 0 auto;
+    line-height: 24px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+  }
+  .holiday {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: red;
+    border-radius: 50%;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &.current{
+    .text {
+      background: purple;
+      color: #fff;
+    }
+  }
 }
 </style>

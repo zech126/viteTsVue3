@@ -19,7 +19,7 @@ interface dataType{
     },
     dateRange: any
   };
-  defaultConfig: any
+  defaultConfig: {[key:string]:any}
 }
 
 const proxy = getProxy();
@@ -31,8 +31,8 @@ const attrs: any = useAttrs();
 const slots: any = computed(() => Object.keys(useSlots()));
 const $emit = defineEmits(['update:modelValue']);
 
-const dateAdd = (add:number = 0, type:string = 'day', oldDate:Date = new Date()) => {
-  return new Date(global.$dayjs(oldDate).add(add, type));
+const dateAdd = (add:number = 0, type:any = 'day', oldDate:Date = new Date()) => {
+  return new Date(global.$dayjs(oldDate).add(add, type).format('YYYY/MM/DD HH:mm:ss:SSS'));
 };
 const data:dataType = reactive({
   mValue: '',
@@ -60,22 +60,25 @@ const data:dataType = reactive({
   defaultConfig: {
     size: 'default',
     align: 'right',
+    'popper-class': 'dyt-date-picker-popper',
     'unlink-panels': true
-    // format: 'YYYY-MM-DD HH:mm:ss'
-    // 'value-format': 'YYYY-MM-DD HH:mm:ss'
   }
 });
 const selectConfig = computed(() => {
-  let config:any = {};
+  let config: {disabled?: boolean, readonly?:boolean, placeholder?: string} = {};
+  let addConfig: {'popper-class'?: string, placeholder?: string} = {};
   if (attrs.type && attrs.type.includes('range')) {
     config = {...data.defaultConfig, ...data.pickerProps.dateRange};
   } else {
     config = {...data.defaultConfig, ...data.pickerProps.default};
   }
-  if (config.disabled || config.readonly) {
-    config.placeholder = '';
+  if (!global.$common.isEmpty(attrs['popper-class'])) {
+    addConfig['popper-class'] = `${data.defaultConfig['popper-class']} ${attrs['popper-class']}`;
   }
-  return {...config, ...attrs};
+  if (config.disabled || config.readonly) {
+    addConfig.placeholder = '';
+  }
+  return {...config, ...attrs, ...addConfig};
 });
 // 在此处更新绑定值才能正常触发 fromItem 验证
 const change = (val:string|Array<string|number|Date>|number|Date) => {
@@ -116,41 +119,11 @@ const blur = () => {
 defineExpose({ focus, blur });
 </script>
 
-<style lang="scss">
-.cell {
-  height: 30px;
-  padding: 3px 0;
-  box-sizing: border-box;
-}
-.cell .text {
-  width: 24px;
-  height: 24px;
-  display: block;
-  margin: 0 auto;
-  line-height: 24px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 50%;
-}
-.cell.current .text {
-  background: purple;
-  color: #fff;
-}
-.cell .holiday {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: red;
-  border-radius: 50%;
-  bottom: 0px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.dyt-date-picker-demo{
+<style lang="less">
+.dyt-date-picker-demo {
   &.el-range-editor{
-    &.el-input__inner{
-      padding: 0 10px;
+    .el-range-input{
+      padding: 0 5px;
     }
   }
 }

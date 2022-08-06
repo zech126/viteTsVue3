@@ -251,7 +251,7 @@ defineExpose({
 });
 
 </script>
-<style lang="less">
+<style lang="less" scoped>
 .dyt-table-container{
   position: relative;
   .mian-container{
@@ -278,9 +278,42 @@ defineExpose({
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .el-table{
-    .cell{
-      line-height: 30px;
+  :deep(.el-table) {
+    &.el-table--small{
+      font-size: 14px;
+      .el-checkbox{
+        &.el-checkbox--small {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          .el-checkbox__inner{
+            width: 16px;
+            height: 16px;
+            &:before{
+              top: 6px;
+            }
+            &:after{
+              top: 0px;
+              left: 5px;
+              width: 4px;
+              height: 10px;
+            }
+          }
+        }
+      }
+      .el-table__cell{
+        padding: 6px 0;
+      }
+      .el-table__header{
+        .el-table__cell{
+          padding: 10px 0;
+        }
+      }
+      .cell{
+        min-height: 1.6em;
+        line-height: 1.6em;
+      }
     }
   }
 }
