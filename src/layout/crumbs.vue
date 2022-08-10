@@ -5,10 +5,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-import store from '@/store';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import common from '@/utils/common';
+import { useStore } from "vuex";
+
+const store = useStore();
 
 const $route = useRouter();
 const getCrumbs = computed(() => {

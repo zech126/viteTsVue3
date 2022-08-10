@@ -221,7 +221,7 @@ const filterLayout = () => {
   handWidth();
 }
 // 搜索
-const filterSearch = (type:boolean = true) => {
+const filterSearch = (e:Event, type:boolean = true) => {
   if (props.tableLoading) return;
   if (!global.$common.isEmpty(fConfig.value.validRules) && proxy.$refs.filterForm) {
     proxy.$refs.filterForm.validate((valid:boolean) => {
@@ -287,8 +287,8 @@ const filterFunHand = (fun:any, key:string, type:string) => {
   }
 }
 // 回车事件（使用 插槽、render 方法的不支持）
-const keyupEnter = (e:Element) => {
-  filterSearch(true);
+const keyupEnter = (e:Event) => {
+  filterSearch(e, true);
 }
 // 对象形式的样式转换成字符串
 const componentStyle = (style:[string | object ], set:string = '') => {

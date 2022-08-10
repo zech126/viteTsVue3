@@ -219,6 +219,7 @@ const base = reactive({
   isExpand: false,
   notCalculate: false,
   tableHeight: '',
+  tableMinHeight: 250,
   showPagination: true,
   filterHeight: 0,
   tableDataMap: { rows: 'data.list', total: 'data.total', errorInfos: 'msg' },
@@ -361,7 +362,7 @@ const paginationChange = (pageNum:number, pageSize:number) => {
   if (typeof pageNum !== 'number' && typeof pageSize !== 'number') return;
   filterSearch(false);
 }
-// 改变表格高度(当获取到容全高度小于 200 时，列表高度将自动高度)
+// 改变表格高度(当获取到容全高度小于 tableMinHeight 时，列表高度将自动高度)
 const changeTableHeight = () => {
   if (typeof props.handleTable !== 'boolean' || !props.handleTable) return;
   nextTick(() => {
@@ -389,7 +390,7 @@ const changeTableHeight = () => {
         contHeight -= v[k];
       })
       // console.log(contHeight,dome.parentNode.clientHeight, tableDome.offsetTop, tableDome.querySelector(`.mian-container-table`).offsetTop)
-      base.tableHeight = contHeight < 200 ? null : contHeight
+      base.tableHeight = contHeight < base.tableMinHeight ? null : contHeight;
       // base.notCalculate = base.tableHeight === null;
     } else if (base.isExpand) {
       let newHeight:any = 0;
@@ -398,7 +399,7 @@ const changeTableHeight = () => {
         newHeight = `calc(${props.tableProps.height} - ${difference}px)`;
       } else {
         newHeight = parseInt(props.tableProps.height) - difference;
-        base.tableHeight = newHeight < 200 ? props.tableProps.height : newHeight;
+        base.tableHeight = newHeight < base.tableMinHeight ? props.tableProps.height : newHeight;
         // base.notCalculate = base.tableHeight === base.tableProps.height;
       }
     } else {

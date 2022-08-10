@@ -15,7 +15,9 @@
 </template>
 <script lang="ts" setup>
 import { computed, reactive } from 'vue';
-import store from '@/store';
+import { useStore } from "vuex";
+
+const store = useStore();
 
 let data = reactive({
   headLoading: false

@@ -464,7 +464,7 @@ console.log('移除字符串2端的空格, ddd 和 b.c.d.e 除外', global.$comm
 // const myTime = global.$dayjs().add(1, 'day').format('YYYY-MM-DD');
 // console.log(myTime, global.$route)
 console.log(global);
-console.log(global.api);
+console.log(global.api.module.api20);
 
 </script>
 <style lang="less" scoped>

@@ -10,10 +10,11 @@ import { reactive, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import dytSubmenu from './elSubmenu.vue'
 import routerPage from '@/router/pageRouter';
-import store from '@/store';
 import common from '@/utils/common';
 import { debounce } from '@/utils/debounce';
+import { useStore } from "vuex";
 
+const store = useStore();
 // 定义类型
 interface dataType {
   navList: any;

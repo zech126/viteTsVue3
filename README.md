@@ -171,9 +171,12 @@ export default routes;
     // 更改或插入值
     this.$store.commit('testPage/exitWebOauth', true);
     // 获取值
-    this.$store..getters['testPage/exitWebOauth'];
+    this.$store.getters['testPage/exitWebOauth'];
     // 在 <script lang="ts" setup> 标签下时
     import store from "@/store";
+    // 或
+    import { useStore } from "vuex";
+    const store = useStore();
     // 更改或插入值
     store.commit('testPage/exitWebOauth', true);
     // 获取值

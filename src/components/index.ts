@@ -7,8 +7,8 @@ const jsFiles = import.meta.globEager('../components/*/index.js');
 const tsxFiles = import.meta.globEager('../components/*/index.tsx');
 const jsxFiles = import.meta.globEager('../components/*/index.jsx');
 const vueFiles = import.meta.globEager('../components/*/index.vue');
-const files = {...tsFiles, ...jsFiles, ...tsxFiles, ...jsxFiles, ...vueFiles};
-const start = '/components/';
+const files:{[key:string]: any} = {...tsFiles, ...jsFiles, ...tsxFiles, ...jsxFiles, ...vueFiles};
+const start = './';
 const end = '/index.';
 let fileCont:{ name?:string; '__name'?:string } = {};
 let comKey:{[key:string]:string} = {};
@@ -19,7 +19,7 @@ const install = (app:App) => {
     app.component(key, icons[key]);
   });
 
-  Object.keys(files).forEach((key) => {
+  Object.keys(files).forEach(key => {
     fileCont = files[key].default;
     if (!fileCont) return;
     comKey[key] = fileCont.name ? fileCont.name : key.substring(key.lastIndexOf(start) + start.length, key.lastIndexOf(end));

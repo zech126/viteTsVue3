@@ -1,6 +1,7 @@
 // import dytInput from './dytInput.vue';
 // export default dytInput;
 import { defineComponent } from 'vue';
+type configType = { disabled?:boolean, readonly?:boolean, placeholder?: string, clearable?:boolean };
 export default defineComponent({
   name: 'DytInput',
   data () {
@@ -11,14 +12,14 @@ export default defineComponent({
   setup() {},
   props: {},
   computed: {
-    slots ():any {
+    slots ():{keys: Array<string>, value: Array<any>} {
       return {
         keys: Object.keys(this.$slots),
         value: Object.values(this.$slots)
       }
     },
     selectConfig () {
-      let config = { clearable: true, placeholder: '请输入', ...this.$attrs };
+      let config:configType = { clearable: true, placeholder: '请输入', ...this.$attrs };
       if (config.disabled || config.readonly) {
         config.placeholder = '';
       }

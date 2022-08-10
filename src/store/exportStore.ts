@@ -1,10 +1,10 @@
-import { createStore } from "vuex";
+import { createStore, Store } from "vuex";
 import storeGetters from "./storeGetters";
 import layout from "@/layout/storeConfig";
 import routerModule from '../router/storeConfig';
 import { cloneDeep } from 'lodash';
 
-const other:any = [layout, routerModule];
+const other = [layout, routerModule];
 
 // store 入口设置
 let storeMaps = {
@@ -64,9 +64,23 @@ let storeMaps = {
 // this.$store.getters['modulesName/stateName']      // 区分模块
 
 // 获取所有 views 目录下一级的 storeConfig.js 文件
-const tsFiles = import.meta.globEager("../views/*/storeConfig.ts");
-const jsFiles = import.meta.globEager("../views/*/storeConfig.js");
+const tsFiles = import.meta.glob("../views/*/storeConfig.ts");
+const jsFiles = import.meta.glob("../views/*/storeConfig.js");
 const files:{[key:string]: any} = {...tsFiles, ...jsFiles};
+
+const handFiles = ():Promise<Array<{fileKey: string, value: {[key:string]: any}}>> => {
+  return new Promise((resolve) => {
+    const fileKeys = Object.keys(files);
+    const allFileRes = fileKeys.map(key => files[key]());
+    Promise.allSettled(allFileRes).then(arr => {
+      const filesRes = arr.map((m:any, i) => {
+        return { status: m.status, value: m.value.default, fileKey: fileKeys[i]}
+      }).filter(f => f.status === 'fulfilled')
+      resolve(filesRes);
+    })
+  })
+}
+
 const hand = (obj:any) => {
   const moduleName = obj.moduleName;
   delete obj.moduleName;
@@ -95,16 +109,19 @@ const hand = (obj:any) => {
   }
 };
 
-other.forEach((item:any) => {
+other.forEach(item => {
   hand(cloneDeep(item));
 });
 
-// 如出现重复，则会被覆盖
-Object.keys(files).forEach((key) => {
-  hand(cloneDeep(files[key].default || {}));
-});
+const exportStore = ():Promise<Store<any>> => {
+  return new Promise((resolve) => {
+    handFiles().then(allFiles => {
+      allFiles.forEach(item => {
+        hand(cloneDeep(item.value || {}));
+      });
+      resolve(createStore(storeMaps));
+    })
+  })
+}
 
-// 创建 store
-const store = createStore(storeMaps);
-
-export default store;
+export default exportStore;

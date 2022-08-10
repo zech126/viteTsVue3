@@ -5,7 +5,7 @@ let routerPath:{[key:string]: string} = {};
 // 获取所有 views 目录下一级 routerConfig.js 文件
 const tsFiles = import.meta.globEager("../views/*/routerConfig.ts");
 const jsFiles = import.meta.globEager("../views/*/routerConfig.js");
-const files = {...tsFiles, ...jsFiles};
+const files:{[key:string]: any} = {...tsFiles, ...jsFiles};
 // 相同路由不做提示
 Object.keys(files).forEach((key) => {
   if (files[key].default) {

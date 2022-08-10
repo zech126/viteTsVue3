@@ -3,7 +3,7 @@ const api = {
     api1: '/sdgfd/sdgh',
     api2: '/sdfh'
   },
-  module2: 'module2',
+  module2: '/api/module2',
   module3: {
     api1: '/api1',
     api2: '/api2',

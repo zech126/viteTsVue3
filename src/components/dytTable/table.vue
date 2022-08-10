@@ -42,10 +42,11 @@
             width="50"
           />
           <slot name="tableColumn">
-            <template v-for="(item, index) in data.columnConfig">
+            <template v-for="(item, index) in data.columnConfig" :key="`col-${item.prop}-${index}`">
               <!-- 自定义插槽列 -->
               <slot v-if="item.slot" :name="item.slot" :column-config="item" />
-              <el-table-column v-else :key="`col-${index}`"
+              <el-table-column
+                v-else
                 v-bind="{
                   'show-overflow-tooltip': true,
                   ...item,

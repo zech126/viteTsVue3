@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from "@vitejs/plugin-vue-jsx"; // 用于支持 vueJsx 文件打包
 import codecompression  from "vite-plugin-codecompression"; // 压缩代码，生成 .gz 格式并将输出目录打包成 zip 包
+// import topLevelAwait from "vite-plugin-top-level-await"; // 用于支持顶级使用 await
 
 const path = require('path');
 // 输出目录
@@ -20,6 +21,12 @@ export default defineConfig(({command, mode}) => {
     plugins: [
       vue(),
       vueJsx(),
+      // topLevelAwait({
+      //   // 每个块模块的顶级 await promise 的导出名称
+      //   promiseExportName: "__tla",
+      //   // 在每个chunk模块中生成顶级 await promise 的导入名称的函数
+      //   promiseImportName: i => `__tla_${i}`
+      // }),
       codecompression({
         fileZip: {
           disable: !outputZip
@@ -93,7 +100,8 @@ export default defineConfig(({command, mode}) => {
         compress: {
           drop_console: true,
           drop_debugger: true
-        }
+        },
+        // keep_classnames: true
       },
     },
     server: {

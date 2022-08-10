@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import $common from "$common";
 import $http from "$request";
 import $api from '$api';
-import store from "@/store/index";
+import store from "@/store";
 import router from "@/router/index";
 import customComponents from './components/index';
 import 'element-plus/theme-chalk/index.css';

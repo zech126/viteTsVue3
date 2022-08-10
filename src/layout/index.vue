@@ -28,13 +28,14 @@
 </template>
 <script lang="ts" setup>
 import { reactive, computed } from 'vue';
-import store from '@/store';
 import headerDemo from './header.vue';
 import sideNavDemo from './sideNav.vue';
 import crumbs from './crumbs.vue';
 import noAccessView from './401.vue';
 import nonExistView from './404.vue';
+import { useStore } from "vuex";
 
+const store = useStore();
 let data = reactive({
   loadingTxt: '页面加载中，请稍后...'
 });

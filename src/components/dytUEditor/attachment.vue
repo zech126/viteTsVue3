@@ -294,7 +294,7 @@ const closeDrawer = () => {
   })
 };
 
-const imageError = (e: Error, image:any) => {
+const imageError = (e:Event, image:any) => {
   image.error = true;
 }
 

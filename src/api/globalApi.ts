@@ -1,6 +1,6 @@
 const globalApi = {
-  module10: '/globalApi/1111',
-  module20: {
+  module7: '/globalApi/1111',
+  module: {
     api10: '/globalApi/yyyy/dsgh',
     api20: '/globalApi/hhh'
   },

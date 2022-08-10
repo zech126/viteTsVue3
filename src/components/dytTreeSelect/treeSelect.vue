@@ -13,8 +13,10 @@
     <el-popover
       ref="popoverRef"
       :placement="data.popoverPlacement"
+      trigger="click"
       :width="data.popoverWidth"
       :hide-after="100"
+      :disabled="props.disabled"
       v-model:visible="data.popoverVisible"
       popper-class="tree-popper-content"
       @after-enter="afterEnter"
@@ -123,6 +125,7 @@
             :filter-method="filterNodeHand"
             :data="treeOptions"
             v-bind="config"
+            :fit-input-width="true"
             :style="`width: ${typeof data.popoverTreeWidth === 'number' ? `${data.popoverTreeWidth}px` : data.popoverTreeWidth};`"
             @node-click="nodeClick"
             @check="check"
@@ -488,7 +491,7 @@ const checkedNodeHand = (assignment:boolean = false) => {
 }
 // 显示隐藏
 const showPopover = () => {
-  data.popoverVisible = props.disabled ? false : !data.popoverVisible;
+  // data.popoverVisible = props.disabled ? false : !data.popoverVisible;
 }
 // 点击当前组件之外的元素
 const clickPopoverOutside = (e:any) => {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-for="(item, index) in menuList" :key="index">
+    <template v-for="(item, index) in props.menuList" :key="index">
       <!-- 存在子级 -->
       <el-sub-menu v-if="item && !$common.isEmpty(item[props.defaultProps.children])" :index="item[props.defaultProps.id]">
         <!-- 菜单父级 -->
