@@ -1,10 +1,10 @@
-import globalApi from "../api/globalApi"; //全局API
+import globalApi from "./globalApi"; //全局API
 const globalPath = '../api/globalApi/globalApi.ts';
 //API 入口设置
 const apiMaps:object = {};
 // 获取所有 views 目录下一级 apiConfig.js 文件
-const tsFiles = import.meta.globEager("../views/*/apiConfig.ts");
-const jsFiles = import.meta.globEager("../views/*/apiConfig.js");
+const tsFiles = import.meta.globEager("../views/**/apiConfig.ts");
+const jsFiles = import.meta.globEager("../views/**/apiConfig.js");
 const files:{[key:string]: any} = {...tsFiles, ...jsFiles};
 let apiKeySpin:{[key:string]: string} = {};
 // API 对象

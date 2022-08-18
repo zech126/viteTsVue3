@@ -258,10 +258,10 @@ const base = reactive({
 const slots = computed(() => {
   return Object.keys($slots)
 });
-const tableColumnConfig:any = computed(() => {
+const tableColumnConfig = computed(() => {
   return props.tableColumns;
 });
-const filterFieldConfig:any = computed(() => {
+const filterFieldConfig = computed(() => {
   return props.filterFields;
 });
 const tableConfig = computed(() => {
@@ -393,7 +393,7 @@ const changeTableHeight = () => {
       base.tableHeight = contHeight < base.tableMinHeight ? null : contHeight;
       // base.notCalculate = base.tableHeight === null;
     } else if (base.isExpand) {
-      let newHeight:any = 0;
+      let newHeight:number | string = 0;
       const difference = Number(global.$common.getElementStyle(filterBar, 'height', true)) - base.filterHeight;
       if (typeof props.tableProps.height === 'string' && !/^\d+$/.test(props.tableProps.height)) {
         newHeight = `calc(${props.tableProps.height} - ${difference}px)`;
@@ -413,7 +413,7 @@ const changeTableHeight = () => {
 }
 // 触发搜索栏按钮
 const filterSearch = (type:boolean = true) => {
-  proxy.$refs[`filterBar-${base.pageId}`] ? proxy.$refs[`filterBar-${base.pageId}`].filterSearch(type) : search(type);
+  proxy.$refs[`filterBar-${base.pageId}`] ? proxy.$refs[`filterBar-${base.pageId}`].filterSearch({}, type) : search(type);
 }
 // 获取搜索栏数据
 const getFilter = () => {

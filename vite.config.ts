@@ -54,7 +54,6 @@ export default defineConfig(({command, mode}) => {
         // src 根目录别名
         { find: '@', replacement: path.resolve(__dirname, './src') },
         { find: '@views', replacement: path.resolve(__dirname, './src/views') },
-        { find: '$api', replacement: path.resolve(__dirname, './src/api/APIConfig.ts') },
         { find: '$common', replacement: path.resolve(__dirname, './src/utils/common.ts') },
         { find: '$request', replacement: path.resolve(__dirname, './src/utils/request.ts') }
       ]
@@ -69,7 +68,7 @@ export default defineConfig(({command, mode}) => {
       rollupOptions: {
         // 入口文件配置
         input: {
-          index: path.resolve(__dirname, "index.html"),
+          index: path.resolve(__dirname, "index.html")
           // project: path.resolve(__dirname,"project.html")
         },
         // 输出

@@ -1,12 +1,12 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from 'vue';
+import App from './App.vue';
 import "@/assets/style/index.less";
 import "@/utils/loadIconFont";
 import dayjs from 'dayjs';
 import $common from "$common";
 import $http from "$request";
-import $api from '$api';
-import store from "@/store";
+import $api from '@/api/index';
+import store from "@/store/index";
 import router from "@/router/index";
 import customComponents from './components/index';
 import 'element-plus/theme-chalk/index.css';

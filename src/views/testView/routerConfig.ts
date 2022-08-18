@@ -1,20 +1,20 @@
 const routes = [
   {
-    name: "测试1",
+    name: "页面测试",
     path: "/test1",
     component: () => import("./page/myPage.vue"),
     meta: { requireAuth: false, keepAlive: false }
   },
   {
-    name: "测试2",
+    name: "JSX 测试",
     path: "/test2",
     component: () => import("./page/test.vue"),
     meta: { requireAuth: false,keepAlive: false }
   },
   {
-    name: '列表',
+    name: '表格测试',
     path: '/tableTest',
-    component: () => import("./page/tableTest.vue"),
+    component: () => import("../testView/page/tableTest.vue"),
     meta: { requireAuth: true, keepAlive: true }
   },
   {

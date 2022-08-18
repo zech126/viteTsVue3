@@ -2,11 +2,11 @@
 import * as icons from '@element-plus/icons-vue';
 import { App } from 'vue';
 // 获取所有组件文件
-const tsFiles = import.meta.globEager('../components/*/index.ts');
-const jsFiles = import.meta.globEager('../components/*/index.js');
-const tsxFiles = import.meta.globEager('../components/*/index.tsx');
-const jsxFiles = import.meta.globEager('../components/*/index.jsx');
-const vueFiles = import.meta.globEager('../components/*/index.vue');
+const tsFiles = import.meta.globEager('../components/**/index.ts');
+const jsFiles = import.meta.globEager('../components/**/index.js');
+const tsxFiles = import.meta.globEager('../components/**/index.tsx');
+const jsxFiles = import.meta.globEager('../components/**/index.jsx');
+const vueFiles = import.meta.globEager('../components/**/index.vue');
 const files:{[key:string]: any} = {...tsFiles, ...jsFiles, ...tsxFiles, ...jsxFiles, ...vueFiles};
 const start = './';
 const end = '/index.';

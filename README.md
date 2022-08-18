@@ -30,7 +30,7 @@
      |    |-- .env.prod 生产环境配置
      |-- src 项目代码存放位置
           |-- api api 文件设置
-          |    |-- APIConfig.ts API 主要入口
+          |    |-- index.ts API 主要入口
           |    |-- globalApi.ts 全局 API 入口
           |-- assets 资源文件存放位置
           |    |-- images 图片存放位置

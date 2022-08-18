@@ -31,9 +31,6 @@
       <component1 :canshu="data.canshu" />
       <component2 :canshu="data.canshu1" />
       <br />
-      第二种用法
-      <component.component1 :canshu="data.canshu" />
-      <component.component2 :canshu="data.canshu1" />
     </div>
     <div style="margin-top:10px;">
       <dyt-input ref="inputRef" v-model="data.inputVal">
@@ -203,7 +200,6 @@
 import { reactive, onMounted } from 'vue';
 import getProxy from "@/utils/proxy";
 import getGlobal from "@/utils/global";
-import * as component from './test';
 import {component1, component2} from './test';
 
 const proxy = getProxy();
