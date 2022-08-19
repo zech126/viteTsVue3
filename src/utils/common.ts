@@ -42,8 +42,7 @@ export class commonClass {
   // 是否为空， 包括 空数组，空对象， null、空字符串、undefined、NaN
   isEmpty (val:any, type = false):val is null | undefined {
     if (['', null, 'undefined', undefined].includes(type && this.isString(val) ? val.trim() : val)) return true;
-    if (this.isJson(val)) return Object.keys(val).length === 0;
-    if (this.isArray(val)) return val.length === 0;
+    if (this.isJson(val) || this.isArray(val)) return Object.keys(val).length === 0;
     if (this.isNumber(val) && isNaN(val)) return true;
     return false;
   }

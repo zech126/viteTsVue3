@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import NProgress from "nprogress";
-import pageRouter from "./pageRouter";
+import pageRouter from "@/router/pageRouter";
 import common from '@/utils/common';
 import "nprogress/nprogress.css";
 import store from "@/store";

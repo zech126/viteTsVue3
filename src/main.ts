@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import App from './App.vue';
+import App from '@/App.vue';
 import "@/assets/style/index.less";
 import "@/utils/loadIconFont";
 import dayjs from 'dayjs';
@@ -8,7 +8,7 @@ import $http from "$request";
 import $api from '@/api/index';
 import store from "@/store/index";
 import router from "@/router/index";
-import customComponents from './components/index';
+import customComponents from '@/components/index';
 import 'element-plus/theme-chalk/index.css';
 import localforage from 'localforage';
 import ElementPlus from 'element-plus';

@@ -37,6 +37,7 @@ const getGlobal = () => {
     readonly $router: Router;
     readonly $store: Store<any>;
     readonly api: apiValType;
+    readonly $api: apiValType;
     // [key:string]:any;
   }
 }

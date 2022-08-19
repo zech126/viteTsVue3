@@ -41,6 +41,7 @@ declare module '@vue/runtime-core' {
     readonly $router: Router;
     readonly $store: Store<any>;
     readonly api: apiValType;
+    readonly $api: apiValType;
     readonly $refs: Array<any> | {[key: string]: any};
     // [key:string]: any;
   }

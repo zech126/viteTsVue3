@@ -1,7 +1,7 @@
 import { createStore } from "vuex";
-import storeGetters from "./storeGetters";
+import storeGetters from "@/store/storeGetters";
 import layout from "@/layout/storeConfig";
-import routerModule from '../router/storeConfig';
+import routerModule from '@/router/storeConfig';
 import { cloneDeep } from 'lodash';
 
 const other:any = [layout, routerModule];
@@ -70,16 +70,7 @@ const files:{[key:string]: any} = {...tsFiles, ...jsFiles};
 const hand = (obj:any) => {
   const moduleName = obj.moduleName;
   delete obj.moduleName;
-  if (typeof moduleName !== "string") {
-    storeMaps.state = { ...storeMaps.state, ...(obj.state || {}) };
-    storeMaps.mutations = { ...storeMaps.mutations, ...(obj.mutations || {}) };
-    storeMaps.actions = { ...storeMaps.actions, ...(obj.actions || {}) };
-    storeMaps.getters = { ...storeMaps.getters, ...(obj.getters || {}) };
-    // 模块不为空时
-    if (obj.modules) {
-      storeMaps.modules = { ...storeMaps.modules, ...(obj.modules || {}) };
-    }
-  } else if (moduleName && moduleName.length > 0) {
+  if (typeof moduleName === "string" && moduleName.length > 0) {
     // 命名模块名，存在自定义模块时
     if (obj.modules) {
       storeMaps.modules = { ...storeMaps.modules, ...(obj.modules || {}) };
@@ -92,6 +83,15 @@ const hand = (obj:any) => {
       ...(obj || {}),
     };
     // storeMaps.modules = {...storeMaps.modules, ...newModules}
+  } else {
+    storeMaps.state = { ...storeMaps.state, ...(obj.state || {}) };
+    storeMaps.mutations = { ...storeMaps.mutations, ...(obj.mutations || {}) };
+    storeMaps.actions = { ...storeMaps.actions, ...(obj.actions || {}) };
+    storeMaps.getters = { ...storeMaps.getters, ...(obj.getters || {}) };
+    // 模块不为空时
+    if (obj.modules) {
+      storeMaps.modules = { ...storeMaps.modules, ...(obj.modules || {}) };
+    }
   }
 };
 

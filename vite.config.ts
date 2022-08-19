@@ -73,9 +73,24 @@ export default defineConfig(({command, mode}) => {
         },
         // 输出
         output: {
+          // 用于从入口点创建的块的打包输出格式, [name]表示文件名, [hash]表示该文件内容hash值
           chunkFileNames: `${assetsName}/js/[name]-[hash].js`,
+          // 用于命名代码拆分时创建的共享块的输出命名
           entryFileNames: `${assetsName}/js/[name]-[hash].js`,
-          assetFileNames: `${assetsName}/[name]-[hash].[ext]`,
+          // 拆分 js 到模块文件夹
+          // chunkFileNames: (chunkInfo) => {
+          //   const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/') : [];
+          //   const fileName = facadeModuleId[facadeModuleId.length - 2] || '[name]';
+          //   return `${assetsName}/js/${fileName}/[name].[hash].js`;
+          // },
+          // 用于输出静态资源的命名, [ext]表示文件扩展名
+          assetFileNames: `${assetsName}/[ext]/[name]-[hash].[ext]`,
+          // assetFileNames: (chunkInfo) => {
+          //   if (chunkInfo.name.includes('/assets/')) {
+          //     return `${assetsName}/assets/[name]-[hash].[ext]`;
+          //   }
+          //   return `${assetsName}/[ext]/[name]-[hash].[ext]`;
+          // },
           manualChunks(directory) {
             if (directory.includes('node_modules')) {
               return directory.toString().split('node_modules/')[1].split('/')[0].toString();
