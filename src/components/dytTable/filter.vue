@@ -320,6 +320,9 @@ onMounted(() => {
   // 绑定事件
   window.addEventListener('resize', filterLayout);
   filterLayout();
+  nextTick(() => {
+    filterLayout(); // 多执行一次，修正由于样式引起的宽度度不准确
+  })
 });
 // 组件销毁前
 onBeforeUnmount(() => {
@@ -369,7 +372,7 @@ defineExpose({
 })
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .dyt-filter-container{
   position: relative;
   margin-bottom: 10px;
@@ -397,9 +400,9 @@ defineExpose({
     .dyt-input-demo {
       width: 214px;
     }
-    .el-form-item{
+    :deep(.el-form-item){
       margin-bottom: 21px;
-      margin-right: 20px;
+      margin-right: 15px;
       .el-form-item__error{
         padding-top: 1px;
       }

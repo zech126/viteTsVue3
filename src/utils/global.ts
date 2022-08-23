@@ -6,7 +6,7 @@ import { Router, RouteLocationNormalizedLoaded } from "vue-router";
 import { Store } from "vuex";
 import type { Message, Notify, LoadingOptions, IElMessageBox } from 'element-plus';
 
-type apiValType = {readonly[key:string]: apiValType};
+type apiValType = string & {readonly[key:string]: apiValType};
 type PluginFunc<T = unknown> = (option: T, c: typeof dayjs.Dayjs, d: typeof dayjs) => void;
 interface RouteOptions extends RouteLocationNormalizedLoaded {
   herf: string;

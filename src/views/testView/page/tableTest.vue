@@ -1,5 +1,8 @@
 <template>
   <div style="height:100%;">
+    <div style="padding: 15px;">
+      你好啊，，我占位了
+    </div>
     <dyt-table
       :filter-fields="filterFields"
       :filter-model="filterModel"

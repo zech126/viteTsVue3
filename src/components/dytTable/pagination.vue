@@ -1,5 +1,5 @@
 <template>
-  <div :id="`pagination_${props.pageId}`" class="dyt-pagination-container">
+  <div :id="`pagination-${props.pageId}`" class="dyt-pagination-container">
     <div v-if="slots.includes('paginationTop')" class="pagination-top-content">
       <slot name="paginationTop" />
     </div>
@@ -116,8 +116,9 @@ const currentChange = (val:number) => {
   $emit('change', data.pageNum, data.pageSize);
 }
 </script>
-<style lang="less">
+<style lang="less" scoped>
 .dyt-pagination-container{
+  position: relative;
   padding-top: 10px;
   .pagination-top-content,
   .pagination-bottom-content{

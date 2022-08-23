@@ -148,7 +148,7 @@ export class commonClass {
     const urlOption = newUrl.substring(newUrl.indexOf('?') + 1);
     const urlList = urlOption.split('&');
     let urlJson:{[key:string]:string} = {};
-    const keysList = !this.isEmpty(key) ? key : this.isObject(config) && !this.isEmpty(config.keys) ? config.keys : '';
+    const keysList = !this.isEmpty(key) ? key : this.isObject(config) && !this.isEmpty(config.keys) ? config.keys : null;
     urlList.forEach(item => {
       const pos = item.indexOf('=');
       urlJson[item.substring(0, pos)] = item.substring(pos + 1);
@@ -396,7 +396,7 @@ export class commonClass {
    * @param isNumber 是否返回数字，当值不支持 number 时，则原样返回
    * @returns 
    */
-  getElementStyle (element:string | Element | null, styleName?:string, isNumber?:boolean):number|string|null {
+  getElementStyle (element:string | HTMLElement | Element | null, styleName?:string, isNumber?:boolean):number|string|null {
     const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element as HTMLElement;
     if (!newElement || this.isEmpty(styleName)) return isNumber ? 0 : null;
     // const style = newElement.currentStyle ? newElement.currentStyle[styleName] : document.defaultView.getComputedStyle(newElement, null)[styleName];
@@ -420,7 +420,7 @@ export class commonClass {
    * @param element 目标节点或节点标识id,class等标识
    * @returns 
    */
-  getElementOffset (element:string | Element | null):{x:number, y:number} {
+  getElementOffset (element:string | HTMLElement | Element | null):{x:number, y:number} {
     const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element as HTMLElement;
     let offset = { x: 0, y: 0 }
     if (this.isEmpty(newElement)) return offset;
@@ -439,7 +439,7 @@ export class commonClass {
    * @param element 目标节点或节点标识id,class等标识
    * @returns 
    */
-  getElementScrollTop (element:string | Element | null):number {
+  getElementScrollTop (element:string | HTMLElement | Element | null):number {
     const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element as HTMLElement;
     if (!newElement) return 0;
     let top = 0;
