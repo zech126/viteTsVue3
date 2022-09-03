@@ -308,11 +308,18 @@ body {
       }
     }
   }
-  .lapa{
-    &.icon-loading{
-      display: inline-block;
-      animation:iconLoading 1.2s linear infinite;
-    }
+  // loading 旋转
+  .icon-loading{
+    display: inline-block;
+    animation:iconLoading 1.2s linear infinite;
+  }
+  // svg 图标设置
+  svg.icon, svg.svg-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
   }
   // tip 提示
   .popper-limit-tips{

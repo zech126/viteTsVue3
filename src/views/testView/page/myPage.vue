@@ -23,7 +23,9 @@
     <div style="margin-top: 10px;">
       UI自带图标： <Icon style="font-size:50px;" color="red" name="edit" /> <Icon style="font-size:50px;" color="red" name="loading" />
       <p/>
-      fontIcon： <i style="font-size:50px;" class="lapa icon-loading" />
+      fontIcon：<i style="font-size:50px;" class="lapa icon-loading" />
+      <p/>
+      fontIcon SVG：<svg-icon name="icon-loading" style="font-size: 30px;" />
     </div>
     <div style="margin-top: 10px;">
       JSX 组件：<br /><br />

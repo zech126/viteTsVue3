@@ -12,6 +12,7 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
+// import getGlobal from '@/utils/global';
 import { reactive, computed, useSlots, useAttrs } from 'vue';
 
 // const global = getGlobal();
@@ -128,7 +129,7 @@ const customClassName = computed(() => {
     &.dialog-custom-class-small{
       --el-dialog-width: 80%;
       width: var(--el-dialog-width);
-      margin-top: 15vh;
+      margin-top: var(--el-dialog-margin-top, 15vh);
       .el-dialog__header{
         height: @headDefaultH;
         .el-dialog__title{
@@ -137,7 +138,7 @@ const customClassName = computed(() => {
         }
       }
       .el-dialog__body{
-        max-height: calc(70vh - 90px);
+        max-height:calc(100vh - var(--el-dialog-margin-top, 15vh) * 2 - 90px);
       }
       .el-dialog__footer{
         padding: 10px 10px 5px 10px;
@@ -148,7 +149,7 @@ const customClassName = computed(() => {
     &.dialog-custom-class-full{
       --el-dialog-width: 100%;
       width: var(--el-dialog-width);
-      margin-top: 0vh;
+      margin-top: var(--el-dialog-margin-top, 0);
       .el-dialog__header{
         height: @headFullH;
         .el-dialog__title{
@@ -157,7 +158,7 @@ const customClassName = computed(() => {
         }
       }
       .el-dialog__body{
-        max-height: calc(100vh - 110px);
+        max-height:calc(100vh - var(--el-dialog-margin-top, 0) * 2 - 110px);
       }
       .el-dialog__footer{
         padding: 15px 15px 10px 15px;
@@ -168,7 +169,7 @@ const customClassName = computed(() => {
     &.dialog-custom-class-medium{
       --el-dialog-width: 90%;
       width: var(--el-dialog-width);
-      margin-top: 5vh;
+      margin-top: var(--el-dialog-margin-top, 5vh);
       .el-dialog__header{
         height: @headDefaultH;
         .el-dialog__title{
@@ -177,7 +178,7 @@ const customClassName = computed(() => {
         }
       }
       .el-dialog__body{
-        max-height: calc(90vh - 90px);
+        max-height:calc(100vh - var(--el-dialog-margin-top, 5vh) * 2 - 90px);
       }
       .el-dialog__footer{
         padding: 10px 10px 5px 10px;
@@ -188,7 +189,7 @@ const customClassName = computed(() => {
     &.dialog-custom-class-mini{
       --el-dialog-width: 65%;
       width: var(--el-dialog-width);
-      margin-top: 22vh;
+      margin-top: var(--el-dialog-margin-top, 22vh);
       .el-dialog__header{
         height: @headDefaultH;
         .el-dialog__title{
@@ -197,7 +198,7 @@ const customClassName = computed(() => {
         }
       }
       .el-dialog__body{
-        max-height: calc(56vh - 90px);
+        max-height:calc(100vh - var(--el-dialog-margin-top, 22vh) * 2 - 90px);
       }
       .el-dialog__footer{
         padding: 10px 10px 5px 10px;

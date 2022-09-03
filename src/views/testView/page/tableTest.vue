@@ -72,11 +72,23 @@
       <template v-slot:filter-commonStr6>
         <dyt-input v-model="filterModel.commonStr6" placeholder="搜索栏插槽"/>
       </template>
-      <!-- 只定义表头其他默认； 列配置里面的 prod 的值追加 -header -->
+      <!-- 自定义表头 -->
       <template v-slot:name-header="{column, $index }">
-        {{ column.label }}-{{ $index }}-只定义表头其他默认
+        {{ column.property }}-自定义表头-{{ $index + 1 }}
       </template>
-      <!-- 自定义列内容 -->
+      <!-- 自定义内容 -->
+      <!-- <template v-slot:myName1-content="{column, $index }">
+        {{ column.property }}-自定义内容-{{ $index + 1 }}
+      </template> -->
+      <!-- 自定义表头 -->
+      <!-- <template v-slot:myName-header="{column, $index }">
+        {{ column.property }}-自定义表头和内容-{{ $index + 1 }}
+      </template> -->
+      <!-- 自定义内容 -->
+      <!-- <template v-slot:myName-content="{row, column }">
+        {{column.property}}-{{ row.name }}
+      </template> -->
+      <!-- 自定义列内容 插槽里面使用 el-table-column 开启列拖拽，当前列无效-->
       <template v-slot:myName1="{columnConfig}">
         <el-table-column v-bind="columnConfig">
           <template v-slot="{row, column, $index }">
@@ -84,14 +96,14 @@
           </template>
         </el-table-column>
       </template>
-      <!-- 自定义列头、自定义列内容 -->
+      <!-- 自定义表头和内容 插槽里面使用 el-table-column 开启列拖拽，当前列无效-->
       <template v-slot:myName="{columnConfig}">
         <el-table-column v-bind="columnConfig">
-          <template v-slot:header="{column, $index }">
-            {{ column.label }}-自定义列头-{{ $index + 1 }}
+          <template v-slot:header="{column, $index}">
+            {{columnConfig.slot}}-{{ column.label }}-{{ $index + 1 }}
           </template>
           <template v-slot="{row, column, $index }">
-            {{column.label}}-自定义内容-{{ row.name }}-{{ $index + 1 }}
+            {{columnConfig.slot}}-{{column.label}}-{{ row.name }}-{{ $index + 1 }}
           </template>
         </el-table-column>
       </template>
@@ -335,7 +347,11 @@ export default defineComponent({
       ],
       tableConfog: {
         // 打开页面立即加载数据
-        // autoload: true,
+        autoload: true,
+        // 是否开启行拖拽排序
+        enableRowSort: true,
+        // 是否开启列拖拽排序
+        enableColSort: true,
         // 表格是否多选
         multiple: true,
         // 开启表格多选时有效
@@ -362,8 +378,8 @@ export default defineComponent({
             }
           }
         },
-        {slot: 'myName', label: '自定义列1', align: 'center', 'min-width': '230'},
-        {slot: 'myName1', label: '自定义列2', align: 'center', 'min-width': '230'},
+        {slot: 'myName', label: '自定义表头和内容', align: 'center', 'min-width': '230'},
+        {slot: 'myName1', label: '自定义内容', align: 'center', 'min-width': '230'},
         {label: '电话', prop: 'phone', align: 'center', 'min-width': '120'},
         {label: '邮箱', prop: 'email', align: 'center', 'width': '200'},
         {label: '部门', prop: 'deptName', align: 'center', 'min-width': '200'},
@@ -447,7 +463,9 @@ export default defineComponent({
       for (let i = 0; i < pageSize; i ++) {
         tableList.push({
           username: `username-${i + 1}`,
-          name: `name-${i + 1}`
+          name: `name-${i + 1}`,
+          phone: `phone-${i + 1}`,
+          email: `email-${i + 1}`
         })
       }
       return new Promise((reslove, reject) => {

@@ -1,11 +1,11 @@
 @font-face {
   font-family: "lapa"; /* Project id 2831836 */
-  src: url('iconfont.eot?t=1649471664640'); /* IE9 */
-  src: url('iconfont.eot?t=1649471664640#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('iconfont.woff2?t=1649471664640') format('woff2'),
-       url('iconfont.woff?t=1649471664640') format('woff'),
-       url('iconfont.ttf?t=1649471664640') format('truetype'),
-       url('iconfont.svg?t=1649471664640#lapa') format('svg');
+  src: url('iconfont.eot?t=1662176913092'); /* IE9 */
+  src: url('iconfont.eot?t=1662176913092#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('iconfont.woff2?t=1662176913092') format('woff2'),
+       url('iconfont.woff?t=1662176913092') format('woff'),
+       url('iconfont.ttf?t=1662176913092') format('truetype'),
+       url('iconfont.svg?t=1662176913092#lapa') format('svg');
 }
 
 .lapa {
@@ -14,6 +14,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-jieliudingdan:before {
+  content: "\e62e";
+}
+
+.icon-question:before {
+  content: "\e633";
 }
 
 .icon-loading:before {

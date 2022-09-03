@@ -13,40 +13,42 @@
       <!-- 表格 -->
       <div v-if="props.tableConfig.showTable" class="mian-container-table">
         <el-table
+          :id="`table-body-${props.pageId}`"
           :ref="`table_${props.pageId}`"
           v-bind="data.tableAttr"
           v-on="tableListeners"
-          :data="props.tableData"
+          :data="data.tableData"
           :height="$common.isEmpty(props.tableHeight) ? null : props.tableHeight"
           :max-height="(data.tableAttr['max-height'] || data.tableAttr['maxHeight'] || null)"
           style="width: 100%;"
         >
-          <el-table-column
-            v-if="typeof props.tableConfig.multiple === 'boolean' && props.tableConfig.multiple"
-            align="center"
-            type="selection"
-            width="50"
-            :selectable="selectable"
-          />
-          <el-table-column
-            v-if="typeof props.tableConfig.indexMethod === 'function'"
-            align="center"
-            type="index"
-            width="50"
-            :index="props.tableConfig.indexMethod"
-          />
-          <el-table-column
-            v-if="typeof props.tableConfig.indexMethod === 'boolean' && props.tableConfig.indexMethod"
-            align="center"
-            type="index"
-            width="50"
-          />
           <slot name="tableColumn">
             <template v-for="(item, index) in data.columnConfig" :key="`col-${item.prop}-${index}`">
+            <!-- class-name="disabled-drag-srot" -->
+            <el-table-column
+              v-if="typeof props.tableConfig.multiple === 'boolean' && props.tableConfig.multiple && item.defaultCol"
+              align="center"
+              type="selection"
+              width="50"
+              :selectable="selectable"
+            />
+            <el-table-column
+              v-if="typeof props.tableConfig.indexMethod === 'function' && item.defaultCol"
+              align="center"
+              type="index"
+              width="50"
+              :index="props.tableConfig.indexMethod"
+            />
+            <el-table-column
+              v-if="typeof props.tableConfig.indexMethod === 'boolean' && props.tableConfig.indexMethod && item.defaultCol"
+              align="center"
+              type="index"
+              width="50"
+            />
               <!-- 自定义插槽列 -->
-              <slot v-if="item.slot" :name="item.slot" :column-config="item" />
+              <slot v-if="item.slot && !item.defaultCol" :name="item.slot" :column-config="item" />
               <el-table-column
-                v-else
+                v-else-if="!item.defaultCol"
                 v-bind="{
                   'show-overflow-tooltip': true,
                   ...item,
@@ -55,20 +57,22 @@
                 }"
               >
                 <template v-slot="scope">
-                  <dyt-node
-                    v-if="typeof data.cloumnsRender[`render-${index}`] === 'function'"
-                    :node="data.cloumnsRender[`render-${index}`]"
-                    :node-parameter="scope"
-                  />
-                  <div v-else class="table-ellipsis-tips"
-                    v-on="data.cloumnsEvents[`events-${index}`] ? {
-                      click: (e:any) => {
-                        data.cloumnsEvents[`events-${index}`].click && data.cloumnsEvents[`events-${index}`].click(scope, e);
-                      }
-                    }: {}"
-                  >
-                    {{ scope.row[item.prop] }}
-                  </div>
+                  <slot :name="`${item.prop}-content`" v-bind="scope">
+                    <dyt-node
+                      v-if="typeof data.cloumnsRender[`render-${index}`] === 'function'"
+                      :node="data.cloumnsRender[`render-${index}`]"
+                      :node-parameter="scope"
+                    />
+                    <div v-else class="table-ellipsis-tips"
+                      v-on="data.cloumnsEvents[`events-${index}`] ? {
+                        click: (e:any) => {
+                          data.cloumnsEvents[`events-${index}`].click && data.cloumnsEvents[`events-${index}`].click(scope, e);
+                        }
+                      }: {}"
+                    >
+                      {{ scope.row[item.prop] }}
+                    </div>
+                  </slot>
                 </template>
                 <!-- 自定义表头的内容. 参数为 { column, $index } -->
                 <template v-slot:header="scope">
@@ -99,19 +103,19 @@
 <script lang="ts" setup>
 import getGlobal from '@/utils/global';
 import getProxy from '@/utils/proxy';
-import { reactive, computed, useSlots, useAttrs, watch, PropType } from 'vue';
+import Sortable from 'sortablejs';
+import { reactive, computed, useSlots, useAttrs, onMounted, watch, PropType, nextTick } from 'vue';
 
 interface dataType{
   columnAlign: Array<any>;
   columnConfig: Array<any>;
   cloumnsRender: any;
   cloumnsEvents: any;
+  tableData: Array<object>;
   tableAttr: {
     height?: any;
     'highlight-current-row': boolean;
-    // 'row-key': (row) => {
-    //   return row.userId
-    // },
+    'row-key'?: string | ((row: {[key:string]:any}) => string),
     stripe: boolean;
     size: string;
     border: boolean;
@@ -122,11 +126,14 @@ const $slots = useSlots();
 const $attrs = useAttrs();
 const global = getGlobal();
 const proxy = getProxy();
+const $emit = defineEmits(['tableRowSortEnd', 'tableRowSortStart', 'tableColSortStart', 'tableColSortEnd']);
 const props = defineProps({
   // 表格其他设置
   tableConfig: { type: Object as PropType<{
     autoload?: boolean,
     multiple?: boolean,
+    enableRowSort?: boolean,
+    enableColSort?: boolean,
     showTable?: boolean,
     [key:string]: any
   }>,  default: () => {return {}} },
@@ -136,6 +143,7 @@ const props = defineProps({
   // 表格配置 对应 elementUI 的 table Attributes
   tableProps: { type: Object as PropType<{[key:string]: any}>, default: () => {return {}} },
   tableColumns:  { type: Array as PropType<{[key:string]: any}[]>, default: () => [] },
+  // dargTableColumns:  { type: Array as PropType<{[key:string]: any}[]>, default: () => [] },
   // 请求中
   tableLoading: { type: Boolean, default: false },
 });
@@ -145,12 +153,10 @@ const data:dataType = reactive({
   columnConfig: [],
   cloumnsRender: {},
   cloumnsEvents: {},
+  tableData: [],
   tableAttr: {
     height: '',
     'highlight-current-row': true,
-    // 'row-key': (row) => {
-    //   return row.userId
-    // },
     stripe: true,
     size: 'small',
     border: true
@@ -172,7 +178,7 @@ const tableListeners = computed(() => {
   })
   return tableFun;
 });
-
+// 初始化列
 const initColumns = (arr:Array<any>) => {
   let columns:Array<any> = [];
   data.cloumnsRender = {};
@@ -186,16 +192,95 @@ const initColumns = (arr:Array<any>) => {
       data.cloumnsEvents[`events-${index}`] = item.events;
       delete item.events;
     }
+    // 开启当前列禁用拖拽处理
+    if ((typeof item.disabledColSrot === 'boolean' && item.disabledColSrot) || !global.$common.isEmpty(item.slot)) {
+      item['class-name'] = global.$common.isEmpty(item['class-name']) ? 'disabled-drag-srot' : `${item['class-name']} disabled-drag-srot`;
+      delete item.disabledColSrot;
+    }
     columns.push(item);
-  })
+  });
   data.columnConfig = columns;
 }
-// 用于多选表格，清空用户的选择
+/**
+ * 创建行拖拽实例
+ * @param element 目标节点或节点标识id,class等标识
+ */
+const initTableRowSort = () => {
+  const table = document.querySelector(`#table-body-${props.pageId} .el-table__body-wrapper tbody`) as HTMLElement;
+  if (!table) return;
+  Sortable.create(table, {
+    group: 'rowSort',
+    // group: {
+    //   name: 'rowSort',
+    //   // 是否允许同一分组其他列表将数据放入当前列表
+    //   put: false
+    // },
+    animation: 200,
+    delay: 0,
+    easing: 'cubic-bezier(1, 0, 0, 1)',
+    draggable: '.el-table__row',
+    // 开始拖动
+    onStart: (event: Sortable.SortableEvent) => {
+      $emit('tableRowSortStart', event);
+    },
+    // 结束拖动事件
+    onEnd: (event: Sortable.SortableEvent) => {
+      let listData = global.$common.copy(data.tableData);
+      const oldData = global.$common.copy(data.tableData);
+      listData.splice(event.newIndex as number, 0, listData.splice(event.oldIndex as number, 1)[0]);
+      data.tableData = listData.map((m:object, index: number) => {
+        return {
+          ...m,
+          '$tableRowIndex': index + 1
+        }
+      })
+      nextTick(() => {
+        $emit('tableRowSortEnd', { data: listData, oldData,  event: event });
+      })
+    }
+  })
+}
+/**
+ * 创建列拖拽实例
+ * @param element 目标节点或节点标识id,class等标识
+ */
+const initTableColumnSort = () => {
+  const table = document.querySelector(`#table-body-${props.pageId} .el-table__header tr`) as HTMLElement;
+  if (!table) return;
+  Sortable.create(table, {
+    group: 'columnSort',
+    // group: {
+    //   name: 'columnSort',
+    //   // 是否允许同一分组其他列表将数据放入当前列表
+    //   put: false
+    // },
+    animation: 200,
+    delay: 0,
+    filter: '.disabled-drag-srot',
+    easing: 'cubic-bezier(1, 0, 0, 1)',
+    // 开始拖动
+    onStart: (event: Sortable.SortableEvent) => {
+      $emit('tableColSortStart', event);
+    },
+    // 结束拖动事件
+    onEnd: (event: Sortable.SortableEvent) => {
+      // 列修改需在 dytTable.vue 的 tableColSortEnd 方法修改
+      $emit('tableColSortEnd', event);
+    }
+  })
+}
+/**
+ * 用于多选表格，清空用户的选择
+ */
 const clearSelection = () => {
   proxy?.$refs[`table_${props.pageId}`]?.clearSelection();
 }
-// 用于多选表格，切换某一行的选中状态，如果使用了第二个参数，则是设置这一行选中与否（selected 为 true 则选中）
-const toggleRowSelection = (row:any, selected:any) => {
+/**
+ * 用于多选表格，切换某一行的选中状态，如果使用了第二个参数，则是设置这一行选中与否（selected 为 true 则选中）
+ * @param row 列表行数据
+ * @param selected 是否选中，true 则为选中
+ */
+const toggleRowSelection = (row:{[key:string]:any}, selected?:boolean) => {
   proxy?.$refs[`table_${props.pageId}`]?.toggleRowSelection(row, selected);
 }
 // 用于多选表格，切换所有行的选中状态
@@ -231,13 +316,36 @@ const selectable = (row:any, index:any) => {
 }
 
 watch(() => props.tableProps, (val:any) => {
-  data.tableAttr = {...data.tableAttr, ...val}
+  let otherAttr:{
+    'row-key'?: string | ((row: {[key:string]:any}) => string)
+  } = {};
+  // 当 row-key 为空时才使用默认设置
+  if ((props.tableConfig.enableRowSort || props.tableConfig.enableColSort) && global.$common.isEmpty(val['row-key'])) {
+    otherAttr['row-key'] = (row:{[key:string]: any}) => {
+      return JSON.stringify(row);
+    }
+  }
+  data.tableAttr = {...data.tableAttr, ...otherAttr, ...val};
   delete data.tableAttr.height;
 }, {deep: true, immediate: true});
 
 watch(() => props.tableColumns, (val:any) => {
   initColumns(global.$common.copy(val));
 }, {deep: true, immediate: true});
+
+watch(() => props.tableData, (val:Array<object>) => {
+  data.tableData = val.map((m:object, index: number) => {
+    return {
+      ...m,
+      '$tableRowIndex': index + 1
+    }
+  })
+}, {deep: true, immediate: true});
+
+onMounted(() => {
+  props.tableConfig.enableRowSort && initTableRowSort();
+  props.tableConfig.enableColSort && initTableColumnSort();
+});
 
 defineExpose({
   clearSelection,
@@ -248,7 +356,9 @@ defineExpose({
   clearSort,
   clearFilter,
   doLayout,
-  sort
+  sort,
+  initTableRowSort,
+  initTableColumnSort
 });
 
 </script>

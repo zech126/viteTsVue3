@@ -71,6 +71,10 @@
         :table-height="base.tableHeight"
         :table-props="props.tableProps"
         :table-config="tableConfig"
+        @tableRowSortStart="tableRowSortStart"
+        @tableRowSortEnd="tableRowSortEnd"
+        @tableColSortStart="tableColSortStart"
+        @tableColSortEnd="tableColSortEnd"
         v-on="tableListeners"
       >
         <!-- 默认插槽 -->
@@ -83,6 +87,10 @@
         </template>
         <!-- 自定义表头的内容. 参数为 { column, $index } -->
         <template v-for="(item) in tableHeaderSlots" v-slot:[item]="scope">
+          <slot :name="item" v-bind="scope" />
+        </template>
+        <!-- 自定义表格内容. 参数为 { column, $index } -->
+        <template v-for="(item) in tableContentSlots" v-slot:[item]="scope">
           <slot :name="item" v-bind="scope" />
         </template>
         <!-- 插入至表格最后一行之后的内容，如果需要对表格的内容进行无限滚动操作，可能需要用到这个 slot。若表格有合计行，该 slot 会位于合计行之上 -->
@@ -146,13 +154,16 @@ import getProxy from "@/utils/proxy";
 import filterBar from './filter.vue';
 import pagination from './pagination.vue';
 import tableView from './table.vue';
+import { SortableEvent } from 'sortablejs';
 
 const includeFun = ['filterReset', 'expandFilter', 'requested'];
 const global = getGlobal();
 const proxy = getProxy();
 const $slots = useSlots();
 const $attrs = useAttrs();
-const $emit = defineEmits(['requested', 'expandFilter', 'filterReset', 'filterValidate']);
+const $emit = defineEmits([
+  'requested', 'expandFilter', 'filterReset', 'filterValidate', 'tableRowSortEnd', 'tableRowSortStart', 'tableColSortEnd', 'tableColSortStart'
+]);
 const props = defineProps({
   // 搜索栏
   filterFields: { type: Array as PropType<Array<{[key:string]:any}>>, default: () => [] },
@@ -178,12 +189,17 @@ const props = defineProps({
   tableConfog: { type: Object as PropType<{
     autoload?: boolean,
     multiple?: boolean,
+    enableRowSort?: boolean,
+    enableColSort?: boolean,
     showTable?: boolean
   }>,  default: () => {return {}} },
   tableConfig: { type: Object as PropType<{
     autoload?: boolean,
     multiple?: boolean,
-    showTable?: boolean
+    enableRowSort?: boolean,
+    enableColSort?: boolean,
+    showTable?: boolean,
+    indexMethod?: any,
   }>,  default: () => {return {}} },
   // 表格配置 对应 elementUI 的 table Attributes
   tableProps: { type: Object as PropType<{[key:string]:any}>, default: () => {return {}} },
@@ -222,12 +238,18 @@ const base = reactive({
   tableMinHeight: 250,
   showPagination: true,
   filterHeight: 0,
+  pageColumns: (props.tableColumns||[]),
+  isInitColumns: true,
   tableDataMap: { rows: 'data.list', total: 'data.total', errorInfos: 'msg' },
   tableOtherConfog: {
     // 打开页面立即加载数据
     autoload: false,
     // 表格是否多选
     multiple: false,
+    // 是否开启行拖拽排序
+    enableRowSort: false,
+    // 是否开启列拖拽排序
+    enableColSort: false,
     // 显示列表
     showTable: true
   },
@@ -258,14 +280,34 @@ const base = reactive({
 const slots = computed(() => {
   return Object.keys($slots)
 });
-const tableColumnConfig = computed(() => {
-  return props.tableColumns;
-});
-const filterFieldConfig = computed(() => {
-  return props.filterFields;
-});
 const tableConfig = computed(() => {
   return {...base.tableOtherConfog, ...props.tableConfog, ...props.tableConfig}
+});
+// 默认初始化列需在此次处理
+const tableColumnConfig = computed(() => {
+  let defaultCol:Array<any> = [];
+  let beforeCol:Array<any> = [];
+  let afterCol:Array<any> = [];
+  let columns:Array<any> = [];
+  if (base.isInitColumns) {
+    typeof tableConfig.value.multiple === 'boolean' && tableConfig.value.multiple && defaultCol.push({defaultCol: true});
+    typeof tableConfig.value.indexMethod === 'function' && defaultCol.push({defaultCol: true});
+    typeof tableConfig.value.indexMethod === 'boolean' && tableConfig.value.indexMethod && defaultCol.push({defaultCol: true});
+    (base.pageColumns||[]).forEach((item) => {
+      if (['left', 'right'].includes(item.fixed)) {
+        ['left'].includes(item.fixed) && beforeCol.push(item);
+        ['right'].includes(item.fixed) && afterCol.push(item);
+      } else {
+        columns.push(item);
+      }
+    })
+    return [...defaultCol, ...beforeCol, ...columns, ...afterCol];
+  } else {
+    return base.pageColumns;
+  }
+})
+const filterFieldConfig = computed(() => {
+  return props.filterFields;
 });
 
 // 绑定到列表的事件
@@ -284,6 +326,11 @@ const tableListeners = computed(() => {
 const tableHeaderSlots = computed(() => {
   const headerSlots = Object.keys($slots).filter(item => item.includes('-header'));
   return global.$common.arrRemoveRepeat(headerSlots);
+});
+// 列表的内容插槽
+const tableContentSlots = computed(() => {
+  const contentSlots = Object.keys($slots).filter(item => item.includes('-content'));
+  return global.$common.arrRemoveRepeat(contentSlots);
 });
 
 // 点击搜索按钮、翻页、列表条数改变时触发, 当 type 为 true 时，则返回到第一页并请求数据
@@ -426,6 +473,62 @@ const changeTableHeight = () => {
     })
   })
 }
+// 行排序开始拖动
+const tableRowSortStart = (event: SortableEvent) => {
+  $emit('tableRowSortStart', event);
+}
+// 行排序拖动结束
+const tableRowSortEnd = (reslove: {data: Array<{[key:string]: any}>, oldData: Array<{[key:string]: any}>, event?: SortableEvent}) => {
+  $emit('tableRowSortEnd', reslove);
+}
+/**
+ * 创建行拖拽实例
+ * @param element 目标节点或节点标识id,class等标识
+ */
+const initTableRowSort = (element: string | HTMLElement | Element | null) => {
+  proxy.$refs[`table_${base.pageId}`] && proxy.$refs[`table_${base.pageId}`].initTableRowSort(element);
+}
+// 列排序开始拖动
+const tableColSortStart = (event: SortableEvent) => {
+  $emit('tableRowSortStart', event);
+}
+// 列拖拽完成
+const tableColSortEnd = (event?: SortableEvent) => {
+  const newColumns = global.$common.copy(tableColumnConfig.value);
+  base.isInitColumns = false;
+  if (event) {
+    const oldIndex =  event.oldIndex as number;
+    const newIndex = event.newIndex as number;
+    const oldItem = global.$common.copy(newColumns[oldIndex]);
+    const newItem = global.$common.copy(newColumns[newIndex]);
+    const startIndex = oldIndex > newIndex ? newIndex : oldIndex + 1;
+    const endIndex = oldIndex > newIndex ? oldIndex - 1 : newIndex;
+    newColumns.forEach((item:any, index:number) => {
+      if (index >= startIndex && index <= endIndex) {
+        item.fixed = newColumns[index + (oldIndex > newIndex ? 1 : -1)].fixed;
+      }
+    });
+    if (global.$common.isEmpty(newItem.fixed)) {
+      delete oldItem.fixed;
+    } else {
+      oldItem.fixed = newItem.fixed;
+    }
+    newColumns.splice(oldIndex, 1);
+    newColumns.splice(newIndex, 0, oldItem);
+    base.pageColumns = newColumns;
+  }
+  base.pageColumns = newColumns;
+  nextTick(() => {
+    $emit('tableColSortEnd', { columns: base.pageColumns,  event: event });
+  })
+}
+/**
+ * 创建列拖拽实例
+ * @param element 目标节点或节点标识id,class等标识
+ */
+const initTableColumnSort = (element: string | HTMLElement | Element | null) => {
+  proxy.$refs[`table_${base.pageId}`] && proxy.$refs[`table_${base.pageId}`].initTableColumnSort(element);
+}
 // 触发搜索栏按钮
 const filterSearch = (type:boolean = true) => {
   proxy.$refs[`filterBar-${base.pageId}`] ? proxy.$refs[`filterBar-${base.pageId}`].filterSearch({}, type) : search(type);
@@ -549,7 +652,9 @@ defineExpose({
   clearSort,
   clearFilter,
   doLayout,
-  sort
+  sort,
+  initTableRowSort,
+  initTableColumnSort
 });
 </script>
 <style lang="less" scoped>
