@@ -2,7 +2,7 @@
   <el-dialog
     v-bind="selectConfig"
     :title="props.title"
-    :custom-class="customClassName"
+    :class="customClassName"
     :top="marginTop"
   >
     <slot />

@@ -18,10 +18,10 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^2.0.6",
+    "@element-plus/icons-vue": "^2.0.9",
     "axios": "^0.26.1",
     "dayjs": "^1.11.4",
-    "element-plus": "^2.2.12",
+    "element-plus": "^2.2.16",
     "js-cookie": "^3.0.1",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
