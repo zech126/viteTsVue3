@@ -61,7 +61,7 @@
                     <dyt-node
                       v-if="typeof data.cloumnsRender[`render-${index}`] === 'function'"
                       :node="data.cloumnsRender[`render-${index}`]"
-                      :node-parameter="scope"
+                      :prop="scope"
                     />
                     <div v-else class="table-ellipsis-tips"
                       v-on="data.cloumnsEvents[`events-${index}`] ? {

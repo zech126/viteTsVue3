@@ -264,26 +264,22 @@ const expandHand = () => {
   $emit('filterExpand', data.isExpand);
 }
 // 处理参数中的异步
-const filterFunHand = (fun:any, key:string, type:string) => {
+const filterFunHand = (filterItem:any, key:string, type:string) => {
   const typeVal = { array: [], string: '', object: {}, number: null };
   data.filterAsync[key] = {value: typeVal[type], loading: true};
-  if (typeof fun === 'function') {
-    const newFun = fun();
-    if (newFun.then && newFun.catch) {
-      newFun.then((res:any) => {
+  if (typeof filterItem === 'function') {
+    const newItem = filterItem();
+    if (global.$common.isPromise(newItem)) {
+      newItem.then((res:any) => {
         data.filterAsync[key] = {value: res, loading: false};
       }).catch(() => {
         data.filterAsync[key] = {value: typeVal[type], loading: false};
       });
-    }else if (newFun.then) {
-      newFun.then((res:any) => {
-        data.filterAsync[key] = {value: res, loading: false};
-      })
     } else {
-      data.filterAsync[key] = {value: newFun, loading: false};
+      data.filterAsync[key] = {value: newItem, loading: false};
     }
   } else {
-    data.filterAsync[key] = {value: fun, loading: false};
+    data.filterAsync[key] = {value: filterItem, loading: false};
   }
 }
 // 回车事件（使用 插槽、render 方法的不支持）
@@ -397,12 +393,12 @@ defineExpose({
   }
   .dyt-filter-form{
     position: relative;
-    .dyt-input-demo {
-      width: 214px;
-    }
     :deep(.el-form-item){
       margin-bottom: 21px;
       margin-right: 15px;
+      .dyt-input-demo {
+        width: 214px;
+      }
       .el-form-item__error{
         padding-top: 1px;
       }

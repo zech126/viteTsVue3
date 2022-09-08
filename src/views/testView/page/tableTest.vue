@@ -388,27 +388,32 @@ export default defineComponent({
         {
           label: '操作', fixed: 'right', align: 'center', 'width': '150',
           render: ({row}:any) => {
-            return <div>
-              <el-button
-                {...{
-                  size: 'small',
-                  type: 'primary',
-                  onclick: () => {
-                    this.$message({ message: '你点击了编辑按钮', type: 'warning'})
-                    this.showDialog();
-                  }
-                }}
-              >编辑</el-button>
-              <el-button
-                {...{
-                  size: 'small',
-                  type: 'danger',
-                  onclick: () => {
-                    this.$message({ message: '你点击了删除按钮', type: 'warning'})
-                  }
-                }}
-              >删除</el-button>
-            </div>
+            return new Promise((resolve) => {
+              const operate = <div>
+                <el-button
+                  {...{
+                    size: 'small',
+                    type: 'primary',
+                    onclick: () => {
+                      this.$message({ message: '你点击了编辑按钮', type: 'warning'});
+                      this.showDialog();
+                      console.log(row);
+                    }
+                  }}
+                >编辑</el-button>
+                <el-button
+                  {...{
+                    size: 'small',
+                    type: 'danger',
+                    onclick: () => {
+                      this.$message({ message: '你点击了删除按钮', type: 'warning'});
+                      console.log(row);
+                    }
+                  }}
+                >删除</el-button>
+              </div>;
+              resolve(operate);
+            });
           }
         },
       ],
