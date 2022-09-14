@@ -463,14 +463,15 @@ export default defineComponent({
     // 获取列表数据
     requestHandler (requestData:{[key:string]: any}) {
       let tableList:Array<any> = [];
-      const remaining = this.tableTotal - ((requestData.pageNum - 1) * requestData.pageSize);
+      const origination = (requestData.pageNum - 1) * requestData.pageSize;
+      const remaining = this.tableTotal - origination;
       const pageSize = remaining > requestData.pageSize ? requestData.pageSize : remaining;
       for (let i = 0; i < pageSize; i ++) {
         tableList.push({
-          username: `username-${i + 1}`,
-          name: `name-${i + 1}`,
-          phone: `phone-${i + 1}`,
-          email: `email-${i + 1}`
+          username: `username-${origination + i + 1}`,
+          name: `name-${origination + i + 1}`,
+          phone: `phone-${origination + i + 1}`,
+          email: `email-${origination + i + 1}`
         })
       }
       return new Promise((reslove, reject) => {

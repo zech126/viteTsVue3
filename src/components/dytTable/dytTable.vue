@@ -354,6 +354,7 @@ const search = (type: boolean = false, options: {valid?: boolean} = {}) => {
         base.tableLoading = false;
         return;
       }
+      base.pageTableData = { rows: [], total: 0 };
       const requestData = await props.requestHandler(newFilter);
       base.tableDataMap = {...base.tableDataMap, ...props.contentDataMap };
       Object.keys(base.tableDataMap).forEach(key => {

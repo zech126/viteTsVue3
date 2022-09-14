@@ -1,4 +1,4 @@
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import common from '@/utils/common';
 export default defineComponent({
   name: 'DytNode',
@@ -7,22 +7,21 @@ export default defineComponent({
     nodeParameter: { type: Object, default: () => {return {}}},
     prop: { type: Object, default: () => {return {}}}
   },
-  data () {
-    return {
-      nodeInfo: ''
+  setup(props) {
+    let nodeText = ref('');
+    const handNode = (prop:{[key:string]: any}) => {
+      const res = props.node(prop);
+      if (common.isPromise(res)) {
+        return res.then((node) => {
+          nodeText.value = node;
+        }).catch(() => {
+          nodeText.value = '';
+        })
+      }
+      nodeText.value = res;
     }
-  },
-  created() {
-    const res = this.node({...this.nodeParameter, ...this.prop});
-    if (!common.isPromise(res)) {
-      this.nodeInfo = res;
-      return;
-    }
-    res.then((node) => {
-      this.nodeInfo = node;
-    }).catch(() => {
-      this.nodeInfo = '';
-    })
+    handNode ({...props.prop, ...props.nodeParameter});
+    return { nodeInfo: nodeText }
   },
   render() {
     return this.nodeInfo;
