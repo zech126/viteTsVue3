@@ -581,7 +581,7 @@ watch(() => props.modelValue, (val:any) => {
   if (JSON.stringify(val) === JSON.stringify(data.vModel)) return;
   const oldtModel = global.$common.copy(data.vModel);
   if (props.string && config.value.multiple) {
-    data.vModel = global.$common.isEmpty(val) ? [] : val.split(props.split);
+    data.vModel = global.$common.isEmpty(val) ? [] : global.$common.split(val, props.split);
   } else if (!Array.isArray(val)) {
     data.vModel = global.$common.isEmpty(val) ? [] : Array.isArray(val) ? val : [val];
   } else {
@@ -611,7 +611,7 @@ watch(() => data.inputValue, (val) => {
 }, {deep: true});
 // 绑定值监听
 watch(() => data.vModel, (val, old) => {
-  updateVal(config.value.multiple ? (props.string ? val.split(props.separStr || props.split) : val) : (props.backArray ? val : val[0]));
+  updateVal(config.value.multiple ? (props.string ? global.$common.split(val, props.separStr || props.split) : val) : (props.backArray ? val : val[0]));
 }, {deep: true});
 
 // 导出方法

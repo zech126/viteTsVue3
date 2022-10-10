@@ -12,6 +12,7 @@ import customComponents from '@/components/index';
 import 'element-plus/theme-chalk/index.css';
 import localforage from 'localforage';
 import ElementPlus from 'element-plus';
+import * as lodash from 'lodash';
 // import elFormValidate from "@/utils/elFormValidate";
 import zhCn from 'element-plus/es/locale/lang/zh-cn'; // 引入中文包，否则默认文本为英文
 import { ClickOutside as vClickOutside } from 'element-plus';
@@ -34,6 +35,7 @@ app.config.globalProperties.$common = $common;
 app.config.globalProperties.api = $api;
 app.config.globalProperties.$api = $api;
 app.config.globalProperties.$http = $http;
+app.config.globalProperties.lodash = lodash;
 app.config.globalProperties.localforage = localforage;
 
 // 注册 store

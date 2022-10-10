@@ -359,7 +359,7 @@ const search = (type: boolean = false, options: {valid?: boolean} = {}) => {
       base.tableDataMap = {...base.tableDataMap, ...props.contentDataMap };
       Object.keys(base.tableDataMap).forEach(key => {
         if (base.tableDataMap[key].includes('.')) {
-          const keys = base.tableDataMap[key].split('.');
+          const keys = global.$common.split(base.tableDataMap[key], '.');
           const hand = (res:any, index:number) => {
             if (index >= keys.length - 1) {
               base.pageTableData[key] = res[keys[index]];

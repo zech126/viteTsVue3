@@ -4,6 +4,7 @@ import { ComponentInternalInstance, getCurrentInstance } from 'vue';
 import dayjs from 'dayjs';
 import { Router, RouteLocationNormalizedLoaded } from "vue-router";
 import { Store } from "vuex";
+import type lodash from 'lodash';
 import type { Message, Notify, LoadingOptions, IElMessageBox } from 'element-plus';
 
 type apiValType = string & {readonly[key:string]: apiValType};
@@ -38,6 +39,7 @@ const getGlobal = () => {
     readonly $store: Store<any>;
     readonly api: apiValType;
     readonly $api: apiValType;
+    readonly lodash: typeof lodash;
     // [key:string]:any;
   }
 }

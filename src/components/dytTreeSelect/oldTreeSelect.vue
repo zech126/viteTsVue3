@@ -254,7 +254,7 @@ export default defineComponent({
         if (JSON.stringify(val) === JSON.stringify(this.vModel)) return;
         const oldtModel = this.$common.copy(this.vModel);
         if (this.string && this.config.multiple) {
-          this.vModel = this.$common.isEmpty(val) ? [] : val.split(this.split);
+          this.vModel = this.$common.isEmpty(val) ? [] : this.$common.split(val, this.split);
         } else if (!Array.isArray(val)) {
           this.vModel = this.$common.isEmpty(val) ? [] : Array.isArray(val) ? val : [val];
         } else {
@@ -487,7 +487,7 @@ export default defineComponent({
         !this.config['check-strictly'] && handArr(checkNodes);
         this.vModel = checkKeys;
         if (JSON.stringify(this.modelValue) === JSON.stringify(this.vModel)) return;
-        this.updateVal(this.string ? this.vModel.split(this.split) : this.vModel);
+        this.updateVal(this.string ? this.$common.split(this.vModel, this.split) : this.vModel);
       })
     },
     // 显示隐藏

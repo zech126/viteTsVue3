@@ -1,4 +1,4 @@
-// import common from '@/assets/scripts/common';
+import common from '@/utils/common';
 const process = import.meta.env;
 export default {
   // 匹配不同模块服务地址
@@ -17,11 +17,11 @@ export default {
   },
   // 处理方法, 执行后不会继续执行后面代码
   hand: {
-    200: (response:any, responseData:any) => {
+    200: (response:{[i:string]:any}, responseData:any) => {
       return responseData
     },
     // token 无效 或 过去
-    451: (response:any, responseData:any) => {
+    451: (response:{[i:string]:any}, responseData:any) => {
       console.error('登录过期')
       return responseData;
     }
@@ -29,5 +29,18 @@ export default {
   // 其他
   other: {
     unknown: '系统未知错误,请反馈给管理员'
+  },
+  // 下载文件
+  downLoadFile: (response:{[i:string]:any}) => {
+    let str = response.headers['content-disposition'];
+    if (!response || !str) return response.data;
+    // let suffix = '';
+    let fileName = '';
+    // 截取文件名和文件类型
+    if (str.lastIndexOf('.')) {
+      fileName = decodeURI(str.substring(str.indexOf('=') + 1, str.lastIndexOf('.')));
+    }
+    common.downloadFile(response.data, {name: fileName});
+    return response.data;
   }
 }

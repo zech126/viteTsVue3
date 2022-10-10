@@ -296,17 +296,6 @@ const closeTag = (tag:any) => {
 const tagkeyup = (e:Object) => {
   $emit('keyup', e);
 }
-// 字符串分割
-const strSplitHand = (str:string, splitStr:Array<string> | string) => {
-  if (global.$common.isEmpty(str)) return [];
-  if (typeof str !== 'string') return str;
-  if (typeof splitStr === 'string') return str.split(splitStr);
-  if (global.$common.isArray(splitStr)) {
-    if (splitStr.length === 0) return [str];
-    return str.split(new RegExp(`${splitStr.join('|')}+`)).filter(item => !global.$common.isEmpty(item, true));
-  }
-  return [str];
-}
 // 处理多行文本内容
 const changeInputVal = (matchingSplit:Array<any>) => {
   let tagList:any = matchingSplit;
@@ -359,7 +348,8 @@ const addTagHand = (e:any = {}) => {
     }
     return;
   }
-  const newAddItems:any = strSplitHand(base.inputValue, props.split).filter(item => !global.$common.isEmpty(item, true));
+  // 字符串分割
+  const newAddItems:any = global.$common.split(base.inputValue, props.split, true);
   let addItems:Array<any> = [];
   let matchingSplit:Array<any> = [];
   newAddItems.forEach((item:any) => {

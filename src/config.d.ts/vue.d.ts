@@ -3,6 +3,7 @@ import { AxiosInstance } from "axios";
 import { Router, RouteLocationNormalizedLoaded } from "vue-router";
 import { Store } from "vuex";
 import dayjs from 'dayjs';
+import type lodash from 'lodash';
 import type { commonClass } from "../utils/common";
 import type { Message, Notify, LoadingOptions, IElMessageBox } from 'element-plus';
 
@@ -43,6 +44,7 @@ declare module '@vue/runtime-core' {
     readonly api: apiValType;
     readonly $api: apiValType;
     readonly $refs: Array<any> | {[key: string]: any};
+    readonly lodash: typeof lodash;
     // [key:string]: any;
   }
 }

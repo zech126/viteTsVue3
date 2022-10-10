@@ -35,6 +35,10 @@ instance.interceptors.request.use((config) => {
         config.params = !common.isEmpty(config.params) ? common.removeEmpty(config.params) : undefined;
       }
     }
+    // 当下载文件时
+    if (typeof config.downLoadFile === 'boolean' && config.downLoadFile) {
+      config.responseType = 'blob';
+    }
     return config;
   }
   return new Promise((resolve, reject) => {
@@ -51,6 +55,9 @@ instance.interceptors.response.use((response) => {
   let newMsg = responseData.msg;
   // 状态码处理
   if (requestHand.hand[code]) {
+    if (typeof response.config.downLoadFile === 'boolean' && response.config.downLoadFile) {
+      return requestHand.downLoadFile(response);
+    }
     return requestHand.hand[code](response, response.data);
   }
   // 错误处理

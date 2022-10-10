@@ -122,7 +122,8 @@ export default function addAttachmentBtn (options: {onclick?:(editor:{[key:strin
                 successHandler(res.value.filetype, res.value.link, res.value.info, res.value.file, res.value.loadingId, editor);
               } else {
                 console.error(`文件 ${res.value.file.name} 上传失败: ${res.value.msg}`);
-                errorHandler(`"${res.value.file.name}"上传失败: ${res.value.msg}`, res.value.loadingId, res.value.filetype, editor)
+                // successHandler(res.value.filetype, `../${res.value.file.name}`, res.value.info, res.value.file, res.value.loadingId, editor);
+                errorHandler(`"${res.value.file.name}"上传失败: ${res.value.msg}`, res.value.loadingId, res.value.filetype, editor);
               }
             }
           })

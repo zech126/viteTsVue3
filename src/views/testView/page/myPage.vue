@@ -203,6 +203,8 @@ import { reactive, onMounted } from 'vue';
 import getProxy from "@/utils/proxy";
 import getGlobal from "@/utils/global";
 import {component1, component2} from './test';
+// import { debounce } from '@/utils/debounce';
+// import { debounce } from 'lodash';
 
 const proxy = getProxy();
 const global = getGlobal();
@@ -443,11 +445,21 @@ setTimeout(() => {
 // }
 const dd = {
   d: [],
-  h: [[[], ['3', '', ['1']]], {}, '', {d: 'sdh', sddf: {lgd:'', dshdsh: {hhg: [{dfsgdg:[{gggggg: []}]}, '', {web:''}]}}}, [[[]]]],
+  h: [
+    [[], ['3', '', ['1']]],
+    {},
+    '', 
+    {d: 'sdh', sddf: {lgd:'', dshdsh: {hhg: [{dfsgdg:[{gggggg: []}]}, '', {web:[{dg: [{},{d:''}]}, {g: ''}]}]}}},
+    [[[]]],
+    {sddf: {lgd:'', dshdsh: {hhg: [{dfsgdg:[{gggggg: []}]}, '', {web:[{dg: [{},{d:''}]}, {g: ''}]}]}}},
+    [],
+    {fdsgsdg: ''}
+  ],
   f: { g: { b:{ c: {} } } },
   jg: { dg: { fd: { gss:'', ddgf: { dfthj: '0' } } }, h: {} },
-  hg: [[], []],
-  hh: '123'
+  hg: [[], [], {d:'33'}, {d: ''}],
+  hh: '123',
+  tyty: () => {}
 };
 
 const trm = {
@@ -455,14 +467,29 @@ const trm = {
   b: { c: { sdf: null, fhdfg: 123, gghgf: true, jkhjl: false, tyty: () => {}, d: { fadsg: '  ds  asg ', sd: '  ', e: 'hji;l  ' } } },
   c: [[]],
   ddd: {d: '   ', f: ' d dsgh  ', gsg: ['  ', 'dg ', '  dsgf  '] },
-  d: [{d: ['asg  ', '  dasgf111  ', '   ', '   zasfg'], ddd: {gds: '  sdh', dfgh: '   ',  agas: '  sdfgh   ', hhjh: '   dsfh111'}}]
+  d: [{d: ['asg  ', '  dasgf111  ', '   ', '   zasfg'], ddd: {gds: '  sdh', dfgh: '   ',  agas: '  sdfgh   ', hhjh: '   dsfh111'}}],
+  h: [
+    [[], ['3', '', ['1']]],
+    {},
+    '     ooo ', 
+    {d: '  s dh ', sddf: {lgd:' 0 ', dshdsh: {hhg: [{dfsgdg:[{gggggg: []}]}, ' ds fg ', {web:[{dg: [{ghjk: '  srtty '},{d:' dgf '}]}, {g: ' fdd '}]}]}}},
+    [[[]]],
+    {sddf: {lgd:'  dfy', dshdsh: {hhg: [{dfsgdg:[{gggggg: ['  dsg ']}]}, '  dstew ', {web:[{dg: [{ghjk:'   ds    '},{d:'  dete'}]}, {g: 'weghjf '}]}]}}},
+    [],
+    {fdsgsdg: 'werytui   '}
+  ],
 };
-console.log('移除空值, hg 和 h[3].sddf.dshdsh.hhg[2] 除外', global.$common.removeEmpty(dd, ['hg', 'h[*].sddf.dshdsh.hhg[*]'], true));
-console.log('移除字符串2端的空格, ddd 和 b.c.d.e 除外', global.$common.trim(trm, ['ddd', 'b.c.d.e']));
+console.log('移除空值, hg 和 h[*].sddf.dshdsh.hhg[2].web[0].dg[1] 除外', global.$common.removeEmpty(dd, ['hg', 'h[*].sddf.dshdsh.hhg[2].web[0].dg[1]'], true));
+console.log('移除字符串2端的空格, ddd.gsg 和 h[*].sddf.dshdsh.hhg[2].web[0].dg[1] 除外', global.$common.trim(trm, ['ddd.gsg', 'h[*].sddf.dshdsh.hhg[2].web[0].dg[1]']));
 // const myTime = global.$dayjs().add(1, 'day').format('YYYY-MM-DD');
 // console.log(myTime, global.$route)
 console.log(global, global.api);
 console.log(global.$dayjs().add(1, 'y').add(1, 'M').add(1, 'd').format('YYYY-MM-DD'));
+// global.$common.downloadFile(window.location.origin + '/src/main.ts', {name: '', timestamp: false});
+global.$common.split('你\n好,的，昂.都是多人他.发个交易日.发国库突然.塞特我塞特我', ['.', ',', '，', '\n']);
+// console.log(global.lodash);
+const isEm = [[],[],[[],[],[[],[],[{g:{}}]]]];
+console.log(global.$common.isEmpty(isEm, true), global.$common.isRegExp(/dfgd/g));
 </script>
 <style lang="less" scoped>
 .dytImage{
