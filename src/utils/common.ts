@@ -499,7 +499,7 @@ export class commonClass {
    */
   removeEmpty (target: Array<any>|{[key:string]: any}, ruleOut?:string | Array<string> | boolean, emptyAllClean?:boolean):Array<any>|{[key:string]: any} {
     let outKey:Array<string> = [];
-    if (!isEmpty(ruleOut) && (typeof ruleOut == 'string' || this.isArray(ruleOut))) {
+    if (!this.isEmpty(ruleOut) && (typeof ruleOut == 'string' || this.isArray(ruleOut))) {
       outKey = typeof ruleOut == 'string' ? [ruleOut] : ruleOut;
     } else if (typeof ruleOut == 'boolean') {
       emptyAllClean = ruleOut;
@@ -508,8 +508,8 @@ export class commonClass {
       if (this.isArray(option)) {
         let newObj:Array<any> = [];
         for(let i = 0, len = option.length; i < len; i++) {
-          let currentLikeKey = `${isEmpty(stackPointerLike)?'':stackPointerLike}[*]`;
-          const otherLikeKey = `${isEmpty(stackPointerLike)?'':stackPointerLike}[${i}]`;
+          let currentLikeKey = `${this.isEmpty(stackPointerLike)?'':stackPointerLike}[*]`;
+          const otherLikeKey = `${this.isEmpty(stackPointerLike)?'':stackPointerLike}[${i}]`;
           for (let oi = 0, olen = outKey.length; oi < olen; oi++) {
             if (outKey[oi].includes(otherLikeKey)) {
               const newStr = outKey[oi].substring(0, otherLikeKey.length);
@@ -517,13 +517,13 @@ export class commonClass {
             }
           }
           if (!outKey.includes(currentLikeKey)) {
-            if (!isEmpty(option[i])) {
+            if (!this.isEmpty(option[i])) {
               if (this.isObject(option[i])) {
                 const newVal = hand(option[i], false, currentLikeKey);
                 if (!emptyAllClean && !clean) {
-                  isEmpty(newVal) && this.isJson(option[i]) ? newObj.push(option[i]) : newObj.push(newVal);
+                  this.isEmpty(newVal) && this.isJson(option[i]) ? newObj.push(option[i]) : newObj.push(newVal);
                 } else {
-                  !isEmpty(newVal) && newObj.push(newVal);
+                  !this.isEmpty(newVal) && newObj.push(newVal);
                 }
               } else {
                 newObj.push(option[i]);
@@ -539,15 +539,15 @@ export class commonClass {
         let newObj = {};
         const objKeys = Object.keys(option);
         for(let i = 0, len = objKeys.length; i < len; i++) {
-          const currentLikeKey = `${isEmpty(stackPointerLike) ? '' : `${stackPointerLike}.`}${objKeys[i]}`;
+          const currentLikeKey = `${this.isEmpty(stackPointerLike) ? '' : `${stackPointerLike}.`}${objKeys[i]}`;
           if (!outKey.includes(objKeys[i]) && !outKey.includes(currentLikeKey)) {
-            if (!isEmpty(option[objKeys[i]]) && option[objKeys[i]] !== 'web-null') {
+            if (!this.isEmpty(option[objKeys[i]]) && option[objKeys[i]] !== 'web-null') {
               if (this.isObject(option[objKeys[i]])) {
                 const newVal = hand(option[objKeys[i]], false, currentLikeKey);
                 if (!emptyAllClean && !clean) {
                   newObj[objKeys[i]] = newVal;
                 } else {
-                  !isEmpty(newVal) && (newObj[objKeys[i]] = newVal);
+                  !this.isEmpty(newVal) && (newObj[objKeys[i]] = newVal);
                 }
               } else {
                 newObj[objKeys[i]] = option[objKeys[i]];
