@@ -484,12 +484,17 @@ console.log('移除字符串2端的空格, ddd.gsg 和 h[*].sddf.dshdsh.hhg[2].w
 // const myTime = global.$dayjs().add(1, 'day').format('YYYY-MM-DD');
 // console.log(myTime, global.$route)
 console.log(global, global.api);
-console.log(global.$dayjs().add(1, 'y').add(1, 'M').add(1, 'd').format('YYYY-MM-DD'));
+// console.log(global.$dayjs().add(1, 'y').add(1, 'M').add(1, 'd').format('YYYY-MM-DD'));
 // global.$common.downloadFile(window.location.origin + '/src/main.ts', {name: '', timestamp: false});
-global.$common.split('你\n好,的，昂.都是多人他.发个交易日.发国库突然.塞特我塞特我', ['.', ',', '，', '\n']);
-// console.log(global.lodash);
+console.log(global.$common.split('你\n好,的，昂.都是多人他.发个交易日.发国库突然.塞特我塞特我', ['.', ',', '，', '\n']));
 const isEm = [[],[],[[],[],[[],[],[{g:{}}]]]];
 console.log(global.$common.isEmpty(isEm, true), global.$common.isRegExp(/dfgd/g));
+console.log(global.$common.toLocaleDate('2022-10-02 01:10:56:998', 'YYYY-MM-DD HH:mm:ss:SSS'));
+console.log(global.$common.toISODate('2022-10-2 9:10:56:998', 'YYYY-MM-DD HH:mm:ss:SSS'));
+let ddd = {
+  d: new Date()
+}
+console.log(global.$common.copy(ddd), global.$common.removeEmpty(ddd));
 </script>
 <style lang="less" scoped>
 .dytImage{

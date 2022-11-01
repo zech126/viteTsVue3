@@ -2,9 +2,10 @@ import Cookies from 'js-cookie';
 import store from '@/store';
 import {
   debounce, throttle, cloneDeep, isArray, isObject, isNumber, isString, isBoolean, isFunction, isDate, isRegExp, isSymbol,
-  isSet, isEmpty
+  isSet
 } from 'lodash';
 import axios from 'axios';
+import dayjs from 'dayjs';
 class commonTool {
   /**
    * 下载操作
@@ -63,6 +64,16 @@ class commonTool {
       return { type: newFileType, Uint8Array: base64Data }
     }
   }
+  /**
+   * 返回本地时间与标准时间的时差(正数为东区，负数为西区)
+   * @returns 
+   */
+  getTimeDifference () {
+    const nowDate = new Date();
+    const dateISO = nowDate.toISOString().split(/[^0-9]/);
+    const dateLocale = nowDate.toLocaleString().split(/[^0-9]/);
+    return Number(dateLocale[3]) - Number(dateISO[3]);
+  }
 }
 const tool = new commonTool();
 export class commonClass {
@@ -96,6 +107,14 @@ export class commonClass {
     this.isSet = isSet; // 是否为 Set
   }
   /**
+   * 是否为 undefined
+   * @param value 
+   * @returns 
+   */
+  isUndefined (value:any):value is undefined {
+    return typeof value === 'undefined'
+  }
+  /**
    * 是否Promise对象
    * @param value 
    * @returns 
@@ -126,10 +145,17 @@ export class commonClass {
    * @returns 
    */
   isEmpty (value?:any, type = false):value is null | undefined {
-    if (type && this.isString(value)) return isEmpty(value.trim());
-    if (type && this.isObject(value)) return isEmpty(this.removeEmpty(value, true));
+    if (this.isDate(value)) return isNaN(value.getTime());
+    if (this.isString(value)) {
+      return this.isBoolean(type) && type ? value.trim() === '' : value === '';
+    }
     if (this.isNumber(value)) return isNaN(value);
-    return isEmpty(value);
+    if (this.isJson(value) || this.isArray(value)) {
+      const arr = Object.values(value);
+      if (!type) return arr.length <= 0;
+      return Object.keys(this.removeEmpty(arr, true)).length <= 0;
+    }
+    return value === null || this.isUndefined(value);
   }
   /**
    * 数组去重
@@ -165,7 +191,7 @@ export class commonClass {
    * @param element 目标元素
    */
   smoothScroll (element:string | HTMLElement) {
-    const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element;
+    const newElement = this.isString(element) ? document.querySelector(element) as HTMLElement : element;
     newElement.scrollIntoView({
       behavior: 'smooth'
     });
@@ -241,7 +267,7 @@ export class commonClass {
     if (this.isEmpty(str) || !this.isString(str)) return [];
     if (this.isRegExp(sign)) return str.split(sign);
     if (this.isEmpty(sign) || (!this.isString(sign) && !this.isArray(sign))) return [str];
-    const isRemove = typeof removeEmpty === 'boolean' && removeEmpty;
+    const isRemove = this.isBoolean(removeEmpty) && removeEmpty;
     if (this.isString(sign)) {
       if (isRemove) return str.split(sign).filter(f => !this.isEmpty(f, true));
       return str.split(sign);
@@ -268,11 +294,11 @@ export class commonClass {
    * @returns 
    */
   trim (target:string | {[key:string]:any} | Array<any>, ruleOut?:string | Array<string>):typeof target {
-    if (!this.isString(target) && !this.isArray(target) && !this.isObject(target)) return target;
-    const outKey = !this.isEmpty(ruleOut) ? (typeof ruleOut == 'string' ? [ruleOut] : this.isArray(ruleOut) ? ruleOut : []) : [];
+    if (!this.isString(target) && !this.isArray(target) && !this.isJson(target)) return target;
+    const outKey = !this.isEmpty(ruleOut) ? (this.isString(ruleOut) ? [ruleOut] : this.isArray(ruleOut) ? ruleOut : []) : [];
     const hand = (obj:string | {[key:string]:any} | Array<any>, stackPointerLike?:string):typeof obj => {
-      if (typeof obj === 'string') return obj.trim();
-      if (!this.isObject(obj)) return obj;
+      if (this.isString(obj)) return obj.trim();
+      if (!this.isJson(obj) && this.isArray(obj)) return obj;
       let backVal;
       if (this.isArray(obj)) {
         backVal = [];
@@ -286,10 +312,10 @@ export class commonClass {
             }
           }
           if (!outKey.includes(currentLikeKey)) {
-            if (this.isObject(obj[index])) {
+            if (this.isJson(obj[index]) || this.isArray(obj[index])) {
               backVal.push(hand(obj[index], currentLikeKey))
             } else {
-              typeof obj[index] == 'string' ? backVal.push(obj[index].trim()) : backVal.push(obj[index]);
+              this.isString(obj[index]) ? backVal.push(obj[index].trim()) : backVal.push(obj[index]);
             }
           } else {
             backVal.push(obj[index]);
@@ -301,10 +327,10 @@ export class commonClass {
         for(let index = 0, len = objKeys.length; index < len; index++) {
           const currentLikeKey = `${this.isEmpty(stackPointerLike) ? '' : `${stackPointerLike}.`}${objKeys[index]}`;
           if (!outKey.includes(objKeys[index]) && !outKey.includes(currentLikeKey)) {
-            if ( this.isObject(obj[objKeys[index]])) {
+            if (this.isJson(obj[objKeys[index]]) || this.isArray(obj[objKeys[index]])) {
               backVal[objKeys[index]] = hand(obj[objKeys[index]], currentLikeKey);
             } else {
-              backVal[objKeys[index]] = typeof obj[objKeys[index]] == 'string' ? obj[objKeys[index]].trim() : obj[objKeys[index]];
+              backVal[objKeys[index]] = this.isString(obj[objKeys[index]]) ? obj[objKeys[index]].trim() : obj[objKeys[index]];
             }
           } else {
             backVal[objKeys[index]] = obj[objKeys[index]];
@@ -348,7 +374,7 @@ export class commonClass {
    * @returns 
    */
   copyToClip (content:any): Promise<any> {
-    const copyTxt = this.isObject(content) ? JSON.stringify(content) : content;
+    const copyTxt = this.isJson(content) ? JSON.stringify(content) : content;
     return new Promise(resolve => {
       // execCommand 方法有可能弃用，，
       if (document.execCommand) {
@@ -426,7 +452,7 @@ export class commonClass {
    * @returns 
    */
   getCookie (keys:string | Array<string> | {[key:string]: string}):string | {[key:string]: string} {
-    if (this.isObject(keys)) {
+    if (this.isJson(keys) || this.isArray(keys)) {
       let newVal:string | {[key:string]: string} = {};
       if (this.isJson(keys)) {
         const objKey = Object.keys(keys);
@@ -440,7 +466,7 @@ export class commonClass {
       }
       return newVal;
     }
-    return typeof keys === 'string' ? (Cookies.get(keys) || '') : '';
+    return this.isString(keys) ? (Cookies.get(keys) || '') : '';
   }
   /**
    * 插入cookie，支持数组和json
@@ -471,7 +497,7 @@ export class commonClass {
           Cookies.set(key[i].key, key[i].value, key[i].expires || {});
         }
       }
-    } else if(typeof key === 'string' && typeof val !== 'undefined'){
+    } else if(this.isString(key) && !this.isUndefined(val)){
       Cookies.set(key, val, expires||{});
     }
   }
@@ -482,7 +508,7 @@ export class commonClass {
    */
   delCookie (keys:string | Array<string>) {
     if (this.isEmpty(keys)) return;
-    if (typeof keys === 'string') {
+    if (this.isString(keys)) {
       Cookies.remove(keys);
     } else if (this.isArray(keys)) {
       for(let i = 0, len = keys.length; i < len; i++) {
@@ -499,17 +525,19 @@ export class commonClass {
    */
   removeEmpty (target: Array<any>|{[key:string]: any}, ruleOut?:string | Array<string> | boolean, emptyAllClean?:boolean):Array<any>|{[key:string]: any} {
     let outKey:Array<string> = [];
-    if (!this.isEmpty(ruleOut) && (typeof ruleOut == 'string' || this.isArray(ruleOut))) {
-      outKey = typeof ruleOut == 'string' ? [ruleOut] : ruleOut;
-    } else if (typeof ruleOut == 'boolean') {
+    if (!this.isEmpty(ruleOut) && (this.isString(ruleOut) || this.isArray(ruleOut))) {
+      outKey = this.isString(ruleOut) ? [ruleOut] : ruleOut;
+    } else if (this.isBoolean(ruleOut)) {
       emptyAllClean = ruleOut;
     }
     const hand = (option:string | Array<any>|{[key:string]: any}, clean:boolean, stackPointerLike?:string) => {
       if (this.isArray(option)) {
         let newObj:Array<any> = [];
+        let currentLikeKey = '';
+        let otherLikeKey = '';
         for(let i = 0, len = option.length; i < len; i++) {
-          let currentLikeKey = `${this.isEmpty(stackPointerLike)?'':stackPointerLike}[*]`;
-          const otherLikeKey = `${this.isEmpty(stackPointerLike)?'':stackPointerLike}[${i}]`;
+          currentLikeKey = `${this.isEmpty(stackPointerLike)?'':stackPointerLike}[*]`;
+          otherLikeKey = `${this.isEmpty(stackPointerLike)?'':stackPointerLike}[${i}]`;
           for (let oi = 0, olen = outKey.length; oi < olen; oi++) {
             if (outKey[oi].includes(otherLikeKey)) {
               const newStr = outKey[oi].substring(0, otherLikeKey.length);
@@ -518,7 +546,7 @@ export class commonClass {
           }
           if (!outKey.includes(currentLikeKey)) {
             if (!this.isEmpty(option[i])) {
-              if (this.isObject(option[i])) {
+              if (this.isJson(option[i]) || this.isArray(option[i])) {
                 const newVal = hand(option[i], false, currentLikeKey);
                 if (!emptyAllClean && !clean) {
                   this.isEmpty(newVal) && this.isJson(option[i]) ? newObj.push(option[i]) : newObj.push(newVal);
@@ -538,11 +566,12 @@ export class commonClass {
       if (this.isJson(option)) {
         let newObj = {};
         const objKeys = Object.keys(option);
+        let currentLikeKey = '';
         for(let i = 0, len = objKeys.length; i < len; i++) {
-          const currentLikeKey = `${this.isEmpty(stackPointerLike) ? '' : `${stackPointerLike}.`}${objKeys[i]}`;
+          currentLikeKey = `${this.isEmpty(stackPointerLike) ? '' : `${stackPointerLike}.`}${objKeys[i]}`;
           if (!outKey.includes(objKeys[i]) && !outKey.includes(currentLikeKey)) {
             if (!this.isEmpty(option[objKeys[i]]) && option[objKeys[i]] !== 'web-null') {
-              if (this.isObject(option[objKeys[i]])) {
+              if (this.isJson(option[objKeys[i]]) || this.isArray(option[objKeys[i]])) {
                 const newVal = hand(option[objKeys[i]], false, currentLikeKey);
                 if (!emptyAllClean && !clean) {
                   newObj[objKeys[i]] = newVal;
@@ -591,7 +620,7 @@ export class commonClass {
     const isAdmin:boolean = !this.isEmpty(userInfo.loginName) && admins.includes(userInfo.loginName);
     const permissionsIds = store.getters['layout/permissionsIds'];
     if (this.isEmpty(keys, true)) return isAdmin || false;
-    if (this.isObject(keys)) {
+    if (this.isJson(keys) || this.isArray(keys)) {
       let newVal:{[key:string]:boolean} = {};
       if (this.isJson(keys)) {
         const objKeys = Object.keys(keys);
@@ -615,7 +644,7 @@ export class commonClass {
    * @returns 
    */
   getElementStyle (element:string | HTMLElement | Element | null, styleName?:string, isNumber?:boolean):number|string|null {
-    const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element as HTMLElement;
+    const newElement = this.isString(element) ? document.querySelector(element) as HTMLElement : element as HTMLElement;
     if (!newElement || this.isEmpty(styleName)) return isNumber ? 0 : null;
     // const style = newElement.currentStyle ? newElement.currentStyle[styleName] : document.defaultView.getComputedStyle(newElement, null)[styleName];
     const style = newElement.currentStyle ? newElement.currentStyle[styleName] : window.getComputedStyle(newElement, null)[styleName];
@@ -639,7 +668,7 @@ export class commonClass {
    * @returns 
    */
   getElementOffset (element:string | HTMLElement | Element | null):{x:number, y:number} {
-    const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element as HTMLElement;
+    const newElement = this.isString(element) ? document.querySelector(element) as HTMLElement : element as HTMLElement;
     let offset = { x: 0, y: 0 }
     if (this.isEmpty(newElement)) return offset;
     let current = newElement.offsetParent as HTMLElement;
@@ -658,7 +687,7 @@ export class commonClass {
    * @returns 
    */
   getElementScrollTop (element:string | HTMLElement | Element | null):number {
-    const newElement = typeof element === 'string' ? document.querySelector(element) as HTMLElement : element as HTMLElement;
+    const newElement = this.isString(element) ? document.querySelector(element) as HTMLElement : element as HTMLElement;
     if (!newElement) return 0;
     let top = 0;
     let current = newElement.parentNode as HTMLElement;
@@ -667,6 +696,41 @@ export class commonClass {
       current = current.parentNode as HTMLElement;
     }
     return top;
+  }
+  /**
+   * 将指定日期转为指定时差的时间
+   * @param date 需要转换的时间
+   * @param format 返回格式, 例: YYYY/MM/DD HH:mm:ss:SSS 默认Date 对象; https://day.js.org/docs/en/display/format
+   * @param timeDifference 时差(需要转换的时间与国际时间的时差, 默认为本地时间与国际时间的时差)
+   */
+  toLocaleDate (date?:string | Date | number, format?:string, timeDifference?:number|string) {
+    const timeDif = Number(timeDifference);
+    let nformat = format;
+    if (!this.isEmpty(nformat) && ['fulltime'].includes(nformat.toLocaleLowerCase())) {
+      nformat = 'YYYY-MM-DD HH:mm:ss';
+    }
+    if (this.isEmpty(date)) {
+      return !this.isEmpty(nformat) ? dayjs().format(nformat) : new Date(dayjs().format('YYYY/MM/DD HH:mm:ss:SSS'));
+    }
+    const dateObj = this.isDate(date) ? date : new Date(this.isString(date) ? date.replace(/-/g, '/') : date);
+    const newDate = dayjs(dateObj).add((this.isEmpty(timeDif) ? tool.getTimeDifference() : timeDif), 'hour');
+    return !this.isEmpty(nformat) ? newDate.format(nformat) : new Date(newDate.format('YYYY/MM/DD HH:mm:ss:SSS'));
+  }
+  /**
+   * 将指定日期通过时差转为国际标准时间
+   * @param date 需要转换的时间
+   * @param format 返回格式, 例: YYYY/MM/DD HH:mm:ss:SSS 默认Date 对象; https://day.js.org/docs/en/display/format
+   * @param timeDifference 时差(需要转换的时间与国际时间的时差, 默认为本地时间与国际时间的时差)
+   */
+  toISODate (date?:string | Date | number, format?:string, timeDifference?:number|string) {
+    const dateObj = !this.isEmpty(date) ? this.isDate(date) ? date : new Date(this.isString(date) ? date.replace(/-/g, '/') : date) : new Date();
+    const timeDif = Number(timeDifference);
+    let nformat = format;
+    if (!this.isEmpty(nformat) && ['fulltime'].includes(nformat.toLocaleLowerCase())) {
+      nformat = 'YYYY-MM-DD HH:mm:ss';
+    }
+    const newDate = dayjs(dateObj).add(-(this.isEmpty(timeDif) ? tool.getTimeDifference() : timeDif), 'hour');
+    return !this.isEmpty(nformat) ? newDate.format(nformat) : new Date(newDate.format('YYYY/MM/DD HH:mm:ss:SSS'));
   }
 }
 

@@ -4,6 +4,7 @@ import "@/assets/style/index.less";
 import "@/utils/loadIconFont";
 import dayjs from 'dayjs';
 import $common from "$common";
+import bus from '@/utils/bus';
 import $http from "$request";
 import $api from '@/api/index';
 import store from "@/store/index";
@@ -32,6 +33,7 @@ app.use(ElementPlus, {
 app.config.globalProperties.$dayjs = dayjs;
 // 注册全局对象
 app.config.globalProperties.$common = $common;
+app.config.globalProperties.$bus = bus;
 app.config.globalProperties.api = $api;
 app.config.globalProperties.$api = $api;
 app.config.globalProperties.$http = $http;

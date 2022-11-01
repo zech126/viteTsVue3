@@ -17,6 +17,18 @@ const navList = [
         url: '/test1'
       },
       {
+        id: '1-21',
+        name: 'common-测试1',
+        icon: '',
+        url: '/test-2'
+      },
+      {
+        id: '1-22',
+        name: 'common-测试2',
+        icon: '',
+        url: '/test-3'
+      },
+      {
         id: '1-3',
         name: 'jsx测试',
         icon: '',

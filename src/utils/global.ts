@@ -1,5 +1,6 @@
 import type { commonClass } from "./common";
 import { AxiosInstance } from "axios";
+import type { busCtrl } from "./bus";
 import { ComponentInternalInstance, getCurrentInstance } from 'vue';
 import dayjs from 'dayjs';
 import { Router, RouteLocationNormalizedLoaded } from "vue-router";
@@ -40,6 +41,7 @@ const getGlobal = () => {
     readonly api: apiValType;
     readonly $api: apiValType;
     readonly lodash: typeof lodash;
+    readonly $bus: busCtrl
     // [key:string]:any;
   }
 }

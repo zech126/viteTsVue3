@@ -6,6 +6,18 @@ const routes = [
     meta: { requireAuth: false, keepAlive: false }
   },
   {
+    name: "页面测试1",
+    path: "/test-2",
+    component: () => import("./page/myPage1.vue"),
+    meta: { requireAuth: false, keepAlive: false }
+  },
+  {
+    name: "页面测试2",
+    path: "/test-3",
+    component: () => import("./page/myPage2.vue"),
+    meta: { requireAuth: false, keepAlive: false }
+  },
+  {
     name: "JSX 测试",
     path: "/test2",
     component: () => import("./page/test.vue"),

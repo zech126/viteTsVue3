@@ -5,6 +5,7 @@ import { Store } from "vuex";
 import dayjs from 'dayjs';
 import type lodash from 'lodash';
 import type { commonClass } from "../utils/common";
+import type { busCtrl } from "../utils/bus";
 import type { Message, Notify, LoadingOptions, IElMessageBox } from 'element-plus';
 
 type apiValType = string & {readonly[key:string]: apiValType};
@@ -45,6 +46,7 @@ declare module '@vue/runtime-core' {
     readonly $api: apiValType;
     readonly $refs: Array<any> | {[key: string]: any};
     readonly lodash: typeof lodash;
+    readonly $bus: busCtrl
     // [key:string]: any;
   }
 }
