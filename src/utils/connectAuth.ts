@@ -9,7 +9,7 @@ const process:ImportMetaEnv = import.meta.env;
 const AUTHUrl = window.location.origin.includes('172.20.200.14') ? process.VITE_AUTH.replace('dyt.pms.com.cn', '172.20.200.14') : process.VITE_AUTH;
 
 const authHand = {
-  againLoginPage: '/index.html#/againLogin', // 重新登录页
+  againLoginPage: '/index.html#/againLoginAuth', // 重新登录页
   homePage: '/index.html#/home', // 首页
   loginPage: '/index.html#/login',  // 登录页
   recordUrl: `${window.location.protocol}//${AUTHUrl}`, // 对应认证中心地址
@@ -271,14 +271,13 @@ const authHand = {
   },
   // 重新登录
   againLogin (type:any = false) {
-    const againLoginFun = (e:any) => {
-      let res = e.data.againLogin;
-      if (!res) return;
-      if (res.success) {
-        this.removeModal();
-        // 解除绑定
-        window.removeEventListener('message', againLoginFun);
-      }
+    const againLoginFun = (e:MessageEvent) => {
+      const key = e.data['key'];
+      if (common.isEmpty(key) || !['auth-againLogin'].includes(key)) return;
+      const res = e.data['value'];
+      if (common.isEmpty(res)) return;
+      this.removeModal();
+      window.removeEventListener('message', againLoginFun);
     }
     // 移除 cookie
     common.delCookie([cookieConfig.tokenName]);
