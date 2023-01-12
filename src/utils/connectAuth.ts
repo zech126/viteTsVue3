@@ -315,6 +315,23 @@ const authHand = {
     } else {
       this.backOauth(`${login}`, true);
     }
+  },
+  /**
+   * 手动去刷新 token
+   * @param isDebounce 是否防抖，防止多次刷新
+   * @returns 返回一个对象
+   */
+  refreshToken (isDebounce?:boolean):Promise<{[k:string]:any} | null> {
+    return new Promise((resolve) => {
+      bus.authSysData('refreshToken', isDebounce).then((token) => {
+        if (!common.isEmpty(token)) {
+          common.setCookie([
+            {key: cookieConfig.tokenName, value: `${token.token_type} ${token.access_token}`}
+          ]);
+        }
+        resolve(token);
+      })
+    })
   }
 }
 

@@ -2,6 +2,7 @@ import common from '@/utils/common';
 
 const process:ImportMetaEnv = import.meta.env;
 const AUTHUrl = window.location.origin.includes('172.20.200.14') ? process.VITE_AUTH.replace('dyt.pms.com.cn', '172.20.200.14') : process.VITE_AUTH;
+const newTime = new Date().getTime();
 
 class commonTool {
   subscribe: {[key:string]:Array<(value?:any) => void>}
@@ -20,7 +21,7 @@ class commonTool {
   loadingTime: number
   constructor () {
     this.messageKey = process.VITE_BROADCASTKEY;
-    this.broadcastUrl = '/index.html#/broadcastMessage';
+    this.broadcastUrl = `/index.html#/broadcastMessage?newTime=${newTime}`;
     this.linkAuth = 'getAuthInfoKey';
     this.clearPassTime = null;
     this.subscribe = {};
@@ -32,7 +33,7 @@ class commonTool {
     this.loadingTime = 0;
     this.iframeDemo = null;
     this.homologyMessageKey = [];
-    this.networkTest = `${window.location.protocol}//${AUTHUrl}/static/js/networkTest.js`;
+    this.networkTest = `${window.location.protocol}//${AUTHUrl}/static/js/networkTest.js?newTime=${newTime}`;
   }
   // 判断是否能连接上中间服务
   isOpenAuth ():Promise<Boolean> {
@@ -224,19 +225,22 @@ export class busCtrl {
    * 触发全局消息广播(支持同源跨浏览器标签，部分浏览器不支持跨标签)
    * @param key 事件 key 值
    * @param value 调用订阅事件的参数
+   * @param isAstride 是否跨域跨浏览器标签进行广播（默认跨域跨浏览器标签进行广播）
    */
-  emit (key:string, value:any) {
+  emit (key:string, value?:any, isAstride?: boolean) {
     // 广播信息
-    if (!common.isBoolean(tool.broadcast)) {
-      tool.broadcast.postMessage({[key]: value}); // 广播到当前源下的所有窗口
-      this.authLoaded().then((iframe:any) => {
-        if (common.isBoolean(iframe) || !iframe) return;
-        tool.homologyMessageKey.push(key);
-        // 将信息发送到认证中心
-        iframe.contentWindow.postMessage({key: key, value: value }, '*');
-      });
-    } else {
-      console.warn('当前浏览器不支持跨跨域标签通讯');
+    if (typeof isAstride === 'undefined' || isAstride) {
+      if (!common.isBoolean(tool.broadcast)) {
+        tool.broadcast.postMessage({[key]: value}); // 广播到当前源下的所有窗口
+        this.authLoaded().then((iframe:any) => {
+          if (common.isBoolean(iframe) || !iframe) return;
+          tool.homologyMessageKey.push(key);
+          // 将信息发送到认证中心
+          iframe.contentWindow.postMessage({key: key, value: value }, '*');
+        });
+      } else {
+        console.warn('当前浏览器不支持跨跨域标签通讯');
+      }
     }
     if (!common.isEmpty(tool.subscribe[key])) {
       for (let i = 0, len = tool.subscribe[key].length; i < len; i++) {
@@ -298,12 +302,13 @@ const bus = new busCtrl();
 if (!common.isBoolean(tool.broadcast)) {
   const listenerMessage = (observer:{[key:string]:Array<(value?:any) => void>}, message:MessageEvent | {data: any}) => {
     const key = Object.keys(observer);
+    const messageKey = Object.keys(message.data);
     let index = -1;
     for (let i = 0, len = key.length; i < len; i++) {
       index = tool.homologyMessageKey.indexOf(key[i]);
       if (index < 0) { // 在当前源已触发过 emit 则不再触发 emit 
         for (let j = 0, len = observer[key[i]].length; j < len; j++) {
-          if (!common.isUndefined(message.data[key[i]]) && !common.isEmpty(observer[key[i]][j])) {
+          if (!common.isEmpty(key[i]) && messageKey.includes(key[i]) && !common.isEmpty(observer[key[i]][j])) {
             observer[key[i]][j](message.data[key[i]]);
           }
         }

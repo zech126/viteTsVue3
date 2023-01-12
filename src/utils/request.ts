@@ -8,17 +8,37 @@ import type { AxiosRequestConfig } from 'axios';
 import 'nprogress/nprogress.css';
 import cookieConfig from '@/utils/cookieConfig';
 
-const resultExceedTime = 1000 * 5; // 单位: 毫秒
+const resultExceedTime = 1000 * 0.5; // 单位: 毫秒
 const pendingList = new Map();
 let resultList:{[k:string]:any} = {};
 
-const isFormData = (data:FormData) => {
+const isFormData = (data:any) => {
   if (common.isEmpty(data)) return false;
   return Object.prototype.toString.call(data) === '[object FormData]';
 }
 const getrequestKey = (config:AxiosRequestConfig) => {
-  let newParams = config ? config.params : {};
-  let newData = config ? config.data : {};
+  let newParams:{[key:string]:any} = {};
+  let newData:{[key:string]:any} = {};
+  if (config) {
+    if (common.isString(config.params) && !isFormData(config.params)) {
+      try {
+        newParams = JSON.parse(config.params || '{}');
+      } catch (e) {
+        newParams = { keyParams: config.params }
+      }
+    } else {
+      newParams = config.params;
+    }
+    if (common.isString(config.data) && !isFormData(config.data)) {
+      try {
+        newData = JSON.parse(config.data || '{}');
+      } catch (e) {
+        newData = { keyData: config.data }
+      }
+    } else {
+      newData = config.data;
+    }
+  }
   if (isFormData(newParams)) {
     let obj = {};
     newParams.forEach((item:any, key:string) => {
@@ -62,7 +82,9 @@ const getrequestKey = (config:AxiosRequestConfig) => {
 const removePending = (requestKey:string, isRemove?:boolean) => {
   // 如果在 pending 中存在当前请求标识，取消当前请求，并且移除
   if (pendingList.has(requestKey)) {
-    delete resultList[requestKey];
+    !isRemove ? delete resultList[requestKey] : setTimeout(() => {
+      delete resultList[requestKey];
+    }, 20);
     pendingList.delete(requestKey);
   }
 }
@@ -73,11 +95,11 @@ const addPending = (config:AxiosRequestConfig) => {
   if (pendingList.has(requestKey)) {
     const thisTime = new Date().getTime();
     if (resultList[requestKey]) {
-      const isReject = resultList[requestKey].status === 'reject';
+      const isReject:boolean = resultList[requestKey].status === 'reject' || resultList[requestKey].remove;
       const requestCacheTime = (resultList[requestKey].resultTime || 0) + (config.cacheTime || resultExceedTime);
       // 过期或异常的移除缓存
       if (thisTime - requestCacheTime > 0 || isReject) {
-        removePending(requestKey);
+        removePending(requestKey, isReject);
         // 移除之后再次添加进来
         config.cancelToken = config.cancelToken || new axios.CancelToken(cancel => {
           pendingList.set(requestKey, cancel);
@@ -163,12 +185,13 @@ instance.interceptors.response.use((response) => {
         };
         return resolve(requestHand.downLoadFile(response));
       }
-      requestHand.hand[code](response, response.data).then((res:any) => {
-        resultList[requestKey] = { resultTime: new Date().getTime(), result: {data: res}};
-        resolve(res);
+      requestHand.hand[code](response).then((res:any) => {
+        resultList[requestKey] = { resultTime: new Date().getTime(), result: res.data || {}};
+        resolve(res.data || {});
       }).catch((err:any) => {
-        resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: err };
-        reject(err);
+        const newErr = err.response && err.response.data ? err.response.data : err.data || err;
+        resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: newErr };
+        reject(newErr);
       });
       return;
     }
@@ -202,24 +225,21 @@ instance.interceptors.response.use((response) => {
       let newMsg = responseData.msg;
       // 状态码处理
       if (!common.isEmpty(requestHand.hand[code])) {
-        requestHand.hand[code](error.response, responseData).then((res:any) => {
-          if (res.data) {
-            if ((common.isBoolean(config.downLoadFile) && config.downLoadFile) || (common.isBoolean(config.isFile) && config.isFile)) {
-              resultList[requestKey] = {
-                resultTime: new Date().getTime(),
-                result: res,
-                downLoadFile: true
-              };
-              return resolve(requestHand.downLoadFile(res));
-            }
-            resultList[requestKey] = { resultTime: new Date().getTime(), result: res};
-            return resolve(res.data);
+        requestHand.hand[code](error.response).then((res:any) => {
+          if ((common.isBoolean(config.downLoadFile) && config.downLoadFile) || (common.isBoolean(config.isFile) && config.isFile)) {
+            resultList[requestKey] = {
+              resultTime: new Date().getTime(),
+              result: res,
+              downLoadFile: true
+            };
+            return resolve(requestHand.downLoadFile(res));
           }
-          resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: res};
-          reject(res);
+          resultList[requestKey] = { resultTime: new Date().getTime(), result: res.data || {}};
+          return resolve(res.data || {});
         }).catch((err:any) => {
-          resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: err};
-          reject(err);
+          const newErr = err.response && err.response.data ? err.response.data : err.data || err;
+          resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: newErr};
+          reject(newErr);
         });
         return;
       }
@@ -245,20 +265,21 @@ instance.interceptors.response.use((response) => {
     if (error.message && pendingList.has(error.message) && common.isEmpty(config)) {
       // 使用定时器获取接口返回值
       const thisRequest = setInterval(() => {
+        if (!pendingList.has(error.message)) {
+          clearInterval(thisRequest);
+          removePending(error.message, true);
+          return reject(error);
+        }
         if (!common.isEmpty(resultList[error.message])) {
           clearInterval(thisRequest);
-          const result = resultList[error.message].result;
-          if (result.data) {
-            if (resultList[error.message].downLoadFile) {
-              resolve(requestHand.downLoadFile(result));
-            } else {
-              resolve(result.data);
-            }
+          const resultObj = resultList[error.message];
+          if (!['reject'].includes(resultObj.status)) {
+            resultObj.downLoadFile ? resolve(requestHand.downLoadFile(resultObj.result)) : resolve(resultObj.result);
           } else {
-            reject(result);
+            reject(resultObj.result);
           }
         }
-      }, 100)
+      }, 10)
       return;
     }
     config && !config.hiddenError && ElMessage({

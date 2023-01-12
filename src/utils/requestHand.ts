@@ -17,16 +17,16 @@ export default {
   },
   // 处理方法, 执行后不会继续执行后面代码
   hand: {
-    200: (response:{[i:string]:any}, responseData:any) => {
+    200: (response:{[i:string]:any}) => {
       return new Promise((resolve, reject) => {
-        resolve(responseData);
+        resolve(response);
       })
     },
     // token 无效 或 过去
-    451: (response:{[i:string]:any}, responseData:any) => {
+    451: (response:{[i:string]:any}) => {
       return new Promise((resolve, reject) => {
         console.error('登录过期')
-        reject(responseData);
+        reject(response);
       })
     }
   },
