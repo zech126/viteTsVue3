@@ -74,6 +74,44 @@ class commonTool {
     const dateLocale = nowDate.toLocaleString().split(/[^0-9]/);
     return Number(dateLocale[3]) - Number(dateISO[3]);
   }
+  /**
+ * 最多执行异步方法数量
+ * @param concurrency 数据源
+ * @param limit 并发最大数量, 默认 10
+ * @returns 
+ */
+  enqueuePromise (concurrency:Array<Function> = [], limit = 10): Promise<Array<any>> {
+    let index = 0;
+    const ret:Array<any> = [];
+    const executing:Array<any> = [];
+    const poolLimit = limit <= 0 ? 1 : limit;
+    const enqueue = ():Promise<unknown> => {
+      // 边界处理, concurrency 为空数组
+      if (index === concurrency.length) {
+        return Promise.resolve();
+      }
+      // 每调一次 enqueue, 初始化一个 promise
+      const newPromise = concurrency[index++]();
+      // 放入 promises 数组
+      ret.push(newPromise);
+      // 将有返回值的 promise 从 executing 数组中删除, 并将下一个需要执行的放进 executing 数组中
+      const perform:any = newPromise.then(() => {
+        return executing.splice(executing.indexOf(perform), 1);
+      }).catch(() => {
+        return executing.splice(executing.indexOf(perform), 1);
+      });
+      // 插入 executing 数组, 表示正在执行的 promise
+      executing.push(perform);
+      // 使用 Promise.rece, 每当 executing 数组中 promise 数量低于 poolLimit, 就实例化新的 promise 并执行
+      let result = Promise.resolve();
+      if (executing.length >= poolLimit) {
+        result = Promise.race(executing);
+      }
+      // 递归, 直到遍历完 concurrency
+      return result.then(() => enqueue());
+    };
+    return enqueue().then(() => ret);
+  }
 }
 const tool = new commonTool();
 export class commonClass {
@@ -740,44 +778,46 @@ export class commonClass {
     return !this.isEmpty(nformat) ? newDate.format(nformat) : new Date(newDate.format('YYYY/MM/DD HH:mm:ss:SSS'));
   }
   /**
-   * 并发请求限制
+ * Promise.allSettled 并发请求限制
+ * @param concurrency 数据源
+ * @param limit 并发最大数量, 默认 10
+ * @returns 
+ */
+  allSettled (concurrency:Array<Function> = [], limit = 10): Promise<Array<{status: 'fulfilled', value: any} | {status: 'rejected', reason: any}>> {
+    return new Promise((resolve) => {
+      tool.enqueuePromise(concurrency, limit).then(ret => {
+        if (this.isFunction(Promise.allSettled)) {
+          resolve(Promise.allSettled(ret));
+        } else {
+          Promise.all(ret).then(res => {
+            let obj:Array<{status: 'fulfilled', value: any} | {status: 'rejected', reason: any}> = [];
+            for (let i = 0, len = res.length; i < len; i++) {
+              obj.push({status: 'fulfilled', value: res[i]});
+            }
+            resolve(obj);
+          }).catch((error) => {
+            let obj:Array<{status: 'fulfilled', value: any} | {status: 'rejected', reason: any}> = [];
+            for (let i = 0, len = ret.length; i < len; i++) {
+              obj.push({status: 'rejected', reason: error});
+            }
+            resolve(obj);
+          });
+        }
+      })
+    })
+  }
+  /**
+   * Promise.all 并发请求限制
    * @param concurrency 数据源
-   * @param type 返回 promise 批量的方式, 默认 all
    * @param limit 并发最大数量, 默认 10
    * @returns 
    */
-  promiseAll (concurrency:Array<Function> = [], type:'all' | 'allSettled' = 'all', limit = 10) {
-    let index = 0;
-    const ret:Array<any> = [];
-    const executing:Array<any> = [];
-    const poolLimit = limit <= 0 ? 1 : limit;
-    const enqueue = ():Promise<unknown> => {
-      // 边界处理, concurrency 为空数组
-      if (index === concurrency.length) {
-        return Promise.resolve();
-      }
-      // 每调一次 enqueue, 初始化一个 promise
-      const newPromise = concurrency[index++]();
-      // 放入 promises 数组
-      ret.push(newPromise);
-      // 将有返回值的 promise 从 executing 数组中删除, 并将下一个需要执行的放进 executing 数组中
-      const perform:any = newPromise.then(() => {
-        return executing.splice(executing.indexOf(perform), 1);
-      }).catch(() => {
-        return executing.splice(executing.indexOf(perform), 1);
-      });
-      // 插入 executing 数组, 表示正在执行的 promise
-      executing.push(perform);
-      // 使用 Promise.rece, 每当 executing 数组中 promise 数量低于 poolLimit, 就实例化新的 promise 并执行
-      let result = Promise.resolve();
-      if (executing.length >= poolLimit) {
-        result = Promise.race(executing);
-      }
-      // 递归, 直到遍历完 concurrency
-      return result.then(() => enqueue());
-    };
-    if (type === 'allSettled') return enqueue().then(() => Promise.allSettled(ret));
-    return enqueue().then(() => Promise.all(ret));
+  promiseAll (concurrency:Array<Function> = [], limit = 10): Promise<Array<any>> {
+    return new Promise((resolve) => {
+      tool.enqueuePromise(concurrency, limit).then(ret => {
+        resolve(Promise.all(ret))
+      })
+    })
   }
 }
 

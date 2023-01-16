@@ -235,20 +235,24 @@ const authHand = {
   ):Promise<any> {
     return new Promise((resolve) => {
       const awaitObj = common.isArray(awaitData) ? awaitData : [awaitData];
-      let awaitList:Array<Promise<unknown>> = [];
+      let awaitList:Array<any> = [];
       let keysObj:Array<{type: boolean, key: string}> = [];
       awaitObj.forEach((item, index) => {
         if (common.isPromise(item)) {
-          awaitList.push(item);
+          awaitList.push(() => {
+            return item
+          });
           keysObj.push({type: false, key: `undefined-key-${index}`});
         } else {
-          awaitList.push(item.dataOrigin);
+          awaitList.push(() => {
+            return item.dataOrigin
+          });
           keysObj.push({type: true, key: item.key});
         }
       });
       let resObj:{[k:string]:any} = {};
       const isAdd = keysObj.map(m => !!m.type);
-      Promise.allSettled(awaitList).then(arr => {
+      common.allSettled(awaitList).then(arr => {
         if (isAdd.length === 0) {
           return resolve(arr.map(m => {
             return m.status === 'fulfilled' ? m.value : null

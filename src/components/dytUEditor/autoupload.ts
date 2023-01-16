@@ -1,4 +1,5 @@
 import { parents } from './tool';
+import common from '@/utils/common';
 
 export default function autoupload (key:string) {
   const domUtils = window.baidu.editor.dom.domUtils;
@@ -97,21 +98,23 @@ export default function autoupload (key:string) {
           errorHandler(`${me.getLang('autoupload.exceedTypeError')}`, loadingId, filetype, me);
           return;
         }
-        uploadFileList.push(new Promise((resolve) => {
-          const uptype = filetype;
-          const id = loadingId;
-          uploadFileFun(file).then((res:{url: string, name?: string, [key:string]:any} | string) => {
-            if (typeof res !== 'string') {
-              resolve({ success: true, link: res.url, info: res, file: file, filetype: uptype, loadingId: id });
-            } else {
-              resolve({ success: true, link: res, info: {}, file: file, filetype: uptype, loadingId: id });
-            }
-          }).catch((msg:string) => {
-            resolve({ success: false, file: file, msg: msg || '上传失败!', filetype: uptype, loadingId: id });
+        uploadFileList.push(() => {
+          return new Promise((resolve) => {
+            const uptype = filetype;
+            const id = loadingId;
+            uploadFileFun(file).then((res:{url: string, name?: string, [key:string]:any} | string) => {
+              if (typeof res !== 'string') {
+                resolve({ success: true, link: res.url, info: res, file: file, filetype: uptype, loadingId: id });
+              } else {
+                resolve({ success: true, link: res, info: {}, file: file, filetype: uptype, loadingId: id });
+              }
+            }).catch((msg:string) => {
+              resolve({ success: false, file: file, msg: msg || '上传失败!', filetype: uptype, loadingId: id });
+            })
           })
-        }))
+        })
       });
-      Promise.allSettled(uploadFileList).then((arr) => {
+      common.allSettled(uploadFileList).then((arr) => {
         arr.forEach(res => {
           if (res.status === 'fulfilled') {
             if (res.value.success && !!res.value.link) {
