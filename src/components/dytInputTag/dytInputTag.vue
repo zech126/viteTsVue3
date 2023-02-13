@@ -221,7 +221,9 @@ const base:dataType = reactive({
     size: 'small'
   }
 });
-const $emit = defineEmits(['update:modelValue','change','click','clearableHand','close','keyup','keyupEnter','addTheTag','show','showAfter','hide','hideAfter']);
+const $emit = defineEmits([
+  'update:modelValue','change','input','click','clearableHand','close','keyup','keyupEnter','addTheTag','show','showAfter','hide','hideAfter'
+]);
 const selectConfig:any = computed(() => {
   let config = { ...base.defaultConfig, ...$attrs, addTag: props.addTag };
   if (props.disabled || props.readonly) {
@@ -362,7 +364,7 @@ const addTagHand = (e:any = {}) => {
     $emit('addTheTag', addItems);
     base.inputValue = '';
   } else {
-    let newTags:Array<any> = [];
+    let addTags:Array<any> = [];
     if (props.defaultProp.value || props.defaultProp.label) {
       const keys:Array<any> = base.vModel.map(tag => {
         return tag[props.defaultProp.value || props.defaultProp.label];
@@ -372,17 +374,17 @@ const addTagHand = (e:any = {}) => {
           let newTag = {};
           props.defaultProp.value && (newTag[props.defaultProp.value] = item);
           props.defaultProp.label && (newTag[props.defaultProp.label] = item);
-          !global.$common.isEmpty(newTag) && newTags.push(newTag);
+          !global.$common.isEmpty(newTag) && addTags.push(newTag);
         }
       })
     }
     if(!props.preview && props.type === 'textarea' && props.limit > 0) {
-      base.vModel = props.defaultProp.value ? newTags : global.$common.copy(addItems);
+      base.vModel = props.defaultProp.value ? addTags : global.$common.copy(addItems);
       setTimeout(() => {
         base.inputValue = changeInputVal(matchingSplit);
       }, 300);
     } else {
-      base.vModel = props.defaultProp.value ? [...base.vModel, ...newTags] : global.$common.arrRemoveRepeat([...base.vModel, ...addItems]);
+      base.vModel = props.defaultProp.value ? [...base.vModel, ...addTags] : global.$common.arrRemoveRepeat([...base.vModel, ...addItems]);
       base.inputValue = '';
     }
   }
@@ -485,7 +487,8 @@ watch(() => props.modelValue, (val:any) => {
     if (!selectConfig.value.addTag) {
       base.vModel = val;
     } else {
-      addTagHand();
+      base.vModel = [];
+      addTagHand('init');
     }
     nextTick(() => {
       base.inputWidth = global.$common.isEmpty(base.vModel) ? '100%;' : '50px;';
@@ -512,11 +515,14 @@ watch(() => base.vModel, (val:Array<any>) => {
         }
       });
     }
+    $emit('input', props.string ? backVal : val);
     $emit('update:modelValue', isString ? (props.type === 'textarea' ? base.inputValue : backVal) : val);
     $emit('change', props.string ? backVal : val);
   } else {
+    $emit('input', props.string ? val.join(props.separStr) : val);
     $emit('update:modelValue', isString ? val.join(props.separStr) : val);
     $emit('change', props.string ? val.join(props.separStr) : val);
+    
   }
   // 由于使用了 elInput 作为输入框输入，表单验证时在输入都都会触发验证，如不多次触发验，改组件后续需要将 elInput 更改为 input
   nextTick(() => {

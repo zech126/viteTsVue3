@@ -82,10 +82,15 @@ const getrequestKey = (config:AxiosRequestConfig) => {
 const removePending = (requestKey:string, isRemove?:boolean) => {
   // 如果在 pending 中存在当前请求标识，取消当前请求，并且移除
   if (pendingList.has(requestKey)) {
-    !isRemove ? delete resultList[requestKey] : setTimeout(() => {
+    if (!isRemove) {
+      pendingList.delete(requestKey);
       delete resultList[requestKey];
-    }, 20);
-    pendingList.delete(requestKey);
+    } else {
+      setTimeout(() => {
+        pendingList.delete(requestKey);
+        delete resultList[requestKey];
+      }, 20);
+    }
   }
 }
 

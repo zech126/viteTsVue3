@@ -486,8 +486,10 @@ export default defineComponent({
         }, Math.random() * Math.random() * 5000)
       });
     },
+    // 重置搜索条件
     filterReset () {
       this.filterModel.commonStr6 = 'commonStr6';
+      this.filterModel.superAdmin3 = 'superAdmin, areyghesgfher, 你好大发生过';
       this.filterModel.commonStr2 = 'commonStr2';
     },
     selectAll (selection:Array<any>) {

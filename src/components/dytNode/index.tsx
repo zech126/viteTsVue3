@@ -7,23 +7,30 @@ export default defineComponent({
     nodeParameter: { type: Object, default: () => {return {}}},
     prop: { type: Object, default: () => {return {}}}
   },
+  data () {
+    return {
+      filterModel: {
+        commonStr2: 'commonStr2'
+      },
+    }
+  },
   setup(props) {
     let nodeText = ref('');
-    const handNode = (prop:{[key:string]: any}) => {
-      const res = props.node(prop);
-      if (common.isPromise(res)) {
-        return res.then((node) => {
+    const getRes = props.node({...props.prop, ...props.nodeParameter});
+    const isPromise = common.isPromise(getRes);
+    const handNode = () => {
+      if (isPromise) {
+        getRes.then((node) => {
           nodeText.value = node;
         }).catch(() => {
           nodeText.value = '';
         })
       }
-      nodeText.value = res;
     }
-    handNode ({...props.prop, ...props.nodeParameter});
-    return { nodeInfo: nodeText }
+    handNode ();
+    return { nodeInfo: nodeText, isPromise: isPromise }
   },
   render() {
-    return this.nodeInfo;
+    return this.isPromise ? this.nodeInfo : this.node({...this.prop, ...this.nodeParameter});
   }
 })
