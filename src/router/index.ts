@@ -67,6 +67,8 @@ const router = createRouter({
 
 // 路由跳转前
 router.beforeEach((to:any, from:any, next:any) => {
+  // 移除所有等待请求的方法
+  store.commit('cancelAllPending', '页面跳转，取消正在请求或还未请求的接口');
   // 路由加载状态
   store.commit('routerModel/routerLoading', true);
   NProgress.start();

@@ -11,13 +11,27 @@ let storeMaps = {
   namespaced: true,
   // 全局数据
   state: {
-    // testData: null,
+    pendingList: new Map()
   },
   // 对数据同步更新
   mutations: {
-    // testData (state, data) {
-    //   state.testData = data;
-    // }
+    // 添加请求到登录列表里
+    pushPending (state: {[key:string]: any}, data:{requestKey: string, cancel: { (message?: string): void }}) {
+      state.pendingList.set(data.requestKey, data.cancel);
+    },
+    // 移除等待中的请求
+    deletePending (state: {[key:string]: any}, data?: string) {
+      state.pendingList.delete(data);
+    },
+    // 取消所有等待中的请求
+    cancelAllPending (state: {[key:string]: any}, data: string = '该请求被主动取消') {
+      for(let [key, value] of state.pendingList) {
+        // 取消
+        value(`${data}: ${key}`);
+        // 移除
+        state.pendingList.delete(key);
+      }
+    }
   },
   // 对数据异步更新
   actions: {
@@ -29,9 +43,10 @@ let storeMaps = {
   },
   // 可以理解为computed ，对 state 进行计算处理, 直接对参数修改会更改到 state， 不建议直接更改 state
   getters: {
-    // testData: (state) => {
-    //   return state.testData === '2222' ? '11' : '22'
-    // }
+    // 返回等待中的请求
+    getPendingList (state: {[key:string]: any}) {
+      return state.pendingList;
+    },
     ...storeGetters,
   },
   // 对数据进行模块区分，模块功能或数据比较多时候建议使用

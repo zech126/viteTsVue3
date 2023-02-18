@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { ElMessage } from 'element-plus'
 import common from '@/utils/common';
+import store from "@/store";
 import requestHand from './requestHand'
 import NProgress from 'nprogress';
 import qs from "qs";
@@ -9,7 +10,6 @@ import 'nprogress/nprogress.css';
 import cookieConfig from '@/utils/cookieConfig';
 
 const resultExceedTime = 1000 * 0.5; // 单位: 毫秒
-const pendingList = new Map();
 let resultList:{[k:string]:any} = {};
 
 const isFormData = (data:any) => {
@@ -80,14 +80,15 @@ const getrequestKey = (config:AxiosRequestConfig) => {
 
 // 移除请求
 const removePending = (requestKey:string, isRemove?:boolean) => {
+  const pendingList = store.getters['getPendingList'];
   // 如果在 pending 中存在当前请求标识，取消当前请求，并且移除
   if (pendingList.has(requestKey)) {
     if (!isRemove) {
-      pendingList.delete(requestKey);
+      store.commit('deletePending', requestKey);
       delete resultList[requestKey];
     } else {
       setTimeout(() => {
-        pendingList.delete(requestKey);
+        store.commit('deletePending', requestKey);
         delete resultList[requestKey];
       }, 20);
     }
@@ -97,6 +98,7 @@ const removePending = (requestKey:string, isRemove?:boolean) => {
 // 添加请求
 const addPending = (config:AxiosRequestConfig) => {
   const requestKey = getrequestKey(config);
+  const pendingList = store.getters['getPendingList'];
   if (pendingList.has(requestKey)) {
     const thisTime = new Date().getTime();
     if (resultList[requestKey]) {
@@ -107,7 +109,7 @@ const addPending = (config:AxiosRequestConfig) => {
         removePending(requestKey, isReject);
         // 移除之后再次添加进来
         config.cancelToken = config.cancelToken || new axios.CancelToken(cancel => {
-          pendingList.set(requestKey, cancel);
+          store.commit('pushPending', {requestKey: requestKey, cancel: cancel});
         })
         return;
       }
@@ -118,9 +120,11 @@ const addPending = (config:AxiosRequestConfig) => {
     });
     return;
   }
+  // 移除 pendingList 中不存在对应的结果值
+  resultList[requestKey] && delete resultList[requestKey];
   // 如果 pending 中不存在当前请求，则添加进去
   config.cancelToken = config.cancelToken || new axios.CancelToken(cancel => {
-    pendingList.set(requestKey, cancel);
+    store.commit('pushPending', {requestKey: requestKey, cancel: cancel});
   })
 }
 
@@ -267,6 +271,7 @@ instance.interceptors.response.use((response) => {
       resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: responseData};
       return reject(responseData);
     }
+    const pendingList = store.getters['getPendingList'];
     if (error.message && pendingList.has(error.message) && common.isEmpty(config)) {
       // 使用定时器获取接口返回值
       const thisRequest = setInterval(() => {
