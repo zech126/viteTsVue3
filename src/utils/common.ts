@@ -387,6 +387,17 @@ export class commonClass {
     }
     return hand(this.copy(target));
   }
+  getParams (obj:{[key:string]:string}):string {
+    if (this.isJson(obj)) {
+      const keys = Object.keys(obj);
+      let params = '';
+      keys.forEach(key => {
+        params += params.includes('=')?`&${key}=${obj[key] }`:`${key}=${obj[key] }`;
+      })
+      return params;
+    }
+    return ''
+  }
   /**
    * 获取全部url参数,并转换成json对象
    * @param config 目标对象
