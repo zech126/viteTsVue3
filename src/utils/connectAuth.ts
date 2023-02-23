@@ -148,10 +148,7 @@ const authHand = {
             delete urlParams.pageName;
             delete urlParams.pagePass;
             const newUrl =  `${pageUrl.substring(0, pageUrl.indexOf('?'))}`;
-            window.location.href = common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`;
-            setTimeout(() => {
-              window.location.reload();
-            }, 10);
+            window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
           })
           return;
         }
@@ -326,8 +323,8 @@ const authHand = {
    * 返回到登录页面
    * @param type 重新登录后是否进入认证中心首页(默认为跳转到退出登录页面)
    */
-  goToLogin (type:boolean = false) {
-    const login = `${this.recordUrl}${this.loginPage}?targetEnv=${this.targetEnv}&systemKey=${this.systemCode}`;
+  goToLogin (type:boolean = false, outLogin: boolean = true) {
+    const login = `${this.recordUrl}${this.loginPage}?targetEnv=${this.targetEnv}&systemKey=${this.systemCode}${outLogin?'&outLogin=outLogin':''}`;
     // 移除 cookie
     common.delCookie([cookieConfig.tokenName]);
     if (!type) {

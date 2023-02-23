@@ -74,6 +74,10 @@ const nonExist = computed(() => store.getters['layout/nonExist']);
         height: calc(100% - var(--layout-crumbs-height));
         background: var(--layout-main-background-color);
         overflow: auto;
+        > :deep(*){
+          height: 100%;
+          overflow: auto;
+        }
       }
     }
   }
