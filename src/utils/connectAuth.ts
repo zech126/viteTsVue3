@@ -130,7 +130,8 @@ const authHand = {
     const pageUrl = window.location.href;
     return new Promise((resolve) => {
       bus.authSysData('getToken').then((token) => {
-        // 这里后面用 common.on('auth-token', (token) => {}) 在主页做监听
+        let urlParams = common.getUrlParams({url: pageUrl})  as {[key:string]:any};
+        const newUrl =  `${pageUrl.substring(0, pageUrl.indexOf('?'))}`;
         if (!common.isEmpty(token)) {
           const accessCookie = common.getCookie(cookieConfig.tokenName);
           const newCookie = `${token.token_type} ${token.access_token}`;
@@ -139,16 +140,21 @@ const authHand = {
               {key: cookieConfig.tokenName, value: newCookie}
             ]);
           }
+          if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
+            delete urlParams.pageName;
+            delete urlParams.pagePass;
+            window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
+            setTimeout(() => {resolve(token)}, 500);
+          }
           return resolve(token);
         }
         // 在苹果手机端 iframe 跨域的情况下读取不到缓存信息：包括session、cookie等; 所以需要在 iframe 里调用一次登录
-        let urlParams = common.getUrlParams({url: pageUrl}) as {[key:string]:any};
         if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
           bus.authSysData('loginAuth', {pageName: urlParams.pageName, pagePame: urlParams.pagePass, getUserInfo: true}).then(res => {
             delete urlParams.pageName;
             delete urlParams.pagePass;
-            const newUrl =  `${pageUrl.substring(0, pageUrl.indexOf('?'))}`;
             window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
+            setTimeout(() => {resolve(res)}, 500);
           })
           return;
         }

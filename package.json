@@ -20,6 +20,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.0.9",
     "axios": "^0.26.1",
+    "broadcast-channel": "^4.20.2",
     "dayjs": "^1.11.4",
     "element-plus": "^2.2.16",
     "js-cookie": "^3.0.1",

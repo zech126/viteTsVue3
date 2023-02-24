@@ -1,4 +1,5 @@
 import common from '@/utils/common';
+import { BroadcastChannel } from 'broadcast-channel';
 
 const process:ImportMetaEnv = import.meta.env;
 const AUTHUrl = window.location.origin.includes('172.20.200.14') ? process.VITE_AUTH.replace('dyt.pms.com.cn', '172.20.200.14') : process.VITE_AUTH;
@@ -26,7 +27,9 @@ class commonTool {
     this.clearPassTime = null;
     this.subscribe = {};
     this.authSysSub = {};
-    this.broadcast = window.BroadcastChannel ? new window.BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`) : false;
+    // this.broadcast = window.BroadcastChannel ? new window.BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`) : false;
+    // 部分浏览器不支持 window.BroadcastChannel 使用 BroadcastChannel 库， 当不支持 BroadcastChannel 时，采用监听LocalStorage 和 IndexedDB 实现通讯
+    this.broadcast = new BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`);
     this.isLoaded = false;
     this.loading = false;
     this.isIframeLoad = false;
@@ -302,14 +305,15 @@ const bus = new busCtrl();
 if (!common.isBoolean(tool.broadcast)) {
   const listenerMessage = (observer:{[key:string]:Array<(value?:any) => void>}, message:MessageEvent | {data: any}) => {
     const key = Object.keys(observer);
-    const messageKey = Object.keys(message.data);
+    const messageData = message.data || message || {};
+    const messageKey = Object.keys(messageData);
     let index = -1;
     for (let i = 0, len = key.length; i < len; i++) {
       index = tool.homologyMessageKey.indexOf(key[i]);
       if (index < 0) { // 在当前源已触发过 emit 则不再触发 emit 
         for (let j = 0, len = observer[key[i]].length; j < len; j++) {
           if (!common.isEmpty(key[i]) && messageKey.includes(key[i]) && !common.isEmpty(observer[key[i]][j])) {
-            observer[key[i]][j](message.data[key[i]]);
+            observer[key[i]][j](messageData[key[i]]);
           }
         }
       } else {
