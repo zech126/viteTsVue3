@@ -171,7 +171,7 @@ const authHand = {
     return new Promise((resolve) => {
       bus.authSysData('getUserInfo').then(res => {
         const userInfo = store.getters['layout/userInfo'];
-        if ((common.isEmpty(userInfo) || userInfo.loginName !== res.username || isUpdate) && !common.isEmpty(res)) {
+        if (!common.isEmpty(res) && (common.isEmpty(userInfo) || userInfo.loginName !== res.username || isUpdate)) {
           store.commit('layout/userInfo', {...(res || {}), loginName: res.username});
         }
         setTimeout(() => {
@@ -218,7 +218,7 @@ const authHand = {
         const addTree:Array<any> = common.isBoolean(process.SSR) && process.DEV ? navListConfig : [];
         // 存储菜单
         if (isUpdate || common.isEmpty(store.getters['layout/menuTree'])) {
-          store.commit('layout/menuTree', [...res, ...addTree]);
+          store.commit('layout/menuTree', [...(res || []), ...addTree]);
         }
         resolve(res);
       })
@@ -344,7 +344,7 @@ const authHand = {
    * @param isDebounce 是否防抖，防止多次刷新
    * @returns 返回一个对象
    */
-  refreshToken (isDebounce?:boolean):Promise<{[k:string]:any} | null> {
+   refreshToken (isDebounce?:boolean):Promise<{[k:string]:any} | null> {
     return new Promise((resolve) => {
       bus.authSysData('refreshToken', isDebounce).then((token) => {
         if (!common.isEmpty(token)) {

@@ -20,11 +20,17 @@ class commonTool {
   isIframeLoad: boolean  // iframe 是否加载完成
   iframeDemo: any
   loadingTime: number
+  isCanMessage: boolean
+  iframeLoadTime: number
+  iframeLoadedTime: number
   constructor () {
     this.messageKey = process.VITE_BROADCASTKEY;
     this.broadcastUrl = `/index.html#/broadcastMessage?newTime=${newTime}`;
     this.linkAuth = 'getAuthInfoKey';
     this.clearPassTime = null;
+    this.isCanMessage = false;
+    this.iframeLoadTime = 1000 * 60 * 2;
+    this.iframeLoadedTime = 0;
     this.subscribe = {};
     this.authSysSub = {};
     // this.broadcast = window.BroadcastChannel ? new window.BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`) : false;
@@ -69,11 +75,21 @@ class commonTool {
   createIframe ():Promise<HTMLElement|boolean> {
     return new Promise((resolve) => {
       let oldIframe:HTMLElement | null = document.querySelector(`#iframe-${this.messageKey}`);
-      if (oldIframe) return resolve(oldIframe);
+      if (oldIframe) {
+        if (this.isIframeLoad) return resolve(oldIframe);
+        setTimeout(() => {
+          if (this.iframeLoadedTime > this.iframeLoadTime) return resolve(false);
+          this.iframeLoadedTime += 500;
+          this.createIframe().then(iframe => {
+            resolve(iframe);
+          })
+        }, 500)
+        return;
+      }
       this.clearPassTime = setTimeout(() => {
         resolve(false);
         this.isIframeLoad = true;
-      }, 1000 * 60 * 4);
+      }, this.iframeLoadTime);
       // 创建 iframe 指向 认证中心
       let iframe = document.createElement('iframe');
       iframe.id = `iframe-${this.messageKey}`;
@@ -91,6 +107,7 @@ class commonTool {
           clearTimeout(this.clearPassTime);
           this.clearPassTime = null;
         }
+        this.isCanMessage = true;
         this.isIframeLoad = true;
         resolve(iframe);
       }
@@ -197,18 +214,19 @@ export class busCtrl {
    */
   authReadyComplete ():Promise<boolean> {
     return new Promise((resolve) => {
-      setTimeout(() => {
-        if (tool.loadingTime > 1000 * 60 * 4) {
-          return resolve(false);
-        }
-        if (!!tool.isIframeLoad) {
-          return resolve(true);
-        }
-        tool.loadingTime = tool.loadingTime + 200;
-        this.authReadyComplete().then(load => {
-          resolve(load);
-        })
-      }, 200)
+      this.authLoaded().then(iframe => {
+        if (common.isBoolean(iframe) || !iframe) return resolve(false);
+        setTimeout(() => {
+          if (tool.loadingTime > 1000 * 60 * 4) {
+            return resolve(false);
+          }
+          if (!!tool.isIframeLoad) return resolve(tool.isCanMessage);
+          tool.loadingTime = tool.loadingTime + 200;
+          this.authReadyComplete().then(load => {
+            resolve(load);
+          })
+        }, 200)
+      })
     })
   }
   /**
