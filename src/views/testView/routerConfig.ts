@@ -34,6 +34,12 @@ const routes = [
     path: '/testUEditor',
     component: () => import("./page/testUEditor.vue"),
     meta: { requireAuth: false, keepAlive: false }
-  }
+  },
+  {
+    name: 'html2canvas',
+    path: '/imageClear',
+    component: () => import("./page/imageClear.vue"),
+    meta: { requireAuth: false, keepAlive: false }
+  },
 ];
 export default routes;
