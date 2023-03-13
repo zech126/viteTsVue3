@@ -91,7 +91,17 @@ class commonTool {
         return Promise.resolve();
       }
       // 每调一次 enqueue, 初始化一个 promise
-      const newPromise = concurrency[index++]();
+      let newPromise = concurrency[index++]();
+      if (Object.prototype.toString.call(newPromise).slice(8, -1) !== 'Promise') {
+        if (isFunction(newPromise)) {
+          newPromise = newPromise();
+          if (Object.prototype.toString.call(newPromise).slice(8, -1) !== 'Promise') {
+            newPromise = Promise.resolve();
+          }
+        } else {
+          newPromise = Promise.resolve();
+        }
+      }
       // 放入 promises 数组
       ret.push(newPromise);
       // 将有返回值的 promise 从 executing 数组中删除, 并将下一个需要执行的放进 executing 数组中

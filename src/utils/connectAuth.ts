@@ -355,6 +355,14 @@ const authHand = {
         resolve(token);
       })
     })
+  },
+  // 停止认证中心自动刷新token
+  clearRefreshToekn () {
+    bus.authSysData('clearRefreshToekn');
+  },
+  // 启用认证中心自动刷新 token
+  enableAutoRefresh () {
+    bus.authSysData('enableAutoRefresh');
   }
 }
 
