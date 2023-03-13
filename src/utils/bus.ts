@@ -1,4 +1,5 @@
 import common from '@/utils/common';
+import { BroadcastChannel } from 'broadcast-channel';
 
 const process:ImportMetaEnv = import.meta.env;
 const AUTHUrl = window.location.origin.includes('172.20.200.14') ? process.VITE_AUTH.replace('dyt.pms.com.cn', '172.20.200.14') : process.VITE_AUTH;
@@ -9,7 +10,6 @@ class commonTool {
   authSysSub: {[key:string]:Array<(value?:any) => void>}
   broadcast: BroadcastChannel | boolean
   isLoaded: boolean
-  loading: boolean
   networkTest: string // 检查认证中心服务是否可访问
   messageKey: string // 通讯 key
   clearPassTime: any
@@ -19,16 +19,27 @@ class commonTool {
   isIframeLoad: boolean  // iframe 是否加载完成
   iframeDemo: any
   loadingTime: number
+  isCanMessage: boolean
+  iframeLoadTime: number
+  frequency: number
+  testLoadedTime: number
+  iframeLoadedTime: number
   constructor () {
     this.messageKey = process.VITE_BROADCASTKEY;
     this.broadcastUrl = `/index.html#/broadcastMessage?newTime=${newTime}`;
     this.linkAuth = 'getAuthInfoKey';
     this.clearPassTime = null;
+    this.isCanMessage = false; // 是否满足跨域广播
+    this.iframeLoadTime = 1000 * 60 * 2; // 测试文件或iframe加载超时时间，单位毫秒
+    this.testLoadedTime = 0; // 测试文件加载时长单，位毫秒
+    this.frequency = 200;  // 测试文件或iframe计数频率，单位毫秒
+    this.iframeLoadedTime = 0; // iframe加载时长，单位毫秒
     this.subscribe = {};
     this.authSysSub = {};
-    this.broadcast = window.BroadcastChannel ? new window.BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`) : false;
+    // this.broadcast = window.BroadcastChannel ? new window.BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`) : false;
+    // 部分浏览器不支持 window.BroadcastChannel 使用 BroadcastChannel 库， 当不支持 BroadcastChannel 时，采用监听LocalStorage 和 IndexedDB 实现通讯
+    this.broadcast = new BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`);
     this.isLoaded = false;
-    this.loading = false;
     this.isIframeLoad = false;
     this.loadingTime = 0;
     this.iframeDemo = null;
@@ -37,26 +48,35 @@ class commonTool {
   }
   // 判断是否能连接上中间服务
   isOpenAuth ():Promise<Boolean> {
-    this.loading = true;
     return new Promise((resolve) => {
-      if (this.isLoaded) {
-        this.loading = false;
-        return resolve(true);
+      if (this.isLoaded) return resolve(true);
+      const oldTest:HTMLElement | null = document.querySelector(`#test-${this.messageKey}`);
+      if (!common.isEmpty(oldTest)) {
+        setTimeout(() => {
+          if (this.testLoadedTime > this.iframeLoadTime) {
+            oldTest.remove();
+            return resolve(false);
+          }
+          this.testLoadedTime += this.frequency;
+          this.isOpenAuth().then(isPass => {
+            resolve(isPass);
+          })
+        }, this.frequency)
+        return;
       }
       let link = document.createElement('script');
       link.src = this.networkTest;
-      document.body.appendChild(link);
+      link.id = `test-${this.messageKey}`;
+      (document.head || document.body).appendChild(link);
       // 加载成功
       link.onload = () => {
         this.isLoaded = true;
-        this.loading = false;
         resolve(true);
         link.remove();
       }
       // 加载失败
       link.onerror = (e) => {
         this.isLoaded = false;
-        this.loading = false;
         resolve(false);
         link.remove();
       }
@@ -65,12 +85,26 @@ class commonTool {
   // 创建 iframe
   createIframe ():Promise<HTMLElement|boolean> {
     return new Promise((resolve) => {
-      let oldIframe:HTMLElement | null = document.querySelector(`#iframe-${this.messageKey}`);
-      if (oldIframe) return resolve(oldIframe);
+      const oldIframe:HTMLElement | null = document.querySelector(`#iframe-${this.messageKey}`);
+      if (!common.isEmpty(oldIframe)) {
+        if (this.isIframeLoad && this.isCanMessage) return resolve(oldIframe);
+        setTimeout(() => {
+          if (this.iframeLoadedTime > this.iframeLoadTime) {
+            this.clearPassTime && clearTimeout(this.clearPassTime);
+            return resolve(false)
+          }
+          this.iframeLoadedTime += this.frequency;
+          this.createIframe().then(iframe => {
+            this.clearPassTime && clearTimeout(this.clearPassTime);
+            resolve(iframe);
+          })
+        }, this.frequency)
+        return;
+      }
       this.clearPassTime = setTimeout(() => {
         resolve(false);
         this.isIframeLoad = true;
-      }, 1000 * 60 * 4);
+      }, this.iframeLoadTime);
       // 创建 iframe 指向 认证中心
       let iframe = document.createElement('iframe');
       iframe.id = `iframe-${this.messageKey}`;
@@ -84,83 +118,14 @@ class commonTool {
         if (!e.data[`${this.messageKey}`]) return resolve(false);
         // 解除绑定
         window.removeEventListener('message', authRrecordInfo);
-        if (this.clearPassTime) {
-          clearTimeout(this.clearPassTime);
-          this.clearPassTime = null;
-        }
+        this.clearPassTime && clearTimeout(this.clearPassTime);
+        this.isCanMessage = true;
         this.isIframeLoad = true;
         resolve(iframe);
       }
       // 监听
       window.addEventListener('message', authRrecordInfo);
     })
-  }
-  /**
-   * 下载操作
-   * @param fileRes 数据源
-   * @param fileName 文件名
-   * @param timestamp 是否在文件后追加时间戳
-   * @param suffix 文件后缀名
-   * @returns 
-   */
-  downLoadHand (fileRes:Blob, fileName:string, timestamp = false, suffix?:string) {
-    return new Promise((resolve, reject) => {
-      try {
-        //  如果支持微软的文件下载方式(ie10+浏览器)
-        // @ts-ignore
-        if (window.navigator.msSaveBlob) {
-          // @ts-ignore
-          window.navigator.msSaveBlob(fileRes, fileName + (timestamp ? `_${Date.now()}` : '') + (suffix?`.${suffix}`:''));
-        } else {
-          // 其他浏览器
-          const a = document.createElement('a');
-          a.href = window.URL.createObjectURL(fileRes);
-          a.style.display = 'none';
-          a.setAttribute('download', fileName + (timestamp ? `_${Date.now()}` : '') + (suffix?`.${suffix}`:''));
-          setTimeout(() => {
-            a.click();
-            setTimeout(() => {
-              a.remove();
-              resolve(true);
-              // 释放缓存
-              window.URL.revokeObjectURL(a.href);
-            }, 10)
-          }, 0)
-        }
-      } catch (error) {
-        console.error('浏览器不支持！');
-        reject(error);
-      }
-    })
-  }
-  // base64 转换为 UintArr
-  getUintArr (base64Data:string) {
-    const isIncludesSign = (/^data:/.test(base64Data) && !base64Data.includes(';base64,'));
-    const arr:Array<string> = base64Data.split(',');
-    const match = isIncludesSign ? arr[0].match(/:(.*?);/) : [];
-    const newFileType = match && match.length > 1 ? match[1] : '';
-    try{
-      let bstr = window.atob(isIncludesSign ? arr[1] : arr[0]);
-      let leng = bstr.length;
-      let UintArr = new Uint8Array(leng);
-      while(leng--){
-        UintArr[leng] = bstr.charCodeAt(leng);
-      }
-      return { type: newFileType, Uint8Array: UintArr }
-    }catch(e){
-      console.warn('数据源格式有误, 可能会丢失部分数据:', e);
-      return { type: newFileType, Uint8Array: base64Data }
-    }
-  }
-  /**
-   * 返回本地时间与标准时间的时差(正数为东区，负数为西区)
-   * @returns 
-   */
-  getTimeDifference () {
-    const nowDate = new Date();
-    const dateISO = nowDate.toISOString().split(/[^0-9]/);
-    const dateLocale = nowDate.toLocaleString().split(/[^0-9]/);
-    return Number(dateLocale[3]) - Number(dateISO[3]);
   }
 }
 const tool = new commonTool();
@@ -169,20 +134,15 @@ export class busCtrl {
   // iframe 加载完成后返回 iframe 对象
   authLoaded ():Promise<HTMLElement|Boolean> {
     return new Promise((resolve) => {
-      if (tool.loading) {
-        setTimeout(() => {
-          this.authLoaded().then(iframe => {
-            resolve(iframe);
-          })
-        }, 200)
-        return;
-      }
       tool.isOpenAuth().then(res => {
         if (!res) {
           console.warn('跨域文件加载失败, 当前只能使用同源通讯');
           return resolve(false);
         }
         tool.createIframe().then(iframe => {
+          if (!common.isEmpty(iframe) && !common.isBoolean(iframe)) {
+            tool.iframeDemo = iframe;
+          }
           resolve(iframe);
         })
       })
@@ -194,18 +154,12 @@ export class busCtrl {
    */
   authReadyComplete ():Promise<boolean> {
     return new Promise((resolve) => {
-      setTimeout(() => {
-        if (tool.loadingTime > 1000 * 60 * 4) {
-          return resolve(false);
-        }
-        if (!!tool.isIframeLoad) {
-          return resolve(true);
-        }
-        tool.loadingTime = tool.loadingTime + 200;
-        this.authReadyComplete().then(load => {
-          resolve(load);
-        })
-      }, 200)
+      if (tool.isCanMessage && !common.isEmpty(tool.iframeDemo)) {
+        return resolve(tool.isCanMessage);
+      }
+      this.authLoaded().then(() => {
+        resolve(tool.isCanMessage);
+      })
     })
   }
   /**
@@ -232,12 +186,16 @@ export class busCtrl {
     if (typeof isAstride === 'undefined' || isAstride) {
       if (!common.isBoolean(tool.broadcast)) {
         tool.broadcast.postMessage({[key]: value}); // 广播到当前源下的所有窗口
-        this.authLoaded().then((iframe:any) => {
-          if (common.isBoolean(iframe) || !iframe) return;
+        if (tool.isCanMessage && !common.isEmpty(tool.iframeDemo)) {
           tool.homologyMessageKey.push(key);
-          // 将信息发送到认证中心
-          iframe.contentWindow.postMessage({key: key, value: value }, '*');
-        });
+          tool.iframeDemo.contentWindow.postMessage({key: key, value: value }, '*'); // 将信息发送到认证中心
+        } else {
+          this.authLoaded().then((iframe:any) => {
+            if (common.isBoolean(iframe) || !iframe) return;
+            tool.homologyMessageKey.push(key);
+            iframe.contentWindow.postMessage({key: key, value: value }, '*'); // 将信息发送到认证中心
+          });
+        }
       } else {
         console.warn('当前浏览器不支持跨跨域标签通讯');
       }
@@ -287,6 +245,10 @@ export class busCtrl {
       } else {
         tool.authSysSub[key].push(reception);
       }
+      if (tool.isCanMessage && !common.isEmpty(tool.iframeDemo)) {
+        tool.iframeDemo.contentWindow.postMessage({key: key, type: tool.linkAuth, value: params }, '*'); // 将信息发送到认证中心
+        return;
+      }
       this.authLoaded().then((iframe:any) => {
         if (common.isBoolean(iframe) || !iframe) return resolve(null);
         // 将信息发送到认证中心
@@ -302,14 +264,15 @@ const bus = new busCtrl();
 if (!common.isBoolean(tool.broadcast)) {
   const listenerMessage = (observer:{[key:string]:Array<(value?:any) => void>}, message:MessageEvent | {data: any}) => {
     const key = Object.keys(observer);
-    const messageKey = Object.keys(message.data);
+    const messageData = message.data || message || {};
+    const messageKey = Object.keys(messageData);
     let index = -1;
     for (let i = 0, len = key.length; i < len; i++) {
       index = tool.homologyMessageKey.indexOf(key[i]);
       if (index < 0) { // 在当前源已触发过 emit 则不再触发 emit 
         for (let j = 0, len = observer[key[i]].length; j < len; j++) {
           if (!common.isEmpty(key[i]) && messageKey.includes(key[i]) && !common.isEmpty(observer[key[i]][j])) {
-            observer[key[i]][j](message.data[key[i]]);
+            observer[key[i]][j](messageData[key[i]]);
           }
         }
       } else {
@@ -317,32 +280,31 @@ if (!common.isBoolean(tool.broadcast)) {
       }
     }
   }
-  // 消息广播
-  bus.authLoaded().then((iframe:any) => {
+
+  bus.authLoaded().then((iframe) => {
     if (common.isBoolean(iframe) || !iframe) {
       if (common.isBoolean(tool.broadcast)) return;
-      // 添加监听广播
-      tool.broadcast.addEventListener('message', (message:MessageEvent) => {
+      // 无法跨域情况广播
+      tool.broadcast.addEventListener('message', (message) => {
         listenerMessage(tool.subscribe, message);
       });
-      return;
     }
-    // 跨域情况广播
-    window.addEventListener('message', (e:MessageEvent) => {
-      if (common.isEmpty(e.data.key) || common.isBoolean(tool.broadcast)) return;
-      if (e.data.type === tool.linkAuth) {
-        const authKeySub = tool.authSysSub[e.data.key];
-        if (common.isEmpty(authKeySub)) return;
-        for (let a = 0, alen = authKeySub.length; a < alen; a++) {
-          !common.isEmpty(authKeySub[a]) && authKeySub[a](e.data.value);
-        }
-      } else {
-        tool.homologyMessageKey = [];
-        listenerMessage(tool.subscribe, {data: {[e.data.key]: e.data.value}});
-        tool.broadcast.postMessage({[e.data.key]: e.data.value}); // 广播到当前源下的所有窗口
+  })
+  // 跨域情况广播
+  window.addEventListener('message', (e:MessageEvent) => {
+    if (common.isEmpty(e.data.key) || common.isBoolean(tool.broadcast)) return;
+    if (e.data.type === tool.linkAuth) {
+      const authKeySub = tool.authSysSub[e.data.key];
+      if (common.isEmpty(authKeySub)) return;
+      for (let a = 0, alen = authKeySub.length; a < alen; a++) {
+        !common.isEmpty(authKeySub[a]) && authKeySub[a](e.data.value);
       }
-    })
-  });
+    } else {
+      tool.homologyMessageKey = [];
+      listenerMessage(tool.subscribe, {data: {[e.data.key]: e.data.value}});
+      tool.broadcast.postMessage({[e.data.key]: e.data.value}); // 广播到当前源下的所有窗口
+    }
+  })
 } else {
   console.warn('当前浏览器不支持跨跨域标签通讯');
 }

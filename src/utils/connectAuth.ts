@@ -127,9 +127,11 @@ const authHand = {
    * @returns 返回一个对象
    */
   getToken (isUpdate?:boolean):Promise<{[k:string]:any} | null> {
+    const pageUrl = window.location.href;
     return new Promise((resolve) => {
       bus.authSysData('getToken').then((token) => {
-        // 这里后面用 common.on('auth-token', (token) => {}) 在主页做监听
+        let urlParams = common.getUrlParams({url: pageUrl})  as {[key:string]:any};
+        const newUrl =  `${pageUrl.substring(0, pageUrl.indexOf('?'))}`;
         if (!common.isEmpty(token)) {
           const accessCookie = common.getCookie(cookieConfig.tokenName);
           const newCookie = `${token.token_type} ${token.access_token}`;
@@ -138,8 +140,25 @@ const authHand = {
               {key: cookieConfig.tokenName, value: newCookie}
             ]);
           }
+          if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
+            delete urlParams.pageName;
+            delete urlParams.pagePass;
+            window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
+            setTimeout(() => {resolve(token)}, 500);
+          }
+          return resolve(token);
         }
-        resolve(token);
+        // 在苹果手机端 iframe 跨域的情况下读取不到缓存信息：包括session、cookie等; 所以需要在 iframe 里调用一次登录
+        if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
+          bus.authSysData('loginAuth', {pageName: urlParams.pageName, pagePame: urlParams.pagePass, getUserInfo: true}).then(res => {
+            delete urlParams.pageName;
+            delete urlParams.pagePass;
+            window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
+            setTimeout(() => {resolve(res)}, 500);
+          })
+          return;
+        }
+        resolve(null);
       })
     })
   },
@@ -152,7 +171,7 @@ const authHand = {
     return new Promise((resolve) => {
       bus.authSysData('getUserInfo').then(res => {
         const userInfo = store.getters['layout/userInfo'];
-        if ((common.isEmpty(userInfo) || userInfo.loginName !== res.username || isUpdate) && !common.isEmpty(res)) {
+        if (!common.isEmpty(res) && (common.isEmpty(userInfo) || userInfo.loginName !== res.username || isUpdate)) {
           store.commit('layout/userInfo', {...(res || {}), loginName: res.username});
         }
         setTimeout(() => {
@@ -199,7 +218,7 @@ const authHand = {
         const addTree:Array<any> = common.isBoolean(process.SSR) && process.DEV ? navListConfig : [];
         // 存储菜单
         if (isUpdate || common.isEmpty(store.getters['layout/menuTree'])) {
-          store.commit('layout/menuTree', [...res, ...addTree]);
+          store.commit('layout/menuTree', [...(res || []), ...addTree]);
         }
         resolve(res);
       })
@@ -310,8 +329,8 @@ const authHand = {
    * 返回到登录页面
    * @param type 重新登录后是否进入认证中心首页(默认为跳转到退出登录页面)
    */
-  goToLogin (type:boolean = false) {
-    const login = `${this.recordUrl}${this.loginPage}?targetEnv=${this.targetEnv}&systemKey=${this.systemCode}`;
+  goToLogin (type:boolean = false, outLogin: boolean = true) {
+    const login = `${this.recordUrl}${this.loginPage}?targetEnv=${this.targetEnv}&systemKey=${this.systemCode}${outLogin?'&outLogin=outLogin':''}`;
     // 移除 cookie
     common.delCookie([cookieConfig.tokenName]);
     if (!type) {
@@ -325,7 +344,7 @@ const authHand = {
    * @param isDebounce 是否防抖，防止多次刷新
    * @returns 返回一个对象
    */
-  refreshToken (isDebounce?:boolean):Promise<{[k:string]:any} | null> {
+   refreshToken (isDebounce?:boolean):Promise<{[k:string]:any} | null> {
     return new Promise((resolve) => {
       bus.authSysData('refreshToken', isDebounce).then((token) => {
         if (!common.isEmpty(token)) {
@@ -336,6 +355,14 @@ const authHand = {
         resolve(token);
       })
     })
+  },
+  // 停止认证中心自动刷新token
+  clearRefreshToekn () {
+    bus.authSysData('clearRefreshToekn');
+  },
+  // 启用认证中心自动刷新 token
+  enableAutoRefresh () {
+    bus.authSysData('enableAutoRefresh');
   }
 }
 
