@@ -9,17 +9,16 @@ class commonTool {
   subscribe: {[key:string]:Array<(value?:any) => void>}
   authSysSub: {[key:string]:Array<(value?:any) => void>}
   broadcast: BroadcastChannel | boolean
-  isLoaded: boolean
+  isLoaded: 'init' | 'fail' | 'succeed'
   networkTest: string // 检查认证中心服务是否可访问
   messageKey: string // 通讯 key
   clearPassTime: any
   broadcastUrl: string // 接入广播信息的地址
   homologyMessageKey: Array<string> // 同源触发的 Key
   linkAuth: string // 获取认证中心系统对应值的 key
-  isIframeLoad: boolean  // iframe 是否加载完成
+  isIframeLoad: 'init' | 'fail' | 'succeed'  // iframe 是否加载完成
   iframeDemo: any
   loadingTime: number
-  isCanMessage: boolean
   iframeLoadTime: number
   frequency: number
   testLoadedTime: number
@@ -29,7 +28,6 @@ class commonTool {
     this.broadcastUrl = `/index.html#/broadcastMessage?newTime=${newTime}`;
     this.linkAuth = 'getAuthInfoKey';
     this.clearPassTime = null;
-    this.isCanMessage = false; // 是否满足跨域广播
     this.iframeLoadTime = 1000 * 60 * 2; // 测试文件或iframe加载超时时间，单位毫秒
     this.testLoadedTime = 0; // 测试文件加载时长单，位毫秒
     this.frequency = 200;  // 测试文件或iframe计数频率，单位毫秒
@@ -39,8 +37,8 @@ class commonTool {
     // this.broadcast = window.BroadcastChannel ? new window.BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`) : false;
     // 部分浏览器不支持 window.BroadcastChannel 使用 BroadcastChannel 库， 当不支持 BroadcastChannel 时，采用监听LocalStorage 和 IndexedDB 实现通讯
     this.broadcast = new BroadcastChannel(`${process.VITE_SYSTEMCODE}-broadcast-channel`);
-    this.isLoaded = false;
-    this.isIframeLoad = false;
+    this.isLoaded = 'init';
+    this.isIframeLoad = 'init';
     this.loadingTime = 0;
     this.iframeDemo = null;
     this.homologyMessageKey = [];
@@ -49,7 +47,7 @@ class commonTool {
   // 判断是否能连接上中间服务
   isOpenAuth ():Promise<Boolean> {
     return new Promise((resolve) => {
-      if (this.isLoaded) return resolve(true);
+      if (this.isLoaded !== 'init') return resolve(this.isLoaded === 'succeed');
       const oldTest:HTMLElement | null = document.querySelector(`#test-${this.messageKey}`);
       if (!common.isEmpty(oldTest)) {
         setTimeout(() => {
@@ -70,13 +68,16 @@ class commonTool {
       (document.head || document.body).appendChild(link);
       // 加载成功
       link.onload = () => {
-        this.isLoaded = true;
+        this.isLoaded = 'succeed';
         resolve(true);
         link.remove();
       }
       // 加载失败
       link.onerror = (e) => {
-        this.isLoaded = false;
+        this.isLoaded = 'fail';
+        setTimeout(() => {
+          this.isLoaded = 'init';
+        }, 1000 * 60 * 30)
         resolve(false);
         link.remove();
       }
@@ -87,10 +88,12 @@ class commonTool {
     return new Promise((resolve) => {
       const oldIframe:HTMLElement | null = document.querySelector(`#iframe-${this.messageKey}`);
       if (!common.isEmpty(oldIframe)) {
-        if (this.isIframeLoad && this.isCanMessage) return resolve(oldIframe);
+        if (this.isIframeLoad === 'fail') return resolve(false);
+        if (this.isIframeLoad === 'succeed') return resolve(oldIframe);
         setTimeout(() => {
           if (this.iframeLoadedTime > this.iframeLoadTime) {
             this.clearPassTime && clearTimeout(this.clearPassTime);
+            this.isIframeLoad = 'fail';
             return resolve(false)
           }
           this.iframeLoadedTime += this.frequency;
@@ -103,7 +106,8 @@ class commonTool {
       }
       this.clearPassTime = setTimeout(() => {
         resolve(false);
-        this.isIframeLoad = true;
+        this.isIframeLoad = 'fail';
+        console.warn('认证中心连接失败');
       }, this.iframeLoadTime);
       // 创建 iframe 指向 认证中心
       let iframe = document.createElement('iframe');
@@ -115,12 +119,16 @@ class commonTool {
         if (typeof e.data[`${this.messageKey}`] === 'undefined') return;
         // 解除绑定
         window.removeEventListener('message', authRrecordInfo);
-        if (!e.data[`${this.messageKey}`]) return resolve(false);
+        if (!e.data[`${this.messageKey}`]) {
+          this.isIframeLoad = 'fail';
+          console.warn('认证中心连接失败');
+          return resolve(false);
+        }
         // 解除绑定
         window.removeEventListener('message', authRrecordInfo);
         this.clearPassTime && clearTimeout(this.clearPassTime);
-        this.isCanMessage = true;
-        this.isIframeLoad = true;
+        this.isIframeLoad = 'succeed';
+        console.log('认证中心连接成功');
         resolve(iframe);
       }
       // 监听
@@ -132,11 +140,11 @@ const tool = new commonTool();
 
 export class busCtrl {
   // iframe 加载完成后返回 iframe 对象
-  authLoaded ():Promise<HTMLElement|Boolean> {
+  authLoaded (hiddenWarn?:boolean):Promise<HTMLElement|Boolean> {
     return new Promise((resolve) => {
       tool.isOpenAuth().then(res => {
         if (!res) {
-          console.warn('跨域文件加载失败, 当前只能使用同源通讯');
+          !hiddenWarn && console.warn('跨域文件加载失败, 当前只能使用同源通讯');
           return resolve(false);
         }
         tool.createIframe().then(iframe => {
@@ -154,11 +162,11 @@ export class busCtrl {
    */
   authReadyComplete ():Promise<boolean> {
     return new Promise((resolve) => {
-      if (tool.isCanMessage && !common.isEmpty(tool.iframeDemo)) {
-        return resolve(tool.isCanMessage);
+      if (tool.isIframeLoad === 'succeed' && !common.isEmpty(tool.iframeDemo)) {
+        return resolve(true);
       }
-      this.authLoaded().then(() => {
-        resolve(tool.isCanMessage);
+      this.authLoaded(true).then(() => {
+        resolve(tool.isIframeLoad === 'succeed');
       })
     })
   }
@@ -186,11 +194,11 @@ export class busCtrl {
     if (typeof isAstride === 'undefined' || isAstride) {
       if (!common.isBoolean(tool.broadcast)) {
         tool.broadcast.postMessage({[key]: value}); // 广播到当前源下的所有窗口
-        if (tool.isCanMessage && !common.isEmpty(tool.iframeDemo)) {
+        if (tool.isIframeLoad === 'succeed' && !common.isEmpty(tool.iframeDemo)) {
           tool.homologyMessageKey.push(key);
           tool.iframeDemo.contentWindow.postMessage({key: key, value: value }, '*'); // 将信息发送到认证中心
         } else {
-          this.authLoaded().then((iframe:any) => {
+          this.authLoaded(true).then((iframe:any) => {
             if (common.isBoolean(iframe) || !iframe) return;
             tool.homologyMessageKey.push(key);
             iframe.contentWindow.postMessage({key: key, value: value }, '*'); // 将信息发送到认证中心
@@ -245,11 +253,11 @@ export class busCtrl {
       } else {
         tool.authSysSub[key].push(reception);
       }
-      if (tool.isCanMessage && !common.isEmpty(tool.iframeDemo)) {
+      if (tool.isIframeLoad === 'succeed' && !common.isEmpty(tool.iframeDemo)) {
         tool.iframeDemo.contentWindow.postMessage({key: key, type: tool.linkAuth, value: params }, '*'); // 将信息发送到认证中心
         return;
       }
-      this.authLoaded().then((iframe:any) => {
+      this.authLoaded(true).then((iframe:any) => {
         if (common.isBoolean(iframe) || !iframe) return resolve(null);
         // 将信息发送到认证中心
         iframe.contentWindow.postMessage({key: key, type: tool.linkAuth, value: params }, '*');

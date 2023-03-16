@@ -8,8 +8,12 @@ import qs from "qs";
 import type { AxiosRequestConfig } from 'axios';
 import 'nprogress/nprogress.css';
 import cookieConfig from '@/utils/cookieConfig';
+import md5 from 'blueimp-md5';
 
 const resultExceedTime = 1000 * 0.5; // 单位: 毫秒
+const checkResTime = 10; // 单位: 毫秒
+const removeRqueryKey = 1000 * 60 * 2; // 超时移除
+let awaitTime:{[key:string]:number} = {};
 let resultList:{[k:string]:any} = {};
 
 const isFormData = (data:any) => {
@@ -26,8 +30,8 @@ const getrequestKey = (config:AxiosRequestConfig) => {
       } catch (e) {
         newParams = { keyParams: config.params }
       }
-    } else {
-      newParams = config.params;
+    } else if (!common.isEmpty(config.params)) {
+      newParams = JSON.parse(JSON.stringify(config.params));
     }
     if (common.isString(config.data) && !isFormData(config.data)) {
       try {
@@ -35,8 +39,8 @@ const getrequestKey = (config:AxiosRequestConfig) => {
       } catch (e) {
         newData = { keyData: config.data }
       }
-    } else {
-      newData = config.data;
+    } else if (!common.isEmpty(config.data)) {
+      newData = JSON.parse(JSON.stringify(config.data));
     }
   }
   if (isFormData(newParams)) {
@@ -75,7 +79,8 @@ const getrequestKey = (config:AxiosRequestConfig) => {
     }
   });
   const responseType = config ? config.responseType || '' : '';
-  return [(config ? config.method || '' : ''), responseType, (config ? config.url || '' : ''), params, dataParams].join('&');
+  const key = [(config ? config.method || '' : ''), responseType, (config ? config.url || '' : ''), params, dataParams].join('&');
+  return `${md5(key)}${config ? `-${config.url}` || '' : ''}`;
 }
 
 // 移除请求
@@ -86,10 +91,12 @@ const removePending = (requestKey:string, isRemove?:boolean) => {
     if (!isRemove) {
       store.commit('deletePending', requestKey);
       delete resultList[requestKey];
+      delete awaitTime[requestKey];
     } else {
       setTimeout(() => {
         store.commit('deletePending', requestKey);
         delete resultList[requestKey];
+        delete awaitTime[requestKey];
       }, 20);
     }
   }
@@ -275,7 +282,8 @@ instance.interceptors.response.use((response) => {
     if (error.message && pendingList.has(error.message) && common.isEmpty(config)) {
       // 使用定时器获取接口返回值
       const thisRequest = setInterval(() => {
-        if (!pendingList.has(error.message)) {
+        awaitTime[error.message] = common.isEmpty(awaitTime[error.message]) ? 0 : awaitTime[error.message] + checkResTime;
+        if (!pendingList.has(error.message) || awaitTime[error.message] > removeRqueryKey) {
           clearInterval(thisRequest);
           removePending(error.message, true);
           return reject(error);
@@ -289,7 +297,7 @@ instance.interceptors.response.use((response) => {
             reject(resultObj.result);
           }
         }
-      }, 10)
+      }, checkResTime)
       return;
     }
     config && !config.hiddenError && ElMessage({

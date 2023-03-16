@@ -17,39 +17,45 @@ const navList = [
         url: '/test1'
       },
       {
-        id: '1-21',
+        id: '1-3',
         name: 'common-测试1',
         icon: '',
         url: '/test-2'
       },
       {
-        id: '1-22',
+        id: '1-4',
         name: 'common-测试2',
         icon: '',
         url: '/test-3'
       },
       {
-        id: '1-3',
+        id: '1-5',
         name: 'jsx测试',
         icon: '',
         url: '/test2'
       },
       {
-        id: '1-4',
+        id: '1-6',
         name: '百度编辑器',
         icon: '',
         url: '/testUEditor'
       },
       {
-        id: '1-5',
+        id: '1-7',
         name: '404测试',
         childList: [
           {
-            id: '5-1',
+            id: '1-7-1',
             name: '404页面',
             icon: '',
             url: '/test/test'
-          }
+          },
+          {
+            id: '1-7-2',
+            name: '图片测试',
+            icon: '',
+            url: '/imageClear'
+          },
         ]
       },
     ]

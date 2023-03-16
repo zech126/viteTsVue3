@@ -47,7 +47,7 @@ class commonTool {
   }
   // base64 转换为 UintArr
   getUintArr (base64Data:string) {
-    const isIncludesSign = (/^data:/.test(base64Data) && !base64Data.includes(';base64,'));
+    const isIncludesSign = (/^data:/.test(base64Data) && base64Data.includes(';base64,'));
     const arr:Array<string> = base64Data.split(',');
     const match = isIncludesSign ? arr[0].match(/:(.*?);/) : [];
     const newFileType = match && match.length > 1 ? match[1] : '';
@@ -80,14 +80,15 @@ class commonTool {
  * @param limit 并发最大数量, 默认 10
  * @returns 
  */
-  enqueuePromise (concurrency:Array<Function> = [], limit = 10): Promise<Array<any>> {
+  enqueuePromise (concurrency:Array<Function> = [], {limit = 10, progress = (percent:number) => {} } = {}): Promise<Array<any>> {
     let index = 0;
     const ret:Array<any> = [];
     const executing:Array<any> = [];
-    const poolLimit = limit <= 0 ? 1 : limit;
+    const poolLimit = limit > 0 ? limit : 10;
     const enqueue = ():Promise<unknown> => {
       // 边界处理, concurrency 为空数组
       if (index === concurrency.length) {
+        concurrency.length === 0 && progress(100);
         return Promise.resolve();
       }
       // 每调一次 enqueue, 初始化一个 promise
@@ -102,6 +103,7 @@ class commonTool {
           newPromise = Promise.resolve();
         }
       }
+      progress(Number(((index / concurrency.length) * 100).toFixed(2)));
       // 放入 promises 数组
       ret.push(newPromise);
       // 将有返回值的 promise 从 executing 数组中删除, 并将下一个需要执行的放进 executing 数组中
@@ -262,7 +264,7 @@ export class commonClass {
  * @param {string} options.encode 字符编码类型
  * @param {boolean} options.timestamp 是否在文件名后追加时间戳
  */
-   downloadFile (data:string|Blob, {name = '', suffix = '', type = '', encode = '', timestamp = false } = {}) {
+  downloadFile (data:string|Blob|File, {name = '', suffix = '', type = '', encode = '', timestamp = false } = {}) {
     return new Promise((resolve, reject) => {
       if (!data) {
         console.error(`数据源不能为空！`);
@@ -282,13 +284,21 @@ export class commonClass {
         // 数据源为地址时
         axios.get(data, {
           responseType: 'blob',
-          // withCredentials: true,
+          // headers: {
+          //   withCredentials: true
+          // }
         }).then(res => {
           let newName = decodeURI(data.substring(data.indexOf('=') + 1, data.lastIndexOf('.')));
           newName = newName.substring(newName.lastIndexOf('/') + 1, newName.length);
           const newSuffix:string = data.substring(data.lastIndexOf('.') + 1, data.length);
-          tool.downLoadHand(res.data, name || newName, timestamp, suffix||newSuffix).then(() => {
-            resolve(true);
+          this.downloadFile(res.data, {
+            name: name || newName,
+            suffix: suffix || (!this.isEmpty(newSuffix) && newSuffix.length > 4 ? '' : newSuffix),
+            timestamp: timestamp,
+            encode: encode,
+            type: type
+          }).then((result) => {
+            resolve(result);
           }).catch((error) => {
             reject(error);
           })
@@ -297,15 +307,16 @@ export class commonClass {
         })
         return;
       }
-      // 数据源为文件流时
-      let blob = this.isBlob(data) ? data : new Blob(this.isArray(data) ? data : [data]);
+      const isFile = this.isFile(data);
+      // 数据源为file格式或文件流时
+      let blob = (this.isBlob(data) || isFile) ? data : new Blob(this.isArray(data) ? data : [data]);
       if (!this.isEmpty(type) || !this.isEmpty(encode)) {
         const options = {
           type: (type || 'text/plain') + (encode ? ';charset=' + encode : 'utf-8')
         }
         blob = this.isBlob(data) ? data : new Blob(this.isArray(data) ? data : [data], options);
       }
-      tool.downLoadHand(blob, name, timestamp, suffix).then(() => {
+      tool.downLoadHand(blob, isFile ? name || data.name : name, timestamp, suffix).then(() => {
         resolve(true);
       }).catch((error) => {
         reject(error);
@@ -471,6 +482,21 @@ export class commonClass {
    base64ToBlob (base64Data:string, fileType?:string): Blob {
     const uintArr = tool.getUintArr(base64Data);
     return new Blob([uintArr.Uint8Array], {type: fileType || uintArr.type || 'text/plain' });
+  }
+  /**
+   * 文件格式转为 base64
+   * @param file 
+   * @returns 
+   */
+  fileToBase64 (file:Blob | File): Promise<string> {
+    return new Promise((reslove,reject) => {
+      let oFileReader = new FileReader();
+      oFileReader.onloadend = (e) => {
+        if (this.isEmpty(e.target)) return reject(e);
+        reslove(e.target.result as string);
+      };
+      oFileReader.readAsDataURL(file);
+    })
   }
   /**
    * 转为文件格式
@@ -799,14 +825,16 @@ export class commonClass {
     return !this.isEmpty(nformat) ? newDate.format(nformat) : new Date(newDate.format('YYYY/MM/DD HH:mm:ss:SSS'));
   }
   /**
- * Promise.allSettled 并发请求限制
- * @param concurrency 数据源
- * @param limit 并发最大数量, 默认 10
- * @returns 
- */
-  allSettled (concurrency:Array<Function> = [], limit = 10): Promise<Array<{status: 'fulfilled', value: any} | {status: 'rejected', reason: any}>> {
+   * Promise.allSettled 并发请求限制
+   * @param concurrency 数据源
+   * @param {object} options 其他配置
+   * @param options.limit 并发最大数量, 默认 10
+   * @param options.progress 执行进度，每次完成一个请求时回调一次，返回当前进度的百分比
+   * @returns 
+  */
+  allSettled (concurrency:Array<Function> = [], {limit = 10, progress = (percent:number) => {} } = {}):Promise<Array<{status: 'fulfilled', value: any} | {status: 'rejected', reason: any}>> {
     return new Promise((resolve) => {
-      tool.enqueuePromise(concurrency, limit).then(ret => {
+      tool.enqueuePromise(concurrency, {limit: limit, progress: progress }).then(ret => {
         if (this.isFunction(Promise.allSettled)) {
           resolve(Promise.allSettled(ret));
         } else {
@@ -830,12 +858,14 @@ export class commonClass {
   /**
    * Promise.all 并发请求限制
    * @param concurrency 数据源
-   * @param limit 并发最大数量, 默认 10
-   * @returns 
-   */
-  promiseAll (concurrency:Array<Function> = [], limit = 10): Promise<Array<any>> {
+   * @param {object} options 其他配置
+   * @param options.limit 并发最大数量, 默认 10
+   * @param options.progress 执行进度，每次完成一个请求时回调一次，返回当前进度的百分比
+   * @returns
+  */
+  promiseAll (concurrency:Array<Function> = [], {limit = 10, progress = (percent:number) => {} } = {}):Promise<Array<any>> {
     return new Promise((resolve) => {
-      tool.enqueuePromise(concurrency, limit).then(ret => {
+      tool.enqueuePromise(concurrency, {limit: limit, progress: progress }).then(ret => {
         resolve(Promise.all(ret))
       })
     })
