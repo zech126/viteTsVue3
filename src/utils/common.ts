@@ -97,10 +97,10 @@ class commonTool {
         if (isFunction(newPromise)) {
           newPromise = newPromise();
           if (Object.prototype.toString.call(newPromise).slice(8, -1) !== 'Promise') {
-            newPromise = Promise.resolve();
+            newPromise = Promise.resolve(newPromise);
           }
         } else {
-          newPromise = Promise.resolve();
+          newPromise = Promise.resolve(newPromise);
         }
       }
       progress(Number(((index / concurrency.length) * 100).toFixed(2)));

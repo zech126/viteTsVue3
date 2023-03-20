@@ -1,11 +1,10 @@
-import axios from 'axios';
+import axios, { AxiosRequestHeaders, AxiosRequestConfig } from 'axios';
 import { ElMessage } from 'element-plus'
 import common from '@/utils/common';
 import store from "@/store";
 import requestHand from './requestHand'
 import NProgress from 'nprogress';
 import qs from "qs";
-import type { AxiosRequestConfig } from 'axios';
 import 'nprogress/nprogress.css';
 import cookieConfig from '@/utils/cookieConfig';
 import md5 from 'blueimp-md5';
@@ -135,6 +134,35 @@ const addPending = (config:AxiosRequestConfig) => {
   })
 }
 
+const requestConfig = (config:AxiosRequestConfig) => {
+  let headersConfig:AxiosRequestHeaders = {};
+  const token = common.getCookie(cookieConfig.tokenName) as string;
+  if (!common.isEmpty(token)) {
+    headersConfig.Authorization = token;
+  }
+  config.headers = {...headersConfig, ...config.headers};
+  config.baseURL = requestHand.baseHand(config.url || '');
+  config.timeout = common.isNumber(config.timeout) && config.timeout > 1000 ? config.timeout : 1000 * 120;
+  // 移除参数中的空值
+  if(common.isEmpty(config.removeEmpty) || (common.isBoolean(config.removeEmpty) && config.removeEmpty)) {
+    // 当非 FormData 或 默认提交时对参数处理
+    if (!isFormData(config.data)) {
+      config.data = !common.isEmpty(config.data) ? common.removeEmpty(config.data) : undefined;
+    }
+    if (!isFormData(config.params)) {
+      config.params = !common.isEmpty(config.params) ? common.removeEmpty(config.params) : undefined;
+    }
+  }
+  // 当下载文件时
+  if ((common.isBoolean(config.downLoadFile) && config.downLoadFile) || (common.isBoolean(config.isFile) && config.isFile)) {
+    config.responseType = 'blob';
+  }
+  if (!common.isBoolean(config.isCache) || config.isCache) {
+    // 缓存请求值
+    addPending(config);
+  }
+  return config;
+}
 // axios 默认配置
 const instance = axios.create({
   headers: {
@@ -147,38 +175,10 @@ const instance = axios.create({
 instance.interceptors.request.use((config) => {
   //配置发送请求的信息
   NProgress.start();
-  const requestConfig = () => {
-    let headersConfig:{[key:string]:any} = {};
-    const token = common.getCookie(cookieConfig.tokenName);
-    if (!common.isEmpty(token)) {
-      headersConfig.Authorization = token;
-    }
-    config.headers = {...headersConfig, ...config.headers};
-    config.baseURL = requestHand.baseHand(config.url || '');
-    config.timeout = common.isNumber(config.timeout) && config.timeout > 1000 ? config.timeout : 1000 * 120;
-    // 移除参数中的空值
-    if(common.isEmpty(config.removeEmpty) || (common.isBoolean(config.removeEmpty) && config.removeEmpty)) {
-      // 当非 FormData 或 默认提交时对参数处理
-      if (!isFormData(config.data)) {
-        config.data = !common.isEmpty(config.data) ? common.removeEmpty(config.data) : undefined;
-      }
-      if (!isFormData(config.params)) {
-        config.params = !common.isEmpty(config.params) ? common.removeEmpty(config.params) : undefined;
-      }
-    }
-    // 当下载文件时
-    if ((common.isBoolean(config.downLoadFile) && config.downLoadFile) || (common.isBoolean(config.isFile) && config.isFile)) {
-      config.responseType = 'blob';
-    }
-    if (!common.isBoolean(config.isCache) || config.isCache) {
-      // 缓存请求值
-      addPending(config);
-    }
-    return config;
-  }
   return new Promise((resolve, reject) => {
+    if (common.isEmpty(config.url)) return reject(new Error('请求地址不能为空'));
     // 可在此次验证登录 token
-    resolve(requestConfig());
+    resolve(requestConfig(config));
   })
 });
 
