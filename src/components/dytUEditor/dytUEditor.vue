@@ -25,7 +25,7 @@ import insertfile from './insertfile'; // 插入方法文件重构
 import addInsertimageBtn from './addInsertimageBtn'; // 上传图片工具栏按钮重构
 import addAttachmentBtn from './addAttachmentBtn'; // 上传附件按钮工具栏重构
 import simpleupload from './simpleupload'; // 上传图片方法重构
-import { LoadEvent } from './loadSubscribe';
+import { LoadEvent } from './loadSubscribeConfig';
 import insertimage from './insertimage.vue';
 // import { parents } from './tool';
 import { debounce } from '@/utils/debounce';
