@@ -199,15 +199,15 @@ instance.interceptors.response.use((response) => {
           result: response,
           downLoadFile: true
         };
-        return resolve(requestHand.downLoadFile(response));
+        return resolve(common.copy(requestHand.downLoadFile(response)));
       }
       requestHand.hand[code](response).then((res:any) => {
         resultList[requestKey] = { resultTime: new Date().getTime(), result: res.data || {}};
-        resolve(res.data || {});
+        resolve(common.copy(res.data || {}));
       }).catch((err:any) => {
         const newErr = err.response && err.response.data ? err.response.data : err.data || err;
         resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: newErr };
-        reject(newErr);
+        reject(common.copy(newErr));
       });
       return;
     }
@@ -228,7 +228,7 @@ instance.interceptors.response.use((response) => {
     });
     console.error(response);
     resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: responseData};
-    return reject(responseData);
+    return reject(common.copy(responseData));
   })
 }, (error) => {
   return new Promise((resolve, reject) => {
@@ -248,14 +248,14 @@ instance.interceptors.response.use((response) => {
               result: res,
               downLoadFile: true
             };
-            return resolve(requestHand.downLoadFile(res));
+            return resolve(common.copy(requestHand.downLoadFile(res)));
           }
           resultList[requestKey] = { resultTime: new Date().getTime(), result: res.data || {}};
-          return resolve(res.data || {});
+          return resolve(common.copy(res.data || {}));
         }).catch((err:any) => {
           const newErr = err.response && err.response.data ? err.response.data : err.data || err;
           resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: newErr};
-          reject(newErr);
+          reject(common.copy(newErr));
         });
         return;
       }
@@ -276,7 +276,7 @@ instance.interceptors.response.use((response) => {
       });
       console.error(error.response);
       resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: responseData};
-      return reject(responseData);
+      return reject(common.copy(responseData));
     }
     const pendingList = store.getters['getPendingList'];
     if (error.message && pendingList.has(error.message) && common.isEmpty(config)) {
@@ -286,15 +286,15 @@ instance.interceptors.response.use((response) => {
         if (!pendingList.has(error.message) || awaitTime[error.message] > removeRqueryKey) {
           clearInterval(thisRequest);
           removePending(error.message, true);
-          return reject(error);
+          return reject(common.copy(error));
         }
         if (!common.isEmpty(resultList[error.message])) {
           clearInterval(thisRequest);
           const resultObj = resultList[error.message];
           if (!['reject'].includes(resultObj.status)) {
-            resultObj.downLoadFile ? resolve(requestHand.downLoadFile(resultObj.result)) : resolve(resultObj.result);
+            resultObj.downLoadFile ? resolve(common.copy(requestHand.downLoadFile(resultObj.result))) : resolve(common.copy(resultObj.result));
           } else {
-            reject(resultObj.result);
+            reject(common.copy(resultObj.result));
           }
         }
       }, checkResTime)
@@ -308,7 +308,7 @@ instance.interceptors.response.use((response) => {
     });
     console.error(JSON.parse(JSON.stringify(error)));
     resultList[requestKey] = { resultTime: new Date().getTime(), status: 'reject', result: error};
-    return reject(error);
+    return reject(common.copy(error));
   })
 });
 export default instance;
