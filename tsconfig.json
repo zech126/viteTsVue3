@@ -13,6 +13,7 @@
     "target": "esnext",
     "useDefineForClassFields": true,
     "suppressImplicitAnyIndexErrors": true,
+    "noImplicitAny": false,  // 不允许隐式的 any 类型， 默认为 true，因插槽递归时标红，所以设置为 false
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,

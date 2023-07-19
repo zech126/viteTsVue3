@@ -24,63 +24,46 @@
         >
           <slot name="tableColumn">
             <template v-for="(item, index) in data.columnConfig" :key="`col-${item.prop}-${index}`">
-            <!-- class-name="disabled-drag-srot" -->
-            <el-table-column
-              v-if="typeof props.tableConfig.multiple === 'boolean' && props.tableConfig.multiple && item.defaultCol"
-              align="center"
-              type="selection"
-              width="50"
-              :selectable="selectable"
-            />
-            <el-table-column
-              v-if="typeof props.tableConfig.indexMethod === 'function' && item.defaultCol"
-              align="center"
-              type="index"
-              width="50"
-              :index="props.tableConfig.indexMethod"
-            />
-            <el-table-column
-              v-if="typeof props.tableConfig.indexMethod === 'boolean' && props.tableConfig.indexMethod && item.defaultCol"
-              align="center"
-              type="index"
-              width="50"
-            />
+              <!-- class-name="disabled-drag-srot" -->
+              <el-table-column
+                v-if="typeof props.tableConfig.multiple === 'boolean' && props.tableConfig.multiple && item.defaultCol"
+                align="center"
+                type="selection"
+                width="50"
+                :selectable="selectable"
+              />
+              <el-table-column
+                v-if="typeof props.tableConfig.indexMethod === 'function' && item.defaultCol"
+                align="center"
+                type="index"
+                width="50"
+                :index="props.tableConfig.indexMethod"
+              />
+              <el-table-column
+                v-if="typeof props.tableConfig.indexMethod === 'boolean' && props.tableConfig.indexMethod && item.defaultCol"
+                align="center"
+                type="index"
+                width="50"
+              />
               <!-- 自定义插槽列 -->
               <slot v-if="item.slot && !item.defaultCol" :name="item.slot" :column-config="item" />
-              <el-table-column
+              <table-column
                 v-else-if="!item.defaultCol"
-                v-bind="{
+                :column-item="{
                   'show-overflow-tooltip': true,
                   ...item,
                   'min-width': item['min-width'] || item.minWidth,
                   align: (data.columnAlign.includes(item.align) ? item.align : 'center')
                 }"
-              >
-                <template v-slot="scope">
-                  <slot :name="`${item.prop}-content`" v-bind="scope">
-                    <dyt-node
-                      v-if="typeof data.cloumnsRender[`render-${index}`] === 'function'"
-                      :node="data.cloumnsRender[`render-${index}`]"
-                      :prop="scope"
-                    />
-                    <div v-else class="table-ellipsis-tips"
-                      v-on="data.cloumnsEvents[`events-${index}`] ? {
-                        click: (e:any) => {
-                          data.cloumnsEvents[`events-${index}`].click && data.cloumnsEvents[`events-${index}`].click(scope, e);
-                        }
-                      }: {}"
-                    >
-                      {{ scope.row[item.prop] }}
-                    </div>
-                  </slot>
+                :cloumn-render-key="`render-${index}`"
+                :cloumn-event-key="`events-${index}`"
+                :cloumns-render="data.cloumnsRender"
+                :cloumns-events="data.cloumnsEvents"
+              > 
+                <template v-for="(slot, index) in tableSlots" v-slot:[slot]="scope" :key="index">
+                  <slot :name="slot" v-bind="scope" />
                 </template>
-                <!-- 自定义表头的内容. 参数为 { column, $index } -->
-                <template v-slot:header="scope">
-                  <slot :name="`${item.prop}-header`" v-bind="scope">
-                    {{ scope.column.label }}
-                  </slot>
-                </template>
-              </el-table-column>
+              </table-column>
             </template>
           </slot>
           <!-- 插入至表格最后一行之后的内容，如果需要对表格的内容进行无限滚动操作，可能需要用到这个 slot。若表格有合计行，该 slot 会位于合计行之上 -->
@@ -104,6 +87,7 @@
 import getGlobal from '@/utils/global';
 import getProxy from '@/utils/proxy';
 import Sortable from 'sortablejs';
+import tableColumn from './tableColumn.vue';
 import { reactive, computed, useSlots, useAttrs, onMounted, watch, PropType, nextTick } from 'vue';
 
 interface dataType{
@@ -166,6 +150,33 @@ const data:dataType = reactive({
 const slots = computed(() => {
   return Object.keys($slots)
 });
+// 列表内插槽键值
+const tableSlots = computed(() => {
+  const columnKey = getArrayObjKey(data.columnConfig, 'prop', 'children');
+  let tSlots:Array<string> = [];
+  columnKey.forEach(key => {
+    slots.value.includes(key) && tSlots.push(key);
+    slots.value.includes(`${key}-header`) && tSlots.push(`${key}-header`);
+    slots.value.includes(`${key}-content`) && tSlots.push(`${key}-content`);
+  })
+  tSlots = global.$common.arrRemoveRepeat(tSlots);
+  return tSlots;
+});
+
+// 获取数组对象对应的key值
+const getArrayObjKey = (arr:Array<{[k:string]:any}> = [], key:string = 'prop', children = 'children', val:Array<string> = []) => {
+  let itemKeys:Array<string> = [...val];
+  arr.forEach(item => {
+    if (!global.$common.isEmpty(item[key])) {
+      itemKeys.push(item[key])
+    }
+    if (!global.$common.isEmpty(item[children])) {
+      itemKeys = [...itemKeys, ...getArrayObjKey(item[children], key, children, itemKeys)];
+    }
+  })
+  return itemKeys;
+}
+
 // 绑定到列表的事件
 const tableListeners = computed(() => {
   const attrs = Object.keys($attrs);
@@ -179,23 +190,30 @@ const tableListeners = computed(() => {
   return tableFun;
 });
 // 初始化列
-const initColumns = (arr:Array<any>) => {
+const initColumns = (arr:Array<any>, renderKey?:string, eventKey?:string) => {
   let columns:Array<any> = [];
   data.cloumnsRender = {};
   data.cloumnsEvents = {};
+  let newRkey = '';
+  let newEkey = '';
   arr.forEach((item, index) => {
+    newRkey = `${global.$common.isEmpty(renderKey) ? `render-${index}` : `${renderKey}-${index}`}`;
+    newEkey = `${global.$common.isEmpty(eventKey) ? `events-${index}` : `${eventKey}-${index}`}`;
     if (typeof item.render === 'function') {
-      data.cloumnsRender[`render-${index}`] = item.render;
+      data.cloumnsRender[newRkey] = item.render;
       delete item.render;
     }
     if (!global.$common.isEmpty(item.events)) {
-      data.cloumnsEvents[`events-${index}`] = item.events;
+      data.cloumnsEvents[newEkey] = item.events;
       delete item.events;
     }
     // 开启当前列禁用拖拽处理
     if ((typeof item.disabledColSrot === 'boolean' && item.disabledColSrot) || !global.$common.isEmpty(item.slot)) {
       item['class-name'] = global.$common.isEmpty(item['class-name']) ? 'disabled-drag-srot' : `${item['class-name']} disabled-drag-srot`;
       delete item.disabledColSrot;
+    }
+    if (!global.$common.isEmpty(item.children) && global.$common.isArray(item.children)) {
+      initColumns(item.children, newRkey, newEkey);
     }
     columns.push(item);
   });

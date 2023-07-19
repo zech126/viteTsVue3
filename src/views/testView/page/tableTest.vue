@@ -76,13 +76,22 @@
       <template v-slot:name-header="{column, $index }">
         {{ column.property }}-自定义表头-{{ $index + 1 }}
       </template>
+      <template v-slot:usernameChild1-header="{column, $index }">
+        {{ column.property }}-自定义表头-{{ $index + 1 }}
+      </template>
+      <template v-slot:usernameChild2-header="{column, $index }">
+        {{ column.property }}-自定义表头-{{ $index + 1 }}
+      </template>
+      <template v-slot:username-header="{column, $index }">
+        {{ column.property }}-自定义表头-{{ column.label }}-{{ $index + 1 }}
+      </template>
       <!-- 自定义内容 -->
-      <!-- <template v-slot:myName1-content="{column, $index }">
-        {{ column.property }}-自定义内容-{{ $index + 1 }}
-      </template> -->
+      <template v-slot:usernameChild3-content="{row, column, $index }">
+        {{ column.property }}-自定义内容-{{ row.usernameChild3 }}-{{ $index + 1 }}
+      </template>
       <!-- 自定义表头 -->
       <!-- <template v-slot:myName-header="{column, $index }">
-        {{ column.property }}-自定义表头和内容-{{ $index + 1 }}
+        {{ column.property }}-自定义表头-{{ $index + 1 }}
       </template> -->
       <!-- 自定义内容 -->
       <!-- <template v-slot:myName-content="{row, column }">
@@ -364,17 +373,52 @@ export default defineComponent({
       // 表格列设置
       tableColumns: [
         {
-          label: '账号', prop: 'username', align: 'center', 'width': '200', sortable: true,
-          // render: (h, {row}) => {
-          //   return row.username
-          // }
+          label: '账号', align: 'center',
+          prop: 'username',
+          children: [
+            {label: '账号1', prop: 'usernameChild1', align: 'center', 'width': '200', sortable: true},
+            {
+              label: '账号2-2', prop: 'usernameChild', align: 'center', 'width': '200', sortable: true,
+              'render-header': ({ column, $index }:{[key:string]:any}) => {
+                return `renderHeader-${column.label}-序号-${$index}`
+              },
+              children: [
+                {
+                  label: '账号1', prop: 'usernameChild2', align: 'center', 'width': '200', sortable: true,
+                  // 使用 render 和插槽时 events 失效
+                  events: {
+                    click: ({row}:any, e:any) => {
+                      console.log('点击账号1列(usernameChild2)', row, e);
+                      this.$message({ message: '点击了“账号1”列', type: 'warning'});
+                    }
+                  }
+                },
+                {
+                  label: '账号2', prop: 'usernameChild1', align: 'center', 'width': '200', sortable: true,
+                  render: ({row}:any) => {
+                    return <div
+                      {...{
+                        onClick: (e:any) => {
+                          console.log(e, row);
+                          this.$message({ message: '点击了“账号2”列', type: 'warning'});
+                        }
+                      }}
+                    >
+                      render-{row.usernameChild1}
+                    </div>
+                  }
+                },
+                { label: '账号-test', prop: 'usernameChild3', align: 'center', 'width': '200', sortable: true }
+              ]
+            }
+          ]
         },
         {
           label: '姓名', prop: 'name', align: 'center', 'width': '200',
-          // 使用 render 时 events 失效
+          // 使用 render 和插槽时 events 失效
           events: {
             click: ({row}:any, e:any) => {
-              console.log('click', row, e)
+              console.log('点击姓名列(name)', row, e)
             }
           }
         },
@@ -394,7 +438,7 @@ export default defineComponent({
                   {...{
                     size: 'small',
                     type: 'primary',
-                    onclick: () => {
+                    onClick: () => {
                       this.$message({ message: '你点击了编辑按钮', type: 'warning'});
                       this.showDialog();
                       console.log(row);
@@ -405,7 +449,7 @@ export default defineComponent({
                   {...{
                     size: 'small',
                     type: 'danger',
-                    onclick: () => {
+                    onClick: () => {
                       this.$message({ message: '你点击了删除按钮', type: 'warning'});
                       console.log(row);
                     }
@@ -468,10 +512,14 @@ export default defineComponent({
       const pageSize = remaining > requestData.pageSize ? requestData.pageSize : remaining;
       for (let i = 0; i < pageSize; i ++) {
         tableList.push({
-          username: `username-${origination + i + 1}`,
-          name: `name-${origination + i + 1}`,
-          phone: `phone-${origination + i + 1}`,
-          email: `email-${origination + i + 1}`
+          usernameChild1: `usernameChild1(用户名)-${origination + i + 1}`,
+          usernameChild2: `usernameChild2(用户名)-${origination + i + 1}`,
+          usernameChild3: `usernameChild3(9999)-${origination + i + 1}`,
+          name: `name(名称)`,
+          phone: `phone(电话)-${origination + i + 1}`,
+          deptName: `deptName(部门)-${origination + i + 1}`,
+          email: `email(邮箱)-${origination + i + 1}`,
+          employeeNo: `employeeNo(工号)-${origination + i + 1}`
         })
       }
       return new Promise((reslove, reject) => {
