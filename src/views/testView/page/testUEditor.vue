@@ -1,32 +1,34 @@
 <template>
-  <dytUEditor 
-    v-model="data.content"
-    :config="data.config1"
-    ref="myUEdito1"
-    :upload-file="uploadFile"
-    :upload-images="uploadImages"
-    :get-images="getImageList"
-    :remove-images="removeImages"
-  />
-  <div style="margin: 10px 0 50px 20px;">
-    <dyt-button @click="getContet('myUEdito1')">获取内容-控制台查看</dyt-button>
-  </div>
-  <dytUEditor v-model="data.content1" :config="data.config2" ref="myUEdito2" />
-  <div style="margin: 10px 0 50px 20px;">
-    <dyt-button @click="getContet('myUEdito2')">获取内容-控制台查看</dyt-button>
-  </div>
+  <div>
+    <dytUEditor 
+      v-model="data.content"
+      :config="data.config1"
+      ref="myUEdito1"
+      :upload-file="uploadFile"
+      :upload-images="uploadImages"
+      :get-images="getImageList"
+      :remove-images="removeImages"
+    />
+    <div style="margin: 10px 0 50px 20px;">
+      <dyt-button @click="getContet('myUEdito1')">获取内容-控制台查看</dyt-button>
+    </div>
+    <dytUEditor v-model="data.content1" :config="data.config2" ref="myUEdito2" />
+    <div style="margin: 10px 0 50px 20px;">
+      <dyt-button @click="getContet('myUEdito2')">获取内容-控制台查看</dyt-button>
+    </div>
 
-  <dytUEditor
-    v-model="data.content2"
-    :config="data.config1"
-    ref="myUEdito3"
-    :upload-file="uploadFile"
-    :upload-images="uploadImages"
-    :get-images="getImageList"
-    :remove-images="removeImages"
-  />
-  <div style="margin: 10px 0 50px 20px;">
-    <dyt-button @click="getContet('myUEdito3')">获取内容-控制台查看</dyt-button>
+    <dytUEditor
+      v-model="data.content2"
+      :config="data.config1"
+      ref="myUEdito3"
+      :upload-file="uploadFile"
+      :upload-images="uploadImages"
+      :get-images="getImageList"
+      :remove-images="removeImages"
+    />
+    <div style="margin: 10px 0 50px 20px;">
+      <dyt-button @click="getContet('myUEdito3')">获取内容-控制台查看</dyt-button>
+    </div>
   </div>
 </template>
 
@@ -139,7 +141,7 @@ const getImageList = () => {
    return new Promise((reslove) => {
     // 模拟接口返回数据
     setTimeout(() => {
-      let list = [];
+      let list:Array<number> = [];
       for (let i = 0; i < 5; i++) {
         list.push(images[Math.random().toString().replace('.', '').substring(0, 2)]);
         // 或（需要删除图片库的图片时，请使用对象）
