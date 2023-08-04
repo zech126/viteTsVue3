@@ -75,21 +75,23 @@ const initImageView = () => {
     data.previewList = data.imageDemo.map((img:any) => img.src).filter(src => {
       return !!src && !src.includes('/dialogs/attachment/') && !src.includes('/themes/default/')
     });
-    if (data.previewList.length > 0) {
-      data.previewUrl = data.previewList[0];
-    }
   });
 }
 // 点击图片
 const imageClickHand  = (event:{[key:string]: any}) => {
-  const target:any = event.target || event.srcElement;
-  const index = target.getAttribute('dyt-image-list-index');
-  data.previewIndex = index ? Number(index) : 0;
+  if (!data.previewUrl && data.previewList.length > 0) {
+    data.previewUrl = data.previewList[0];
+  }
   nextTick(() => {
-    if (proxy.$refs['dytImageRef'] && proxy.$refs['dytImageRef'].$el) {
-      const image = proxy.$refs['dytImageRef'].$el.querySelector('img');
-      image && image.click();
-    }
+    const target:any = event.target || event.srcElement;
+    const index = target.getAttribute('dyt-image-list-index');
+    data.previewIndex = index ? Number(index) : 0;
+    nextTick(() => {
+      if (proxy.$refs['dytImageRef'] && proxy.$refs['dytImageRef'].$el) {
+        const image = proxy.$refs['dytImageRef'].$el.querySelector('img');
+        image && image.click();
+      }
+    })
   })
 }
 // 解除绑定事件
