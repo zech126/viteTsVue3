@@ -365,7 +365,7 @@ export class commonClass {
     const outKey = !this.isEmpty(ruleOut) ? (this.isString(ruleOut) ? [ruleOut] : this.isArray(ruleOut) ? ruleOut : []) : [];
     const hand = (obj:string | {[key:string]:any} | Array<any>, stackPointerLike?:string):typeof obj => {
       if (this.isString(obj)) return obj.trim();
-      if (!this.isJson(obj) && this.isArray(obj)) return obj;
+      if (!this.isJson(obj) && !this.isArray(obj)) return obj;
       let backVal;
       if (this.isArray(obj)) {
         backVal = [];
@@ -642,14 +642,14 @@ export class commonClass {
                 const newVal = hand(option[i], false, currentLikeKey);
                 if (!emptyAllClean && !clean) {
                   this.isEmpty(newVal) && this.isJson(option[i]) ? newObj.push(option[i]) : newObj.push(newVal);
-                } else {
-                  !this.isEmpty(newVal) && newObj.push(newVal);
+                } else if (!this.isEmpty(newVal)) {
+                  newObj.push(newVal);
                 }
-              } else {
+              } else if (!this.isEmpty(option[i])) {
                 newObj.push(option[i]);
               }
             }
-          } else {
+          } else if (!this.isEmpty(option[i])) {
             newObj.push(option[i]);
           }
         }
@@ -667,14 +667,14 @@ export class commonClass {
                 const newVal = hand(option[objKeys[i]], false, currentLikeKey);
                 if (!emptyAllClean && !clean) {
                   newObj[objKeys[i]] = newVal;
-                } else {
-                  !this.isEmpty(newVal) && (newObj[objKeys[i]] = newVal);
+                } else if (!this.isEmpty(newVal)) {
+                  newObj[objKeys[i]] = newVal;
                 }
-              } else {
+              } else if (!this.isEmpty(option[objKeys[i]])) {
                 newObj[objKeys[i]] = option[objKeys[i]];
               }
             }
-          } else {
+          } else if (!this.isEmpty(option[objKeys[i]])) {
             newObj[objKeys[i]] = option[objKeys[i]];
           }
         }

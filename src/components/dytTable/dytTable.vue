@@ -121,6 +121,7 @@
       <!-- 翻页功能 -->
       <pagination
         v-model:page-config="base.pageConfig"
+        :pagination-info="base.paginationInfo"
         :total="base.paginationTotal"
         :page-id="base.pageId"
         :show-pagination="base.showPagination"

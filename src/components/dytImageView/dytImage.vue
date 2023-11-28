@@ -59,22 +59,24 @@ const getTargetContainer = (targetContainer:string | Element = '') => {
 const initImageView = () => {
   removeEvent();
   nextTick(() => {
-    let index = 0;
-    data.imageDemo = getTargetContainer(props.targetContainer).filter(demo => {
-      const includeAttr =  disabledAttr.value.map(attr => demo.getAttribute(attr)).filter(attr => attr && disabledAttr.value.includes(attr));
-      return includeAttr.length === 0;
-    });
-    data.imageDemo.forEach((img:any) => {
-      // 绑定监听事件
-      if (!img.src.includes('/dialogs/attachment/') && !img.src.includes('/themes/default/')) {
-        img.setAttribute('dyt-image-list-index', index);
-        img.addEventListener('click', imageClickHand);
-        index++;
-      }
-    });
-    data.previewList = data.imageDemo.map((img:any) => img.src).filter(src => {
-      return !!src && !src.includes('/dialogs/attachment/') && !src.includes('/themes/default/')
-    });
+    setTimeout(() => {
+      let index = 0;
+      data.imageDemo = getTargetContainer(props.targetContainer).filter(demo => {
+        const includeAttr =  disabledAttr.value.map(attr => demo.getAttribute(attr)).filter(attr => attr && disabledAttr.value.includes(attr));
+        return includeAttr.length === 0;
+      });
+      data.imageDemo.forEach((img:any) => {
+        // 绑定监听事件
+        if (!img.src.includes('/dialogs/attachment/') && !img.src.includes('/themes/default/')) {
+          img.setAttribute('dyt-image-list-index', index);
+          img.addEventListener('click', imageClickHand);
+          index++;
+        }
+      });
+      data.previewList = data.imageDemo.map((img:any) => img.src).filter(src => {
+        return !!src && !src.includes('/dialogs/attachment/') && !src.includes('/themes/default/')
+      });
+    }, 300)
   });
 }
 // 点击图片
