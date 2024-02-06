@@ -1,5 +1,5 @@
-import { parents } from './tool';
 import common from '@/utils/common';
+import { parents } from './tool';
 // 获取选中的文件
 const getFiles = (event:Event) => {
   let target:any = event.target || event.srcElement;

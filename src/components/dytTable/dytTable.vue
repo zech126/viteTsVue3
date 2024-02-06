@@ -5,7 +5,7 @@
     v-loading="!base.initLoading"
     element-loading-text="列表模块初始化"
     :class="{
-      'first-loading': base.firstLoading,
+      'first-loading': base.firstLoading <= 1,
       'table-loading': base.tableLoading,
       'dyt-table-empty': base.pageTableData.rows && base.pageTableData.rows.length === 0
     }"
@@ -163,7 +163,8 @@ const proxy = getProxy();
 const $slots = useSlots();
 const $attrs = useAttrs();
 const $emit = defineEmits([
-  'requested', 'expandFilter', 'filterReset', 'filterValidate', 'tableRowSortEnd', 'tableRowSortStart', 'tableColSortEnd', 'tableColSortStart'
+  'requested', 'expandFilter', 'filterReset', 'filterValidate', 'tableRowSortEnd', 'tableRowSortStart', 'tableColSortEnd', 'tableColSortStart',
+  'search'
 ]);
 const props = defineProps({
   // 搜索栏
@@ -181,9 +182,14 @@ const props = defineProps({
     default: () => {return {}}
   },
   // 表格请求方法
-  requestHandler: { type: Function, default: () => {} },
+  // requestHandler: { type: Function, default: () => {} },
+  requestHandler: { type: Function },
   // 发起请求之前
   requestBefore: { type: Function, default: (filterVal:any) => filterVal },
+  // 表格数据(当 requestHandler 方法存在时无效)
+  data: { type: Array as PropType<Array<{[key:string]:any}>>, default: () => [] },
+  // 列表总数据(当 requestHandler 方法存在时无效)
+  total: { type: Number, default: 0 },
   // 表格列设置
   tableColumns:  { type: Array as PropType<Array<{[key:string]:any}>>, default: () => [] },
   // 表格其他设置
@@ -231,7 +237,7 @@ const props = defineProps({
 const base = reactive({
   pageId: Math.random().toString(36).substring(2),
   initLoading: false,
-  firstLoading: true,
+  firstLoading: 0,
   tableLoading: false,
   isExpand: false,
   notCalculate: false,
@@ -255,7 +261,7 @@ const base = reactive({
     showTable: true
   },
   // 表格数据
-  pageTableData: { rows: [], total: 0 },
+  pageTableData: { rows: [], total: 0 } as {rows: Array<any>, total: Number},
   paginationAlign: 'right',
   // 页码、条数
   pageConfig: {
@@ -344,18 +350,26 @@ const search = (type: boolean = false, options: {valid?: boolean} = {}) => {
   type && (base.pageConfig.pageNum = 1);
   const filterVal = getFilter();
   nextTick(async () => {
+    let newFilter:{[key:string]:any} = {
+      ...filterVal,
+      [base.pageProdKeys['page-size']]: base.pageConfig.pageSize,
+      [base.pageProdKeys['page-num']]: base.pageConfig.pageNum
+    };
     base.tableLoading = true;
     try{
-      const newFilter = await props.requestBefore({
-        ...filterVal,
-        [base.pageProdKeys['page-size']]: base.pageConfig.pageSize,
-        [base.pageProdKeys['page-num']]: base.pageConfig.pageNum
-      });
+      if (!global.$common.isEmpty(props.requestHandler)) {
+        newFilter = await props.requestBefore(newFilter);
+      }
       if (typeof newFilter === 'boolean' && !newFilter) {
         base.tableLoading = false;
         return;
       }
       base.pageTableData = { rows: [], total: 0 };
+      if (global.$common.isEmpty(props.requestHandler)) {
+        $emit('search', newFilter);
+        base.tableLoading = false;
+        return;
+      }
       const requestData = await props.requestHandler(newFilter);
       base.tableDataMap = {...base.tableDataMap, ...props.contentDataMap };
       Object.keys(base.tableDataMap).forEach(key => {
@@ -373,7 +387,7 @@ const search = (type: boolean = false, options: {valid?: boolean} = {}) => {
           base.pageTableData[key]= requestData[base.tableDataMap[key]];
         }
       })
-      base.paginationTotal = base.pageTableData.total || base.pageTableData.rows.length;
+      base.paginationTotal = base.pageTableData.total as number || base.pageTableData.rows.length;
     } catch (err) {
       if (props.isClearData) {
         base.pageTableData = { rows: [], total: 0 };
@@ -382,7 +396,7 @@ const search = (type: boolean = false, options: {valid?: boolean} = {}) => {
       console.error(err)
     }
     base.tableLoading && (base.tableLoading = false);
-    base.firstLoading && (base.firstLoading = false);
+    base.firstLoading && (base.firstLoading = 2);
     // 完成数据请求后触发，无论成功失败
     $emit('requested');
   })
@@ -411,66 +425,84 @@ const paginationChange = (pageNum:number, pageSize:number) => {
   if (typeof pageNum !== 'number' && typeof pageSize !== 'number') return;
   filterSearch(false);
 }
+// 调整容器高度
+const tableViewHeight = () => {
+  return new Promise((resolve) => {
+    const dome = document.querySelector(`#dytTableView-${base.pageId}`) as HTMLElement;
+    const parentNode = dome.parentNode as HTMLElement;
+    if (parentNode) {
+      parentNode.style.position = 'relative';
+    }
+    nextTick(() => {
+      if (dome.offsetTop > 0) {
+        dome.style.height = `calc(100% - ${dome.offsetTop}px)`;
+      }
+      resolve(true);
+    })
+  })
+}
 // 改变表格高度(当获取到容全高度小于 tableMinHeight 时，列表高度将自动高度)
 const changeTableHeight = () => {
-  if (typeof props.handleTable !== 'boolean' || !props.handleTable) return;
-  nextTick(() => {
+  tableViewHeight().then(() => {
+    if (typeof props.handleTable !== 'boolean' || !props.handleTable) return;
     nextTick(() => {
-      const dome = document.querySelector(`#dytTableView-${base.pageId}`) as HTMLElement;
-      if (base.notCalculate || !dome) return;
-      const getBlock = (el:HTMLElement) => {
-        if (!el) return 0;
-        const marginTop = Number(global.$common.getElementStyle(el, 'margin-top', true));
-        const marginBottom = Number(global.$common.getElementStyle(el, 'margin-bottom', true));
-        const height = Number(global.$common.getElementStyle(el, 'height', true));
-        return marginTop + marginBottom + height;
-      };
-      const filterBar = dome.querySelector(`#filter-${base.pageId}`) as HTMLElement;
-      if (!base.isExpand && base.filterHeight === 0) {
-        base.filterHeight = Number(global.$common.getElementStyle(filterBar, 'height', true));
-      }
-      if (global.$common.isEmpty(props.tableProps.height)) {
-        const parentNode = dome.parentNode as HTMLElement;
-        let contHeight = parentNode.clientHeight;      
-        const v = {
-          parentBackGauge: (() => {
-            const paddingTop = Number(global.$common.getElementStyle(parentNode, 'paddingTop', true));
-            const paddingBottom = Number(global.$common.getElementStyle(parentNode, 'paddingBottom', true));
-            return paddingTop + paddingBottom;
-          })(),
-          contentBackGauge: (() => {
-            const paddingTop = Number(global.$common.getElementStyle(dome, 'paddingTop', true));
-            const paddingBottom = Number(global.$common.getElementStyle(dome, 'paddingBottom', true));
-            const marginBottom = Number(global.$common.getElementStyle(dome, 'margin-bottom', true));
-            return paddingTop + paddingBottom + marginBottom + dome.offsetTop;
-          })(),
-          headOccupyHeight: getBlock(dome.querySelector(`#view-${base.pageId}`) as HTMLElement),
-          filterOccupyHeight: getBlock(filterBar),
-          paginationOccupyHeight: getBlock(dome.querySelector(`#pagination-${base.pageId}`) as HTMLElement),
-          tableTopSlotOccupyHeight: getBlock(dome.querySelector(`.table-top-container`) as HTMLElement),
-          tableBottomSlotOccupyHeight: getBlock(dome.querySelector(`.table-bottom-slot`) as HTMLElement)
-        };
-        Object.keys(v).forEach(k => {
-          contHeight -= v[k];
-        });
-        base.tableHeight = (contHeight < base.tableMinHeight ? null : contHeight) as any;
-        // base.notCalculate = base.tableHeight === null;
-      } else if (base.isExpand) {
-        let newHeight:number | string = 0;
-        const difference = Number(global.$common.getElementStyle(filterBar, 'height', true)) - base.filterHeight;
-        if (typeof props.tableProps.height === 'string' && !/^\d+$/.test(props.tableProps.height)) {
-          newHeight = `calc(${props.tableProps.height} - ${difference}px)`;
-        } else {
-          newHeight = parseInt(props.tableProps.height) - difference;
-          base.tableHeight = newHeight < base.tableMinHeight ? props.tableProps.height : newHeight;
-          // base.notCalculate = base.tableHeight === base.tableProps.height;
-        }
-      } else {
-        base.tableHeight = props.tableProps.height;
-      }
       nextTick(() => {
-        // 更新列表布局
-        proxy.$refs[`table_${base.pageId}`] && proxy.$refs[`table_${base.pageId}`].doLayout();
+        const dome = document.querySelector(`#dytTableView-${base.pageId}`) as HTMLElement;
+        if (base.notCalculate || !dome) return;
+        const getBlock = (el:HTMLElement) => {
+          if (!el) return 0;
+          const marginTop = Number(global.$common.getElementStyle(el, 'margin-top', true));
+          const marginBottom = Number(global.$common.getElementStyle(el, 'margin-bottom', true));
+          const height = Number(global.$common.getElementStyle(el, 'height', true));
+          return marginTop + marginBottom + height;
+        };
+        const filterBar = dome.querySelector(`#filter-${base.pageId}`) as HTMLElement;
+        if (!base.isExpand && base.filterHeight === 0) {
+          base.filterHeight = Number(global.$common.getElementStyle(filterBar, 'height', true));
+        }
+        if (global.$common.isEmpty(props.tableProps.height)) {
+          const parentNode = dome.parentNode as HTMLElement;
+          let contHeight = parentNode.clientHeight;      
+          const v = {
+            parentBackGauge: (() => {
+              const paddingTop = Number(global.$common.getElementStyle(parentNode, 'paddingTop', true));
+              const paddingBottom = Number(global.$common.getElementStyle(parentNode, 'paddingBottom', true));
+              return paddingTop + paddingBottom;
+            })(),
+            contentBackGauge: (() => {
+              const paddingTop = Number(global.$common.getElementStyle(dome, 'paddingTop', true));
+              const paddingBottom = Number(global.$common.getElementStyle(dome, 'paddingBottom', true));
+              const marginBottom = Number(global.$common.getElementStyle(dome, 'margin-bottom', true));
+              return paddingTop + paddingBottom + marginBottom + dome.offsetTop;
+            })(),
+            headOccupyHeight: getBlock(dome.querySelector(`#view-${base.pageId}`) as HTMLElement),
+            filterOccupyHeight: getBlock(filterBar),
+            paginationOccupyHeight: getBlock(dome.querySelector(`#pagination-${base.pageId}`) as HTMLElement),
+            tableTopSlotOccupyHeight: getBlock(dome.querySelector(`.table-top-container`) as HTMLElement),
+            tableBottomSlotOccupyHeight: getBlock(dome.querySelector(`.table-bottom-slot`) as HTMLElement)
+          };
+          Object.keys(v).forEach(k => {
+            contHeight -= v[k];
+          });
+          base.tableHeight = (contHeight < base.tableMinHeight ? null : contHeight) as any;
+          // base.notCalculate = base.tableHeight === null;
+        } else if (base.isExpand) {
+          let newHeight:number | string = 0;
+          const difference = Number(global.$common.getElementStyle(filterBar, 'height', true)) - base.filterHeight;
+          if (typeof props.tableProps.height === 'string' && !/^\d+$/.test(props.tableProps.height)) {
+            newHeight = `calc(${props.tableProps.height} - ${difference}px)`;
+          } else {
+            newHeight = parseInt(props.tableProps.height) - difference;
+            base.tableHeight = newHeight < base.tableMinHeight ? props.tableProps.height : newHeight;
+            // base.notCalculate = base.tableHeight === base.tableProps.height;
+          }
+        } else {
+          base.tableHeight = props.tableProps.height;
+        }
+        nextTick(() => {
+          // 更新列表布局
+          proxy.$refs[`table_${base.pageId}`] && proxy.$refs[`table_${base.pageId}`].doLayout();
+        })
       })
     })
   })
@@ -603,8 +635,16 @@ watch(() => props.paginationConfig, (val) => {
     if (!global.$common.isEmpty(val[key])) {
       // 页码设置
       if (['page-size', 'page-num'].includes(key) && typeof val[key] === 'number') {
-        'page-size' === key && (pageConfig['pageSize'] = val[key]);
-        'page-num' === key && (pageConfig['pageNum'] = val[key]);
+        if ('page-size' === key) {
+          pageConfig['pageSize'] = val[key];
+          if (!base.paginationInfo['page-sizes'].includes(val[key] as number)) {
+            base.paginationInfo['page-sizes'].push(val[key] as number);
+          }
+        }
+        if ('page-num' === key) {
+          pageConfig['pageNum'] = val[key];
+        }
+        console.log(key, val[key]);
       }
       // 键值替换
       if (['pageProdKeys'].includes(key)) {
@@ -615,22 +655,31 @@ watch(() => props.paginationConfig, (val) => {
     }
   })
   base.pageConfig = {...base.pageConfig, ...pageConfig};
-  base.paginationInfo = {...base.paginationInfo, ...newConfig}
+  base.paginationInfo = {...base.paginationInfo, ...newConfig};
+  // 排序一下
+  base.paginationInfo['page-sizes'].sort((a, b) => {
+    return a - b;
+  });
 }, {deep: true, immediate: true});
-  
-onMounted(() => {
-  const dome = document.querySelector(`#dytTableView-${base.pageId}`) as HTMLElement;
-  const parentNode = dome.parentNode as HTMLElement;
-  if (parentNode) {
-    parentNode.style.position = 'relative';
-  }
+
+// 表格数据的变更(当 requestHandler 方法存在时无效)
+watch(() => props.data, (val) => {
   nextTick(() => {
-    if (dome.offsetTop > 0) {
-      dome.style.height = `calc(100% - ${dome.offsetTop}px)`;
+    if (!global.$common.isEmpty(props.requestHandler)) return;
+    base.pageTableData = { rows: val, total: props.total };
+    base.paginationTotal = base.pageTableData.total as number || base.pageTableData.rows.length;
+    if (base.firstLoading <= 1) {
+      base.firstLoading++;
     }
   })
-  // 绑定事件
-  window.addEventListener('resize', changeTableHeight);
+}, {deep: true, immediate: true});
+
+// 加载完成时
+onMounted(() => {
+  tableViewHeight().then(() => {
+    // 绑定事件
+    window.addEventListener('resize', changeTableHeight);
+  });
 });
 // 组件销毁前
 onBeforeUnmount(() => {

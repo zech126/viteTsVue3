@@ -30,7 +30,12 @@
             :node="cloumnsRender[props.cloumnRenderKey]"
             :prop="scope"
           />
-          <div v-else class="table-ellipsis-tips"
+          <div
+            v-else
+            :class="{
+              'table-ellipsis-tips': global.$common.isBoolean(columnItem['show-overflow-tooltip']) ? columnItem['show-overflow-tooltip'] : true,
+              'table-row-td': global.$common.isBoolean(columnItem['show-overflow-tooltip']) ? !columnItem['show-overflow-tooltip'] : false
+            }"
             v-on="!!cloumnsEvents[props.cloumnEventKey] ? {
               ...((scope:any) => {
                 let eventObj = {};
@@ -103,5 +108,15 @@ const slots = computed(() => {
 <style lang="less" scoped>
 .dyt-table-column{
   position: relative;
+}
+.table-row-td{
+  display: inline-block;
+  margin: 0 auto;
+  text-align: left;
+}
+.table-ellipsis-tips{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

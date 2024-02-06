@@ -27,7 +27,7 @@
             <el-button
               size="small"
               type="primary"
-              style="height: 30px; padding: 0px 6px;"
+              class="expand-icon-btn"
               :title="`${data.isExpand ? '展开' : '收起'}`"
               @click="expandHand"
             >
@@ -38,13 +38,33 @@
       </div>
       <div :id="`filterForm-${pageId}`" class="dyt-form-container">
         <slot name="filter">
-          <el-form ref="filterForm" :inline="true" :model="data.formData" :rules="(fConfig.validRules || {})" class="dyt-filter-form"  @submit.prevent>
+          <el-form
+            ref="filterForm"
+            :inline="true"
+            :model="data.formData"
+            :rules="(fConfig.validRules || {})"
+            class="dyt-filter-form"
+            :label-width="fConfig.showLabel ? fConfig['label-width'] : 0"
+            @submit.prevent
+          >
             <template v-for="(item, index) in data.filterItems" :key="`item-${index}`">
-              <el-form-item :prop="item.model" class="dyt-filter-item" @keyup.enter="keyupEnter">
-                <div v-if="!$common.isEmpty(data.formData[item.model])" class="filter-item-label">
+              <el-form-item
+                :prop="item.model"
+                class="dyt-filter-item"
+                :class="{'filter-auto-width': !global.$common.isEmpty(item.style) && !global.$common.isEmpty(item.style.width)}"
+                @keyup.enter="keyupEnter"
+                :label-width="fConfig.showLabel ? global.$common.isEmpty(item['label-width']) ? fConfig['label-width'] : item['label-width'] : 0"
+              >
+                <template v-if="fConfig.showLabel" v-slot:label>
+                  <span
+                    :title="fConfig.showLabel ? item.label : ''"
+                    class="filter-form-item-label"
+                  >{{ fConfig.showLabel ? item.label : '' }}</span>
+                </template>
+                <div v-if="!$common.isEmpty(data.formData[item.model]) && !fConfig.showLabel" class="filter-item-label">
                   {{ item.label || '' }}
                 </div>
-                <dyt-node v-if="(typeof item.render === 'function' && !item.slot)" :node="item.render" />
+                <dyt-node v-if="(typeof item.render === 'function' && !item.slot)" :node="item.render" :style="componentStyle(item.style)" />
                 <!-- 注册组件 -->
                 <template v-else-if="(typeof item.render !== 'function' && !item.slot)">
                   <!-- 输入框 -->
@@ -137,6 +157,10 @@ interface dataType{
     showSearch: Boolean;
     // 显示重置按钮, 默认值 true
     showReset: Boolean;
+    // 显示表单 label 文本
+    showLabel: Boolean;
+    // 默认 label 文本宽度
+    'label-width': String | Number,
     validRules: Array<any>;
   },
   btnOffsetRight: Number;
@@ -180,6 +204,8 @@ const data:dataType = reactive({
     showSearch: true,
     // 显示重置按钮, 默认值 true
     showReset: true,
+    showLabel: true,
+    'label-width': '120px',
     validRules: []
   },
   btnOffsetRight: 0,
@@ -372,6 +398,13 @@ defineExpose({
 .dyt-filter-container{
   position: relative;
   margin-bottom: 10px;
+  :deep(.expand-icon-btn){
+    height: 30px;
+    padding: 0px 6px;
+    &:focus-visible{
+      outline: none;
+    }
+  }
   .filter-bottom-content,
   .filter-top-content{
     margin-bottom: 10px;
@@ -396,12 +429,32 @@ defineExpose({
     :deep(.el-form-item){
       margin-bottom: 21px;
       margin-right: 15px;
-      .dyt-input-demo {
-        width: 214px;
+      width: calc(25% - 15px);
+      min-width: 300px;
+      &.filter-auto-width{
+        width: auto;
+        min-width: auto;
       }
       .el-form-item__error{
         padding-top: 1px;
       }
+      .el-form-item__label{
+        padding-right: 5px;
+      }
+      .el-date-editor {
+        &.el-input,
+        &.el-input__wrapper{
+          width: 100%;
+        }
+      }
+    }
+    .filter-form-item-label{
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
     }
     .filter-item-label {
       position: absolute;
@@ -425,6 +478,20 @@ defineExpose({
     position: relative;
     float: right;
     z-index: 3;
+  }
+  :deep(.el-range-editor){
+    .el-range-input{
+      padding: 0 5px;
+    }
+    &.el-input__wrapper {
+      padding: 0;
+      .el-range__icon{
+        margin-left: 5px;
+      }
+      .el-range__close-icon{
+        margin-right: 5px;
+      }
+    }
   }
 }
 </style>

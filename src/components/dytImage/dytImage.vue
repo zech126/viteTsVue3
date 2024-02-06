@@ -7,7 +7,8 @@
     <template #error>
       <slot name="error">
         <div class="image-slot" title="加载失败">
-          <Icon name="picture" /> 加载失败
+          <Icon name="picture" />
+          <span v-if="props.showErrorTxt">加载失败</span>
         </div>
       </slot>
     </template>
@@ -30,7 +31,8 @@ const props = defineProps({
   closePreview: { type: Boolean, default: false },
   // 图片路径
   src: { type: String, default: '' },
-  url: { type: String, default: '' }
+  url: { type: String, default: '' },
+  showErrorTxt: { type: Boolean, default: true },
 });
 const selectConfig = computed(() => {
   let config = {

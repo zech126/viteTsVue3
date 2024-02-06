@@ -407,6 +407,7 @@ const focus = () => {
 // 弹窗位置调整
 const popoverAdjust = () => {
   if (!proxy) return;
+  handPopoverWidth();
   nextTick(() => {
     const content:any = proxy.$refs[`popover-${base.pageId}`];
     if (!content) return;
@@ -559,7 +560,7 @@ defineExpose({
 .dyt-input-tag-content{
   display: flex;
   padding: 3px 3px 0px 3px;
-  min-width: 200px;
+  // min-width: 200px;
   width: 100%;
   min-height: 32px;
   line-height: 1em;
@@ -668,6 +669,10 @@ defineExpose({
       height: @inputHeight;
       line-height: @inputHeight;
       color: var(--el-input-icon-color,var(--el-text-color-placeholder));
+      white-space: nowrap;
+      // white-space: pre;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
     &.input-empty-tag{
       .el-input__inner,

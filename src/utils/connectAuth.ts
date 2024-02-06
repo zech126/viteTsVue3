@@ -15,6 +15,7 @@ const authHand = {
   recordUrl: `${window.location.protocol}//${AUTHUrl}`, // 对应认证中心地址
   targetEnv: process.VITE_CONFIG, // 环境变
   systemCode: process.VITE_SYSTEMCODE, // 系统代码
+  isLoginAuth: false, // 是否正在登录认证中心
 
   addModal: (config:{[k:string]:any}) => {
     const body:any = document.querySelector('body');
@@ -113,7 +114,7 @@ const authHand = {
             ElMessage({ message: '成功退出系统', type: 'success' });
             // 返回登录页面
             setTimeout(() => {
-              isBackLogin && this.goToLogin();
+              isBackLogin && this.goToLogin(false, true);
             }, 500)
           }
           resolve(res);
@@ -129,9 +130,40 @@ const authHand = {
   getToken (isUpdate?:boolean):Promise<{[k:string]:any} | null> {
     const pageUrl = window.location.href;
     return new Promise((resolve) => {
+      if (this.isLoginAuth) return;
+      let urlParams = common.getUrlParams({url: pageUrl})  as {[key:string]:any};
+      const newUrl =  `${pageUrl.substring(0, pageUrl.indexOf('?'))}`;
+      // 在非安全模式(即协议是http)下 iframe 跨域的情况下读取不到缓存信息：包括session、cookie等; 所以需要在 iframe 里调用一次登录
+      if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
+        // 先获取 token 是否有效，如果有效则不重新登录
+        this.validationToken().then(valid => {
+          if (!valid) {
+            this.isLoginAuth = true;
+            bus.authSysData('loginAuth', { pageName: urlParams.pageName, pagePame: urlParams.pagePass, getUserInfo: true }).then(res => {
+              delete urlParams.pageName;
+              delete urlParams.pagePass;
+              this.isLoginAuth = false;
+              window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            }).catch(() => {
+              resolve(null);
+            })
+            return;
+          }
+          delete urlParams.pageName;
+          delete urlParams.pagePass;
+          window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }).catch(() => {
+          resolve(null);
+        })
+        return;
+      }
       bus.authSysData('getToken').then((token) => {
-        let urlParams = common.getUrlParams({url: pageUrl})  as {[key:string]:any};
-        const newUrl =  `${pageUrl.substring(0, pageUrl.indexOf('?'))}`;
         if (!common.isEmpty(token)) {
           const accessCookie = common.getCookie(cookieConfig.tokenName);
           const newCookie = `${token.token_type} ${token.access_token}`;
@@ -140,26 +172,12 @@ const authHand = {
               {key: cookieConfig.tokenName, value: newCookie}
             ]);
           }
-          if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
-            delete urlParams.pageName;
-            delete urlParams.pagePass;
-            window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
-            setTimeout(() => {resolve(token)}, 500);
-          }
           return resolve(token);
         }
-        // 在苹果手机端 iframe 跨域的情况下读取不到缓存信息：包括session、cookie等; 所以需要在 iframe 里调用一次登录
-        if (!common.isEmpty(urlParams.pageName) && !common.isEmpty(urlParams.pagePass)) {
-          bus.authSysData('loginAuth', {pageName: urlParams.pageName, pagePame: urlParams.pagePass, getUserInfo: true}).then(res => {
-            delete urlParams.pageName;
-            delete urlParams.pagePass;
-            window.location.replace(common.isEmpty(urlParams) ? newUrl : `${newUrl}?${common.getParams(urlParams)}`);
-            setTimeout(() => {resolve(res)}, 500);
-          })
-          return;
-        }
         resolve(null);
-      })
+      }).catch(() => {
+        resolve(null);
+      });
     })
   },
   /**
@@ -329,7 +347,7 @@ const authHand = {
    * 返回到登录页面
    * @param type 重新登录后是否进入认证中心首页(默认为跳转到退出登录页面)
    */
-  goToLogin (type:boolean = false, outLogin: boolean = true) {
+  goToLogin (type:boolean = false, outLogin: boolean = false) {
     const login = `${this.recordUrl}${this.loginPage}?targetEnv=${this.targetEnv}&systemKey=${this.systemCode}${outLogin?'&outLogin=outLogin':''}`;
     // 移除 cookie
     common.delCookie([cookieConfig.tokenName]);

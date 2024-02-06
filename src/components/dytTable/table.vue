@@ -402,11 +402,6 @@ defineExpose({
   .mian-container-right{
     margin: 0 10px;
   }
-  .table-ellipsis-tips{
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
   :deep(.el-table) {
     &.el-table--small{
       font-size: 14px;

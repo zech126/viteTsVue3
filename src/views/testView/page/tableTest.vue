@@ -379,6 +379,7 @@ export default defineComponent({
             {label: '账号1', prop: 'usernameChild1', align: 'center', 'width': '200', sortable: true},
             {
               label: '账号2-2', prop: 'usernameChild', align: 'center', 'width': '200', sortable: true,
+              // 建议不要使用 render-header，直接使用插槽
               'render-header': ({ column, $index }:{[key:string]:any}) => {
                 return `renderHeader-${column.label}-序号-${$index}`
               },

@@ -1,17 +1,25 @@
 <template>
-  <el-date-picker ref="dytDatePicker" @change="change" v-bind="selectConfig" v-model="data.mValue" class="dyt-date-picker-demo">
+  <el-date-picker
+    ref="dytDatePicker"
+    @change="change"
+    v-bind="selectConfig"
+    v-model="data.mValue"
+    class="dyt-date-picker-demo"
+    @visible-change="visibleChange"
+  >
     <template v-for="slot in slots" v-slot:[slot]="scope">
       <slot :name="slot" v-bind="scope" />
     </template>
   </el-date-picker>
 </template>
 <script lang="ts" setup>
-import { computed, useSlots, useAttrs, reactive, watch } from 'vue';
+import { computed, useSlots, useAttrs, reactive, watch, nextTick } from 'vue';
 import getProxy from "@/utils/proxy";
 import getGlobal from "@/utils/global";
 
 interface dataType{
   mValue: string | Number | Date | Array<string | number | Date>;
+  isInit: boolean;
   pickerProps: {
     default: {
       placeholder: string,
@@ -25,17 +33,19 @@ interface dataType{
 const proxy = getProxy();
 const global = getGlobal();
 const props = defineProps({
-  modelValue: {type: [String, Number, Date, Array], defalt: ''}
+  modelValue: {type: [String, Number, Date, Array], defalt: ''},
+  quick: { type: Boolean, defualt: true },
 })
 const attrs: any = useAttrs();
 const slots: any = computed(() => Object.keys(useSlots()));
-const $emit = defineEmits(['update:modelValue']);
+const $emit = defineEmits(['update:modelValue', 'change', 'input', 'visible-change']);
 
 const dateAdd = (add:number = 0, type:any = 'day', oldDate:Date = new Date()) => {
   return new Date(global.$dayjs(oldDate).add(add, type).format('YYYY/MM/DD HH:mm:ss:SSS'));
 };
 const data:dataType = reactive({
   mValue: '',
+  isInit: true,
   pickerProps: {
     default: {
       placeholder: '请选择',
@@ -67,10 +77,12 @@ const data:dataType = reactive({
 const selectConfig = computed(() => {
   let config: {disabled?: boolean, readonly?:boolean, placeholder?: string} = {};
   let addConfig: {'popper-class'?: string, placeholder?: string} = {};
-  if (attrs.type && attrs.type.includes('range')) {
-    config = {...data.defaultConfig, ...data.pickerProps.dateRange};
-  } else {
-    config = {...data.defaultConfig, ...data.pickerProps.default};
+  if (props.quick || global.$common.isEmpty(attrs.quick)) {
+    if (attrs.type && attrs.type.includes('range')) {
+      config = {...data.defaultConfig, ...data.pickerProps.dateRange};
+    } else {
+      config = {...data.defaultConfig, ...data.pickerProps.default};
+    }
   }
   if (!global.$common.isEmpty(attrs['popper-class'])) {
     addConfig['popper-class'] = `${data.defaultConfig['popper-class']} ${attrs['popper-class']}`;
@@ -84,6 +96,24 @@ const selectConfig = computed(() => {
 const change = (val:string|Array<string|number|Date>|number|Date) => {
   $emit('update:modelValue', val);
 }
+const visibleChange = (visibility:boolean) => {
+  if (data.isInit) {
+    data.isInit = false;
+  }
+  if (!visibility) {
+    handleClose();
+  }
+  $emit('visible-change', visibility);
+}
+// 监听值变化
+watch(() => data.mValue, (newVal:any) => {
+  if (data.isInit) return;
+  $emit('update:modelValue', newVal);
+  nextTick(() => {
+    $emit('change', newVal);
+    $emit('input', newVal);
+  })
+})
 // 对初始值显示格式兼容处理
 watch(() => props.modelValue, (newVal:any) => {
   if (global.$common.isEmpty(newVal) || global.$common.isEmpty(selectConfig.value['value-format'])) {
@@ -103,20 +133,31 @@ watch(() => props.modelValue, (newVal:any) => {
     $emit('update:modelValue', newT);
     return;
   }
-  let newT = global.$dayjs(newVal).format(selectConfig.value['value-format']);
-  if (newVal === newT) return;
+  const newT = global.$dayjs(newVal).format(selectConfig.value['value-format']);
+  if (data.mValue == newT) return;
   data.mValue = newT;
+  // if (newVal === newT) return;
   $emit('update:modelValue', newT);
 }, {deep: true, immediate: true});
 
 const focus = () => {
-  proxy?.$refs.dytDatePicker?.focus();
+  const handleFun = proxy?.$refs?.dytDatePicker?.focus;
+  global.$common.isFunction(handleFun) && handleFun();
 };
 const blur = () => {
-  proxy?.$refs.dytDatePicker?.blur();
+  const handleFun = proxy?.$refs?.dytDatePicker?.blur;
+  global.$common.isFunction(handleFun) && handleFun();
 };
+const handleClose = () => {
+  const handleFun = proxy?.$refs?.dytDatePicker?.handleClose;
+  global.$common.isFunction(handleFun) && handleFun();
+}
+const handleOpen = () => {
+  const handleFun = proxy?.$refs?.dytDatePicker?.handleOpen;
+  global.$common.isFunction(handleFun) && handleFun();
+}
 // 暴露给父级使用 ref 时使用
-defineExpose({ focus, blur });
+defineExpose({ focus, blur, handleClose, handleOpen });
 </script>
 
 <style lang="less">
