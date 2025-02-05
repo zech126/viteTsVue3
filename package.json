@@ -26,6 +26,7 @@
     "element-plus": "^2.2.16",
     "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.1",
+    "jszip": "^3.10.1",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "nprogress": "^0.2.0",

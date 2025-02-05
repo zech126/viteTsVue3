@@ -594,6 +594,47 @@ export class commonClass {
     }
   }
   /**
+   * 压缩 base64 位的图片
+   * @param config 
+   * @param imgRes 图片
+   * @param imgType 输出图片类型
+   * @param quality 压缩比例
+   * @returns 
+   */
+  reduceImage (config: {imgRes: string, imgType?: string, quality?: number, imgFile?: File}) {
+    return new Promise((resolve) => {
+      let newImage = new Image();
+      newImage.src = config.imgRes;
+      let picName = '';
+      let newType = '';
+      let quality = Number((config.quality || 0.5).toFixed(2));
+      if (quality == 0 || quality == 100) {
+        quality = quality == 0 ? 0.01 : 99.99;
+      }
+      if (!this.isEmpty(config.imgFile)) {
+        picName = config.imgFile.name || '';
+        newType = config.imgFile.type || 'image/jpge';
+      }
+      newImage.onload = (e) => {
+        let canvas = document.createElement('canvas');
+        // 设置canvas大小为图像尺寸
+        canvas.width = newImage.naturalWidth;
+        canvas.height = newImage.naturalHeight;
+        // 获取2D上下文
+        let ctx = canvas.getContext('2d');
+        // 将图像绘制到canvas上
+        ctx?.drawImage(newImage, 0, 0, newImage.naturalWidth, newImage.naturalHeight);
+        // 调用 toDataURL 方法将 canvas 内容转换为 Base64 字符串， 这里的参数表示压缩质量（0-1之间）
+        const compressedImgData = canvas.toDataURL(newType, quality);
+        // 再次转换为 blob
+        resolve({imgData: this.base64ToBlob(compressedImgData, newType), name: picName});
+      }
+      newImage.onerror = () => {
+        resolve({imgData: null, name: picName});
+      }
+    })
+  }
+  /**
    * 移除,支持数组
    * @param keys 需要移除 cookie 的 key
    * @returns 

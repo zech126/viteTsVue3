@@ -41,6 +41,12 @@ const navList = [
         url: '/testUEditor'
       },
       {
+        id: '1-61',
+        name: '图片测试',
+        icon: '',
+        url: '/imageClear'
+      },
+      {
         id: '1-7',
         name: '404测试',
         childList: [
@@ -49,12 +55,6 @@ const navList = [
             name: '404页面',
             icon: '',
             url: '/test/test'
-          },
-          {
-            id: '1-7-2',
-            name: '图片测试',
-            icon: '',
-            url: '/imageClear'
           },
         ]
       },
